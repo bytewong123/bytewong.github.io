@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>数学 on wangzijie&#39;s site</title>
+    <link>https://bytewong123.github.io/tags/%E6%95%B0%E5%AD%A6/</link>
+    <description>Recent content in 数学 on wangzijie&#39;s site</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <lastBuildDate>Sun, 14 Nov 2021 10:53:59 +0800</lastBuildDate><atom:link href="https://bytewong123.github.io/tags/%E6%95%B0%E5%AD%A6/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>leetcode7 整数反转</title>
+      <link>https://bytewong123.github.io/posts/leetcode_7/</link>
+      <pubDate>Sun, 14 Nov 2021 10:53:59 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/posts/leetcode_7/</guid>
+      <description>链接 https://leetcode-cn.com/problems/reverse-integer/
+题目 给你一个 32 位的有符号整数 x ，返回将 x 中的数字部分反转后的结果。 如果反转后整数超过 32 位的有符号整数的范围 [−231, 231 − 1] ，就返回 0。 假设环境不允许存储 64 位整数（有符号或无符号）。 示例 1： 输入：x = 123 输出：321 示例 2： 输入：x = -123 输出：-321 示例 3： 输入：x = 120 输出：21 示例 4： 输入：x = 0 输出：0 思路  不断对x以10取模，得到最后一位 最后一位不断*10 + 下一次的模 x每次除以10，以便向左移动，直到&amp;lt;=0  func reverse(x int) int { if x == 0 { return 0 } negative := false if x &amp;lt; 0 { negative = true x = -x } num := 0 sum := 0 for x &amp;gt; 0 { num = x % 10 sum = sum * 10 + num x /= 10 } if negative { if sum &amp;gt; 1 &amp;lt;&amp;lt; 31 { return 0 } return -sum } if sum &amp;gt; 1 &amp;lt;&amp;lt; 31 - 1 { return 0 } return sum } </description>
+    </item>
+    
+    <item>
+      <title>leetcode9 回文数</title>
+      <link>https://bytewong123.github.io/posts/leetcode_9/</link>
+      <pubDate>Sun, 14 Nov 2021 10:53:59 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/posts/leetcode_9/</guid>
+      <description>链接 https://leetcode-cn.com/problems/palindrome-number/
+题目 给你一个整数 x ，如果 x 是一个回文整数，返回 true ；否则，返回 false 。 回文数是指正序（从左向右）和倒序（从右向左）读都是一样的整数。例如，121 是回文，而 123 不是。 思路  只需要将一个整数从右往左算一个新的整数，然后比较前后两个整数即可 从右往左求整数的方式，每次获取到右侧的一位，然后不断新数*10 + 右侧的第一位作为新数，不断循环直到老数变为0  func isPalindrome(x int) bool { if x &amp;lt; 0 { return false } origin := x newX := 0 base := 10 for x &amp;gt; 0 { extra := x % 10 newX = extra + base * newX x /= 10 } return newX == origin } </description>
+    </item>
+    
+  </channel>
+</rss>

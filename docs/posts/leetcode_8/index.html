@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+    <title>wangzijie&#39;s site</title>
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+    <meta content="utf-8" http-equiv="encoding">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="theme-color" content="#000084" />
+    <link rel="icon" href="https://bytewong123.github.io/favicon.ico">
+    <link rel="canonical" href="https://bytewong123.github.io">
+    
+    
+</head>
+<body>
+<nav class="navbar navbar-inverse navbar-fixed-top">
+    <div class="navbar-inner">
+        <div class="container">
+            <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse"></button>
+            <a class="brand" href="https://bytewong123.github.io">wangzijie&#39;s site</a>
+            <div class="nav-collapse collapse">
+                <ul class="nav">
+                    
+                    
+                        
+                            <li>
+                                <a href="/about/">
+                                    
+                                    <span>About</span>
+                                </a>
+                            </li>
+                        
+                    
+                        
+                            <li>
+                                <a href="/posts/">
+                                    
+                                    <span>All posts</span>
+                                </a>
+                            </li>
+                        
+                    
+                </ul>
+            </div>
+        </div>
+    </div>
+</nav><div id="content" class="container">
+
+<div class="row-fluid navmargin">
+    <div class="page-header">
+        <h1>leetcode8 字符串转换整数 - Sun, Nov 14, 2021</h1>
+    </div>
+    <p class="lead"></p>
+    <h1 id="链接">链接</h1>
+<p><a href="https://leetcode-cn.com/problems/string-to-integer-atoi/">https://leetcode-cn.com/problems/string-to-integer-atoi/</a></p>
+<h1 id="题目">题目</h1>
+<pre><code>请你来实现一个 myAtoi(string s) 函数，使其能将字符串转换成一个 32 位有符号整数（类似 C/C++ 中的 atoi 函数）。
+
+函数 myAtoi(string s) 的算法如下：
+
+读入字符串并丢弃无用的前导空格
+检查下一个字符（假设还未到字符末尾）为正还是负号，读取该字符（如果有）。 确定最终结果是负数还是正数。 如果两者都不存在，则假定结果为正。
+读入下一个字符，直到到达下一个非数字字符或到达输入的结尾。字符串的其余部分将被忽略。
+将前面步骤读入的这些数字转换为整数（即，&quot;123&quot; -&gt; 123， &quot;0032&quot; -&gt; 32）。如果没有读入数字，则整数为 0 。必要时更改符号（从步骤 2 开始）。
+如果整数数超过 32 位有符号整数范围 [−231,  231 − 1] ，需要截断这个整数，使其保持在这个范围内。具体来说，小于 −231 的整数应该被固定为 −231 ，大于 231 − 1 的整数应该被固定为 231 − 1 。
+返回整数作为最终结果。
+注意：
+
+本题中的空白字符只包括空格字符 ' ' 。
+除前导空格或数字后的其余字符串外，请勿忽略 任何其他字符。
+
+</code></pre><h1 id="思路">思路</h1>
+<p>可以把解题拆接为几个步骤，依次攻克</p>
+<ul>
+<li>将原始字符串进行处理，得到只包含数字的字符串</li>
+<li>将只包含数字的字符串去掉前面多余的0</li>
+<li>将去掉多余的0的字符串转换成整数，注意边界条件处理
+<ul>
+<li>边界条件有两个，一个是底数不断*10时是否达到边界</li>
+<li>一个是每一次累计到得到当前位为止的整数时，是否达到边界</li>
+</ul>
+</li>
+</ul>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">myAtoi</span>(<span style="color:#a6e22e">s</span> <span style="color:#66d9ef">string</span>) <span style="color:#66d9ef">int</span> {
+    <span style="color:#a6e22e">s</span> = <span style="color:#a6e22e">strings</span>.<span style="color:#a6e22e">TrimSpace</span>(<span style="color:#a6e22e">s</span>)
+    <span style="color:#66d9ef">if</span> len(<span style="color:#a6e22e">s</span>) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span> {
+        <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">0</span>
+    }
+    <span style="color:#a6e22e">negative</span> <span style="color:#f92672">:=</span> <span style="color:#66d9ef">false</span>
+    <span style="color:#a6e22e">nums</span> <span style="color:#f92672">:=</span> []<span style="color:#66d9ef">byte</span>{}
+    <span style="color:#66d9ef">for</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">:=</span> <span style="color:#ae81ff">0</span>; <span style="color:#a6e22e">i</span> &lt; len(<span style="color:#a6e22e">s</span>); <span style="color:#a6e22e">i</span><span style="color:#f92672">++</span> {
+        <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span> {
+            <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">s</span>[<span style="color:#a6e22e">i</span>] <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;-&#39;</span> {
+                <span style="color:#a6e22e">negative</span> = <span style="color:#66d9ef">true</span>
+                <span style="color:#66d9ef">continue</span>
+            }
+            <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">s</span>[<span style="color:#a6e22e">i</span>] <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;+&#39;</span> {
+                <span style="color:#66d9ef">continue</span>
+            }
+        }
+        <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">s</span>[<span style="color:#a6e22e">i</span>] <span style="color:#f92672">&gt;=</span> <span style="color:#e6db74">&#39;0&#39;</span> <span style="color:#f92672">&amp;&amp;</span> <span style="color:#a6e22e">s</span>[<span style="color:#a6e22e">i</span>] <span style="color:#f92672">&lt;=</span> <span style="color:#e6db74">&#39;9&#39;</span> {
+            <span style="color:#a6e22e">nums</span> = append(<span style="color:#a6e22e">nums</span>, <span style="color:#a6e22e">s</span>[<span style="color:#a6e22e">i</span>])
+        } <span style="color:#66d9ef">else</span> {
+            <span style="color:#66d9ef">break</span>
+        }
+    }
+    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">strToInt</span>(<span style="color:#a6e22e">negative</span> ,<span style="color:#a6e22e">nums</span>)
+}
+
+<span style="color:#66d9ef">func</span> <span style="color:#a6e22e">strToInt</span>(<span style="color:#a6e22e">negative</span> <span style="color:#66d9ef">bool</span>, <span style="color:#a6e22e">nums</span> []<span style="color:#66d9ef">byte</span>) <span style="color:#66d9ef">int</span> {
+    <span style="color:#a6e22e">idx</span> <span style="color:#f92672">:=</span> <span style="color:#ae81ff">0</span>
+    <span style="color:#66d9ef">for</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">:=</span> <span style="color:#ae81ff">0</span>; <span style="color:#a6e22e">i</span> &lt; len(<span style="color:#a6e22e">nums</span>); <span style="color:#a6e22e">i</span><span style="color:#f92672">++</span> {
+        <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">nums</span>[<span style="color:#a6e22e">i</span>] <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;0&#39;</span> {
+            <span style="color:#a6e22e">idx</span><span style="color:#f92672">++</span>
+        } <span style="color:#66d9ef">else</span> {
+            <span style="color:#66d9ef">break</span>
+        }
+    }
+    <span style="color:#a6e22e">nums</span> = <span style="color:#a6e22e">nums</span>[<span style="color:#a6e22e">idx</span>:]
+    <span style="color:#a6e22e">num</span> <span style="color:#f92672">:=</span> <span style="color:#ae81ff">0</span>
+    <span style="color:#a6e22e">base</span> <span style="color:#f92672">:=</span> <span style="color:#ae81ff">1</span>
+    <span style="color:#66d9ef">for</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">:=</span> len(<span style="color:#a6e22e">nums</span>) <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>; <span style="color:#a6e22e">i</span> <span style="color:#f92672">&gt;=</span> <span style="color:#ae81ff">0</span>; <span style="color:#a6e22e">i</span><span style="color:#f92672">--</span> {
+        <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">notInArea</span>(<span style="color:#a6e22e">base</span>, <span style="color:#a6e22e">negative</span>) {
+            <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">limit</span>(<span style="color:#a6e22e">negative</span>)
+        } 
+        <span style="color:#a6e22e">num</span> <span style="color:#f92672">+=</span> <span style="color:#a6e22e">base</span> <span style="color:#f92672">*</span> <span style="color:#a6e22e">charToInt</span>(<span style="color:#a6e22e">nums</span>[<span style="color:#a6e22e">i</span>])
+        <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">notInArea</span>(<span style="color:#a6e22e">num</span>, <span style="color:#a6e22e">negative</span>) {
+            <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">limit</span>(<span style="color:#a6e22e">negative</span>)
+        }
+        <span style="color:#a6e22e">base</span> <span style="color:#f92672">*=</span> <span style="color:#ae81ff">10</span>
+    }
+    <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">negative</span> {
+        <span style="color:#66d9ef">return</span> <span style="color:#f92672">-</span><span style="color:#a6e22e">num</span>
+    }
+    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">num</span>
+}
+
+<span style="color:#66d9ef">func</span> <span style="color:#a6e22e">notInArea</span>(<span style="color:#a6e22e">num</span> <span style="color:#66d9ef">int</span>, <span style="color:#a6e22e">negative</span> <span style="color:#66d9ef">bool</span>) <span style="color:#66d9ef">bool</span> {
+    <span style="color:#66d9ef">return</span> (<span style="color:#a6e22e">negative</span> <span style="color:#f92672">&amp;&amp;</span> <span style="color:#a6e22e">num</span> <span style="color:#f92672">&gt;=</span> <span style="color:#ae81ff">1</span> <span style="color:#f92672">&lt;&lt;</span> <span style="color:#ae81ff">31</span>) <span style="color:#f92672">||</span> (!<span style="color:#a6e22e">negative</span> <span style="color:#f92672">&amp;&amp;</span> <span style="color:#a6e22e">num</span> <span style="color:#f92672">&gt;=</span> <span style="color:#ae81ff">1</span> <span style="color:#f92672">&lt;&lt;</span> <span style="color:#ae81ff">31</span> <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>)
+}
+
+<span style="color:#66d9ef">func</span> <span style="color:#a6e22e">limit</span>(<span style="color:#a6e22e">negative</span> <span style="color:#66d9ef">bool</span>) <span style="color:#66d9ef">int</span> {
+    <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">negative</span> {
+        <span style="color:#66d9ef">return</span> <span style="color:#f92672">-</span>(<span style="color:#ae81ff">1</span> <span style="color:#f92672">&lt;&lt;</span> <span style="color:#ae81ff">31</span>)
+    }
+    <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">1</span> <span style="color:#f92672">&lt;&lt;</span> <span style="color:#ae81ff">31</span> <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>
+}
+
+<span style="color:#66d9ef">func</span> <span style="color:#a6e22e">charToInt</span>(<span style="color:#a6e22e">c</span> <span style="color:#66d9ef">byte</span>) <span style="color:#66d9ef">int</span> {
+    <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">c</span> <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;0&#39;</span> {
+        <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">0</span>
+    }
+    <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">c</span> <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;1&#39;</span> {
+        <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">1</span>
+    }
+    <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">c</span> <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;2&#39;</span> {
+        <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">2</span>
+    }
+    <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">c</span> <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;3&#39;</span> {
+        <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">3</span>
+    }
+    <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">c</span> <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;4&#39;</span> {
+        <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">4</span>
+    }
+    <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">c</span> <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;5&#39;</span> {
+        <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">5</span>
+    }
+    <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">c</span> <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;6&#39;</span> {
+        <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">6</span>
+    }
+    <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">c</span> <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;7&#39;</span> {
+        <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">7</span>
+    }
+    <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">c</span> <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;8&#39;</span> {
+        <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">8</span>
+    }
+    <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">c</span> <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;9&#39;</span> {
+        <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">9</span>
+    }
+    <span style="color:#66d9ef">return</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>
+}
+</code></pre></div>
+    <h4><a href="https://bytewong123.github.io">Back to Home</a></h4>
+</div>
+
+
+        </div><footer class="container">
+    <hr class="soften">
+    <p>
+&copy; 
+
+    
+
+<span id="thisyear">2021</span>
+
+
+</p>
+    <p class="text-center">
+        
+        
+        
+        <a href="https://github.com">GitHub</a> 
+        
+    </p>
+</footer>
+
+</body><link rel="stylesheet" href="/css/bootstrap.css">
+<link rel="stylesheet" href="/css/bootstrap-responsive.css">
+<link rel="stylesheet" href="/css/style.css">
+
+<script src="/js/jquery.js"></script>
+<script src="/js/bootstrap-386.js"></script>
+<script src="/js/bootstrap-transition.js"></script>
+<script src="/js/bootstrap-alert.js"></script>
+<script src="/js/bootstrap-modal.js"></script>
+<script src="/js/bootstrap-dropdown.js"></script>
+<script src="/js/bootstrap-scrollspy.js"></script>
+<script src="/js/bootstrap-tab.js"></script>
+<script src="/js/bootstrap-tooltip.js"></script>
+<script src="/js/bootstrap-popover.js"></script>
+<script src="/js/bootstrap-button.js"></script>
+<script src="/js/bootstrap-collapse.js"></script>
+<script src="/js/bootstrap-carousel.js"></script>
+<script src="/js/bootstrap-typeahead.js"></script>
+<script src="/js/bootstrap-affix.js"></script>
+<script>
+    _386 = { 
+        fastLoad: true ,
+        onePass: false , 
+        speedFactor: 1 
+    };
+
+    
+    function ThisYear() {
+        document.getElementById('thisyear').innerHTML = new Date().getFullYear();
+    };
+</script></html>
