@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en"><head>
-	<meta name="generator" content="Hugo 0.82.1" />
     <title>wangzijie&#39;s site</title>
     <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
     <meta content="utf-8" http-equiv="encoding">
@@ -48,91 +47,46 @@
 
 <div class="row-fluid navmargin">
     <div class="page-header">
-        <h1>wangzijie&#39;s blog</h1>
+        <h1>leetcode26 删除有序数组的重复项 - Sun, Nov 14, 2021</h1>
     </div>
-</div>
+    <p class="lead"></p>
+    <h1 id="链接">链接</h1>
+<p><a href="https://leetcode-cn.com/problems/remove-duplicates-from-sorted-array/">https://leetcode-cn.com/problems/remove-duplicates-from-sorted-array/</a></p>
+<h1 id="题目">题目</h1>
+<pre><code>给你一个有序数组 nums ，请你 原地 删除重复出现的元素，使每个元素 只出现一次 ，返回删除后数组的新长度。
 
-<div class="row-fluid">
-    <div class="span9 bs-docs-sidebar">
-        <p class="lead">Welcome to my site</p>
-        <p></p>
-        <p>学习、记录、生活</p>
-        <p></p>
-        <hr class="soften">
-        <p></p>
-        <h1>Blog posts</h1>
-        <ul>
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-        </ul>
-    </div>
-
-    <div class="span3 bs-docs-sidebar">
-        <h1>Categories</h1>
-        <ul class="nav nav-list bs-docs-sidenav">
-            
-<li>
-    <a href="https://bytewong123.github.io/categories/leetcode/">leetcode</a>
-</li>
-
-        </ul>
-        <p></p>
-        <h1>Tags</h1>
-        <ul class="nav nav-list bs-docs-sidenav">
-            
-<li>
-    <a href="https://bytewong123.github.io/tags/leetcode/">leetcode</a>
-</li>
-
-<li>
-    <a href="https://bytewong123.github.io/tags/%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92/">动态规划</a>
-</li>
-
-<li>
-    <a href="https://bytewong123.github.io/tags/%E5%AD%97%E7%AC%A6%E4%B8%B2/">字符串</a>
-</li>
-
-<li>
-    <a href="https://bytewong123.github.io/tags/%E6%89%BE%E8%A7%84%E5%BE%8B/">找规律</a>
-</li>
-
-<li>
-    <a href="https://bytewong123.github.io/tags/%E6%95%B0%E5%AD%A6/">数学</a>
-</li>
-
-<li>
-    <a href="https://bytewong123.github.io/tags/%E6%95%B0%E7%BB%84/">数组</a>
-</li>
-
-<li>
-    <a href="https://bytewong123.github.io/tags/%E6%A0%88/">栈</a>
-</li>
-
-<li>
-    <a href="https://bytewong123.github.io/tags/%E9%93%BE%E8%A1%A8/">链表</a>
-</li>
-
-        </ul>
-    </div>
+不要使用额外的数组空间，你必须在 原地 修改输入数组 并在使用 O(1) 额外空间的条件下完成。
+</code></pre><h1 id="思路">思路</h1>
+<ul>
+<li>使用双指针法，左指针指向当前位置，右指针去探索不重复的元素</li>
+<li>若左指针与右指针的值相同，右指针开始右移，直到找到一个和左指针不同的值</li>
+<li>然后左指针的左边一个位置替换为右指针找到的第一个与左指针不同的值即可</li>
+</ul>
+<h1 id="时空复杂度">时空复杂度</h1>
+<ul>
+<li>时间复杂度
+O(n)</li>
+<li>空间复杂度
+O(1)</li>
+</ul>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">removeDuplicates</span>(<span style="color:#a6e22e">nums</span> []<span style="color:#66d9ef">int</span>) <span style="color:#66d9ef">int</span> {
+    <span style="color:#66d9ef">if</span> len(<span style="color:#a6e22e">nums</span>) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span> {
+        <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">0</span>
+    }
+    <span style="color:#a6e22e">left</span>, <span style="color:#a6e22e">right</span> <span style="color:#f92672">:=</span> <span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">0</span>
+    <span style="color:#66d9ef">for</span> <span style="color:#a6e22e">right</span> &lt; len(<span style="color:#a6e22e">nums</span>) {
+        <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">nums</span>[<span style="color:#a6e22e">left</span>] <span style="color:#f92672">==</span> <span style="color:#a6e22e">nums</span>[<span style="color:#a6e22e">right</span>] {
+            <span style="color:#a6e22e">right</span><span style="color:#f92672">++</span>
+            <span style="color:#66d9ef">continue</span>
+        } 
+        <span style="color:#a6e22e">left</span><span style="color:#f92672">++</span>
+        <span style="color:#a6e22e">nums</span>[<span style="color:#a6e22e">left</span>] = <span style="color:#a6e22e">nums</span>[<span style="color:#a6e22e">right</span>]
+        <span style="color:#a6e22e">right</span><span style="color:#f92672">++</span>
+    }
+    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">left</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>
+}
+</code></pre></div>
+    <h4><a href="https://bytewong123.github.io">Back to Home</a></h4>
 </div>
 
 

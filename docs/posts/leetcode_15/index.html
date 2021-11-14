@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+    <title>wangzijie&#39;s site</title>
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+    <meta content="utf-8" http-equiv="encoding">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="theme-color" content="#000084" />
+    <link rel="icon" href="https://bytewong123.github.io/favicon.ico">
+    <link rel="canonical" href="https://bytewong123.github.io">
+    
+    
+</head>
+<body>
+<nav class="navbar navbar-inverse navbar-fixed-top">
+    <div class="navbar-inner">
+        <div class="container">
+            <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse"></button>
+            <a class="brand" href="https://bytewong123.github.io">wangzijie&#39;s site</a>
+            <div class="nav-collapse collapse">
+                <ul class="nav">
+                    
+                    
+                        
+                            <li>
+                                <a href="/about/">
+                                    
+                                    <span>About</span>
+                                </a>
+                            </li>
+                        
+                    
+                        
+                            <li>
+                                <a href="/posts/">
+                                    
+                                    <span>All posts</span>
+                                </a>
+                            </li>
+                        
+                    
+                </ul>
+            </div>
+        </div>
+    </div>
+</nav><div id="content" class="container">
+
+<div class="row-fluid navmargin">
+    <div class="page-header">
+        <h1>leetcode15 三数之和 - Sun, Nov 14, 2021</h1>
+    </div>
+    <p class="lead"></p>
+    <h1 id="链接">链接</h1>
+<p><a href="https://leetcode-cn.com/problems/3sum/submissions/">https://leetcode-cn.com/problems/3sum/submissions/</a></p>
+<h1 id="题目">题目</h1>
+<pre><code>给你一个包含 n 个整数的数组 nums，判断 nums 中是否存在三个元素 a，b，c ，使得 a + b + c = 0 ？请你找出所有和为 0 且不重复的三元组。
+
+注意：答案中不可以包含重复的三元组。
+
+ 
+
+示例 1：
+
+输入：nums = [-1,0,1,2,-1,-4]
+输出：[[-1,-1,2],[-1,0,1]]
+示例 2：
+
+输入：nums = []
+输出：[]
+示例 3：
+
+输入：nums = [0]
+输出：[]
+
+</code></pre><h1 id="思路">思路</h1>
+<ul>
+<li>本题求三数之和，故使用双指针的方法，固定一个基准指针为数组的开头，然后另外两位开始不断靠拢移动，直到找到答案，然后基准指针开始右移</li>
+<li>但是需要将数组排序，这样才能满足左小右大，方便通过判断当前和的大小来移动相应的指针</li>
+<li>需要注意的是存在重复解的情况
+<ul>
+<li>当基准指针与上一次基准指针相同，那么双指针的左指针若上一次是当前的基准指针的位置，且满足解，那么这个解会被保留；但是若左指针不是当前基准指针的位置，而是当前基准指针的右侧，那么重复解就出现了，若不止一个，那么当前基准指针的右侧会有多个重复解，因此需要排除这种情况，这种情况不会漏掉解</li>
+<li>若左指针与上一次左指针的位置相同，那么也需要过滤掉，不用担心丢解的情况，因为上一轮已经将解都保留下来了</li>
+</ul>
+</li>
+</ul>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">threeSum</span>(<span style="color:#a6e22e">nums</span> []<span style="color:#66d9ef">int</span>) [][]<span style="color:#66d9ef">int</span> {
+    <span style="color:#a6e22e">quickSort</span>(<span style="color:#a6e22e">nums</span>, <span style="color:#ae81ff">0</span>, len(<span style="color:#a6e22e">nums</span>) <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>)
+    <span style="color:#a6e22e">result</span> <span style="color:#f92672">:=</span> [][]<span style="color:#66d9ef">int</span>{}
+    <span style="color:#66d9ef">for</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">:=</span> <span style="color:#ae81ff">0</span>; <span style="color:#a6e22e">i</span> <span style="color:#f92672">&lt;=</span> len(<span style="color:#a6e22e">nums</span>) <span style="color:#f92672">-</span> <span style="color:#ae81ff">2</span>; <span style="color:#a6e22e">i</span><span style="color:#f92672">++</span> {
+        <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">i</span> &gt; <span style="color:#ae81ff">0</span> <span style="color:#f92672">&amp;&amp;</span> <span style="color:#a6e22e">nums</span>[<span style="color:#a6e22e">i</span>] <span style="color:#f92672">==</span> <span style="color:#a6e22e">nums</span>[<span style="color:#a6e22e">i</span> <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>] {
+            <span style="color:#66d9ef">continue</span>
+        }
+        <span style="color:#a6e22e">left</span>, <span style="color:#a6e22e">right</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>, len(<span style="color:#a6e22e">nums</span>) <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>
+        <span style="color:#a6e22e">other</span> <span style="color:#f92672">:=</span> <span style="color:#ae81ff">0</span> <span style="color:#f92672">-</span> <span style="color:#a6e22e">nums</span>[<span style="color:#a6e22e">i</span>]
+        <span style="color:#66d9ef">for</span> <span style="color:#a6e22e">left</span> &lt; <span style="color:#a6e22e">right</span> {
+            <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">nums</span>[<span style="color:#a6e22e">left</span>] <span style="color:#f92672">==</span> <span style="color:#a6e22e">nums</span>[<span style="color:#a6e22e">left</span> <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>] <span style="color:#f92672">&amp;&amp;</span> <span style="color:#a6e22e">left</span> <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span> <span style="color:#f92672">!=</span> <span style="color:#a6e22e">i</span> {
+                <span style="color:#a6e22e">left</span><span style="color:#f92672">++</span>
+                <span style="color:#66d9ef">continue</span>
+            }
+            <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">nums</span>[<span style="color:#a6e22e">left</span>] <span style="color:#f92672">+</span> <span style="color:#a6e22e">nums</span>[<span style="color:#a6e22e">right</span>] <span style="color:#f92672">==</span> <span style="color:#a6e22e">other</span> {
+                <span style="color:#a6e22e">result</span> = append(<span style="color:#a6e22e">result</span>, []<span style="color:#66d9ef">int</span>{<span style="color:#a6e22e">nums</span>[<span style="color:#a6e22e">i</span>], <span style="color:#a6e22e">nums</span>[<span style="color:#a6e22e">left</span>], <span style="color:#a6e22e">nums</span>[<span style="color:#a6e22e">right</span>]})
+                <span style="color:#a6e22e">left</span><span style="color:#f92672">++</span>
+                <span style="color:#a6e22e">right</span><span style="color:#f92672">--</span>
+            } <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">nums</span>[<span style="color:#a6e22e">left</span>] <span style="color:#f92672">+</span> <span style="color:#a6e22e">nums</span>[<span style="color:#a6e22e">right</span>] &gt; <span style="color:#a6e22e">other</span> {
+                <span style="color:#a6e22e">right</span><span style="color:#f92672">--</span>
+            } <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">nums</span>[<span style="color:#a6e22e">left</span>] <span style="color:#f92672">+</span> <span style="color:#a6e22e">nums</span>[<span style="color:#a6e22e">right</span>] &lt; <span style="color:#a6e22e">other</span> {
+                <span style="color:#a6e22e">left</span><span style="color:#f92672">++</span>
+            }
+        }
+    } 
+    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">result</span>
+}
+
+<span style="color:#66d9ef">func</span> <span style="color:#a6e22e">quickSort</span>(<span style="color:#a6e22e">nums</span> []<span style="color:#66d9ef">int</span>, <span style="color:#a6e22e">left</span>, <span style="color:#a6e22e">right</span> <span style="color:#66d9ef">int</span>) {
+    <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">left</span> &lt; <span style="color:#a6e22e">right</span> {
+        <span style="color:#a6e22e">mid</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">partition</span>(<span style="color:#a6e22e">nums</span>, <span style="color:#a6e22e">left</span>, <span style="color:#a6e22e">right</span>)
+        <span style="color:#a6e22e">quickSort</span>(<span style="color:#a6e22e">nums</span>, <span style="color:#a6e22e">left</span>, <span style="color:#a6e22e">mid</span> <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>)
+        <span style="color:#a6e22e">quickSort</span>(<span style="color:#a6e22e">nums</span>, <span style="color:#a6e22e">mid</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>, <span style="color:#a6e22e">right</span>)
+    }
+}
+
+<span style="color:#66d9ef">func</span> <span style="color:#a6e22e">partition</span>(<span style="color:#a6e22e">nums</span> []<span style="color:#66d9ef">int</span>, <span style="color:#a6e22e">left</span>, <span style="color:#a6e22e">right</span> <span style="color:#66d9ef">int</span>) <span style="color:#66d9ef">int</span> {
+    <span style="color:#a6e22e">pivot</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">nums</span>[<span style="color:#a6e22e">left</span>]
+    <span style="color:#66d9ef">for</span> <span style="color:#a6e22e">right</span> &gt; <span style="color:#a6e22e">left</span> {
+        <span style="color:#66d9ef">for</span> <span style="color:#a6e22e">right</span> &gt; <span style="color:#a6e22e">left</span> <span style="color:#f92672">&amp;&amp;</span> <span style="color:#a6e22e">nums</span>[<span style="color:#a6e22e">right</span>] <span style="color:#f92672">&gt;=</span> <span style="color:#a6e22e">pivot</span> {
+            <span style="color:#a6e22e">right</span><span style="color:#f92672">--</span>
+        }
+        <span style="color:#a6e22e">nums</span>[<span style="color:#a6e22e">left</span>] = <span style="color:#a6e22e">nums</span>[<span style="color:#a6e22e">right</span>]
+        <span style="color:#66d9ef">for</span> <span style="color:#a6e22e">right</span> &gt; <span style="color:#a6e22e">left</span> <span style="color:#f92672">&amp;&amp;</span> <span style="color:#a6e22e">nums</span>[<span style="color:#a6e22e">left</span>] <span style="color:#f92672">&lt;=</span> <span style="color:#a6e22e">pivot</span> {
+            <span style="color:#a6e22e">left</span><span style="color:#f92672">++</span>
+        }
+        <span style="color:#a6e22e">nums</span>[<span style="color:#a6e22e">right</span>] = <span style="color:#a6e22e">nums</span>[<span style="color:#a6e22e">left</span>]
+    }
+    <span style="color:#a6e22e">nums</span>[<span style="color:#a6e22e">left</span>] = <span style="color:#a6e22e">pivot</span>
+    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">left</span>
+}
+</code></pre></div>
+    <h4><a href="https://bytewong123.github.io">Back to Home</a></h4>
+</div>
+
+
+        </div><footer class="container">
+    <hr class="soften">
+    <p>
+&copy; 
+
+    
+
+<span id="thisyear">2021</span>
+
+
+</p>
+    <p class="text-center">
+        
+        
+        
+        <a href="https://github.com">GitHub</a> 
+        
+    </p>
+</footer>
+
+</body><link rel="stylesheet" href="/css/bootstrap.css">
+<link rel="stylesheet" href="/css/bootstrap-responsive.css">
+<link rel="stylesheet" href="/css/style.css">
+
+<script src="/js/jquery.js"></script>
+<script src="/js/bootstrap-386.js"></script>
+<script src="/js/bootstrap-transition.js"></script>
+<script src="/js/bootstrap-alert.js"></script>
+<script src="/js/bootstrap-modal.js"></script>
+<script src="/js/bootstrap-dropdown.js"></script>
+<script src="/js/bootstrap-scrollspy.js"></script>
+<script src="/js/bootstrap-tab.js"></script>
+<script src="/js/bootstrap-tooltip.js"></script>
+<script src="/js/bootstrap-popover.js"></script>
+<script src="/js/bootstrap-button.js"></script>
+<script src="/js/bootstrap-collapse.js"></script>
+<script src="/js/bootstrap-carousel.js"></script>
+<script src="/js/bootstrap-typeahead.js"></script>
+<script src="/js/bootstrap-affix.js"></script>
+<script>
+    _386 = { 
+        fastLoad: true ,
+        onePass: false , 
+        speedFactor: 1 
+    };
+
+    
+    function ThisYear() {
+        document.getElementById('thisyear').innerHTML = new Date().getFullYear();
+    };
+</script></html>

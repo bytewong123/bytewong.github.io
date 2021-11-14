@@ -44,73 +44,42 @@
         </div>
     </div>
 </nav><div id="content" class="container">
-<article class="row-fluid navmargin">
-    <header class="page-header">
-        <h1>Posts</h1>
-    </header>
-    
-    
-</article>
+
+<div class="row-fluid navmargin">
+    <div class="page-header">
+        <h1>leetcode9 回文数 - Sun, Nov 14, 2021</h1>
+    </div>
+    <p class="lead"></p>
+    <h1 id="链接">链接</h1>
+<p><a href="https://leetcode-cn.com/problems/palindrome-number/">https://leetcode-cn.com/problems/palindrome-number/</a></p>
+<h1 id="题目">题目</h1>
+<pre><code>给你一个整数 x ，如果 x 是一个回文整数，返回 true ；否则，返回 false 。
+
+回文数是指正序（从左向右）和倒序（从右向左）读都是一样的整数。例如，121 是回文，而 123 不是。
+
+</code></pre><h1 id="思路">思路</h1>
 <ul>
-
-
-    <li>
-        <a href="https://bytewong123.github.io/posts/leetcode_11/">2021-11-14 | leetcode11 盛最多水的容器</a>
-    </li>
-
-    <li>
-        <a href="https://bytewong123.github.io/posts/leetcode_12/">2021-11-14 | leetcode12 整数转罗马数字</a>
-    </li>
-
-    <li>
-        <a href="https://bytewong123.github.io/posts/leetcode_15/">2021-11-14 | leetcode15 三数之和</a>
-    </li>
-
-    <li>
-        <a href="https://bytewong123.github.io/posts/leetcode_19/">2021-11-14 | leetcode19 删除链表倒数第n个节点</a>
-    </li>
-
-    <li>
-        <a href="https://bytewong123.github.io/posts/leetcode_20/">2021-11-14 | leetcode20 有效的括号</a>
-    </li>
-
-    <li>
-        <a href="https://bytewong123.github.io/posts/leetcode_21/">2021-11-14 | leetcode21 合并两个有序链表</a>
-    </li>
-
-    <li>
-        <a href="https://bytewong123.github.io/posts/leetcode_23/">2021-11-14 | leetcode23 合并k个升序链表</a>
-    </li>
-
-    <li>
-        <a href="https://bytewong123.github.io/posts/leetcode_25/">2021-11-14 | leetcode25 k个一组翻转链表</a>
-    </li>
-
-    <li>
-        <a href="https://bytewong123.github.io/posts/leetcode_26/">2021-11-14 | leetcode26 删除有序数组的重复项</a>
-    </li>
-
-    <li>
-        <a href="https://bytewong123.github.io/posts/leetcode_5/">2021-11-14 | leetcode5 最长回文子串</a>
-    </li>
-
-    <li>
-        <a href="https://bytewong123.github.io/posts/leetcode_6/">2021-11-14 | leetcode6 z字形变化</a>
-    </li>
-
-    <li>
-        <a href="https://bytewong123.github.io/posts/leetcode_7/">2021-11-14 | leetcode7 整数反转</a>
-    </li>
-
-    <li>
-        <a href="https://bytewong123.github.io/posts/leetcode_8/">2021-11-14 | leetcode8 字符串转换整数</a>
-    </li>
-
-    <li>
-        <a href="https://bytewong123.github.io/posts/leetcode_9/">2021-11-14 | leetcode9 回文数</a>
-    </li>
-
+<li>只需要将一个整数从右往左算一个新的整数，然后比较前后两个整数即可</li>
+<li>从右往左求整数的方式，每次获取到右侧的一位，然后不断新数*10 + 右侧的第一位作为新数，不断循环直到老数变为0</li>
 </ul>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">isPalindrome</span>(<span style="color:#a6e22e">x</span> <span style="color:#66d9ef">int</span>) <span style="color:#66d9ef">bool</span> {
+    <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">x</span> &lt; <span style="color:#ae81ff">0</span> {
+        <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">false</span>
+    }
+    <span style="color:#a6e22e">origin</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">x</span>
+    <span style="color:#a6e22e">newX</span> <span style="color:#f92672">:=</span> <span style="color:#ae81ff">0</span>
+    <span style="color:#a6e22e">base</span> <span style="color:#f92672">:=</span> <span style="color:#ae81ff">10</span>
+    <span style="color:#66d9ef">for</span> <span style="color:#a6e22e">x</span> &gt; <span style="color:#ae81ff">0</span> {
+        <span style="color:#a6e22e">extra</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">x</span> <span style="color:#f92672">%</span> <span style="color:#ae81ff">10</span>
+        <span style="color:#a6e22e">newX</span> = <span style="color:#a6e22e">extra</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">base</span> <span style="color:#f92672">*</span> <span style="color:#a6e22e">newX</span>
+        <span style="color:#a6e22e">x</span> <span style="color:#f92672">/=</span> <span style="color:#ae81ff">10</span>
+    }
+    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">newX</span> <span style="color:#f92672">==</span> <span style="color:#a6e22e">origin</span>
+}
+</code></pre></div>
+    <h4><a href="https://bytewong123.github.io">Back to Home</a></h4>
+</div>
+
 
         </div><footer class="container">
     <hr class="soften">
