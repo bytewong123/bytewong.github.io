@@ -6,7 +6,16 @@
     <description>Recent content on wangzijie&#39;s site</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Sun, 14 Nov 2021 10:53:59 +0800</lastBuildDate><atom:link href="https://bytewong123.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sat, 20 Nov 2021 13:10:59 +0800</lastBuildDate><atom:link href="https://bytewong123.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>cka真题练习——权限控制</title>
+      <link>https://bytewong123.github.io/posts/cka1/</link>
+      <pubDate>Sat, 20 Nov 2021 13:10:59 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/posts/cka1/</guid>
+      <description>cka真题练习——权限控制 创建ClusterRole绑定到service account You have been asked to create a new ClusterRole for a deployment pipeline and bind it to a specific ServiceAccount scoped to a specific namespace. Create a new ClusterRole named deployment-clusterrole, which only allows to create the following resource types: Deployment statefulset Daemonset Create a new ServiceAccount named cicd-token in the existing namespace app-team1. bind the new ClusterRole deployment-clusterrole to the new Service Account cicd-token, limited to the namespace app-team1.</description>
+    </item>
+    
     <item>
       <title>leetcode11 盛最多水的容器</title>
       <link>https://bytewong123.github.io/posts/leetcode_11/</link>
