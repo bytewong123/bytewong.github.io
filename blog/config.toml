@@ -1,0 +1,31 @@
+baseURL = "https://example.com/"
+title = "sheeks"
+languageCode = "en"
+hasCJKLanguage = false
+
+theme = "maupassant"
+
+[author]
+  name = "sheeks"
+
+[params]
+  author = "sheeks"
+  subtitle = "dev"
+  keywords = "golang,go语言,go语言笔记,sheeks,java,android,博客,项目管理,python,软件架构,公众号,小程序"
+  description = "专注于IT互联网，包括但不限于Go语言(golang)、Java、Android、Python、项目管理、抖音分析、软件架构等"
+
+[menu]
+  [[menu.main]]
+    identifier = "about"
+    name = "关于"
+    url = "/about/"
+    weight = 4
+
+[[params.links]]
+  title = "Android Gradle权威指南"
+  name = "Android Gradle权威指南"
+  url = "http://yuedu.baidu.com/ebook/14a722970740be1e640e9a3e"
+[[params.links]]
+  title = "常用开发工具CDN镜像"
+  name = "常用开发工具CDN镜像"
+  url = "http://mirrors.flysnow.org/"
