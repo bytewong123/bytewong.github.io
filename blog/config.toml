@@ -4,6 +4,7 @@ languageCode = "en"
 hasCJKLanguage = false
 
 theme = "maupassant"
+summaryLength = 0
 
 [author]
   name = "sheeks"

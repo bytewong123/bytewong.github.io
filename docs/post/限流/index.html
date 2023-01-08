@@ -1,0 +1,424 @@
+<!doctype html>
+<html lang="en">
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+
+    <title>限流 | sheeks</title>
+    <meta property="og:title" content="限流 - sheeks">
+    <meta property="og:type" content="article">
+        
+    <meta property="article:published_time" content='2023-01-08T18:06:57&#43;08:00'>
+        
+        
+    <meta property="article:modified_time" content='2023-01-08T18:06:57&#43;08:00'>
+        
+    <meta name="Keywords" content="golang,go语言,go语言笔记,sheeks,java,android,博客,项目管理,python,软件架构,公众号,小程序">
+    <meta name="description" content="限流">
+        
+    <meta name="author" content="sheeks">
+    <meta property="og:url" content="https://bytewong123.github.io/post/%E9%99%90%E6%B5%81/">
+    <link rel="shortcut icon" href='/favicon.ico'  type="image/x-icon">
+
+    <link rel="stylesheet" href='/css/normalize.css'>
+    <link rel="stylesheet" href='/css/style.css'>
+    <script type="text/javascript" src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    
+    
+    
+    
+    
+    
+</head>
+
+<body>
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://bytewong123.github.io/">
+                        sheeks
+                    </a>
+                
+                <p class="description">dev</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://bytewong123.github.io/">Home</a>
+                    
+                    <a  href="https://bytewong123.github.io/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    
+    <article class="post">
+        <header>
+            <h1 class="post-title">限流</h1>
+        </header>
+        
+  <time datetime="2023-01-08T10:06:57Z" class="post-meta meta-date dt-published">
+    2023-01-08
+  </time>
+
+
+<div class="post-meta meta-category">
+  <span>&nbsp;|</span>
+  
+    <a href='/categories/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1' target="_blank">系统设计</a>
+  
+</div>
+
+
+        
+        
+        <div class="post-content">
+            <h1 id="限流">限流</h1>
+<p>#技术/系统设计</p>
+<p>限流指的是通过限制到达系统的并发请求数量，保证系统能够正常响应部分用户请求，而对于超过限制的流量，则只能通过拒绝服务的方式保证整体系统的可用性。限流策略一般部署在服务的入口层，比如 API 网关中，这样可以对系统整体流量做塑形。而在微服务架构中，你也可以在 RPC 客户端中引入限流的策略，来保证单个服务不会被过大的流量压垮。</p>
+<h2 id="常见的限流算法">常见的限流算法</h2>
+<h3 id="固定窗口算法">固定窗口算法</h3>
+<p>限流的目的是限制一段时间内发向系统的总体请求量，比如，限制一分钟之内系统只能承接 1 万次请求，那么最暴力的一种方式就是记录这一分钟之内访问系统的请求量有多少，如果超过了 1 万次的限制，那么就触发限流的策略返回请求失败的错误。如果这一分钟的请求量没有达到限制，那么在下一分钟到来的时候先重置请求量的计数，再统计这一分钟的请求量是否超过限制</p>
+<p>这种算法虽然实现非常简单，但是却有一个很大的缺陷 ：无法限制短时间之内的集中流量。
+假如我们需要限制每秒钟只能处理 10 次请求，如果前一秒钟产生了 10 次请求，这 10 次请求全部集中在最后的 10 毫秒中，而下一秒钟的前 10 毫秒也产生了 10 次请求，那么在这 20 毫秒中就产生了 20 次请求，超过了限流的阈值。但是因为这 20 次请求分布在两个时间窗口内，所以没有触发限流，这就造成了限流的策略并没有生效。</p>
+<h3 id="滑动窗口">滑动窗口</h3>
+<p>算法的原理是将时间的窗口划分为多个小窗口，每个小窗口中都有单独的请求计数。
+我们将 1s 的时间窗口划分为 5 份，每一份就是 200ms；那么当在 1s 和 1.2s 之间来了一次新的请求时，我们就需要统计之前的一秒钟内的请求量，也就是 0.2s～1.2s 这个区间的总请求量，如果请求量超过了限流阈值那么就执行限流策略。
+滑动窗口的算法解决了临界时间点上突发流量无法控制的问题，但是却因为要存储每个小的时间窗口内的计数，所以空间复杂度有所增加。</p>
+<p>虽然滑动窗口算法解决了窗口边界的大流量的问题，但是它和固定窗口算法一样，还是无法限制短时间之内的集中流量，也就是说无法控制流量让它们更加平滑</p>
+<h3 id="漏桶算法">漏桶算法</h3>
+<p>漏桶算法的原理很简单，它就像在流量产生端和接收端之间增加一个漏桶，流量会进入和暂存到漏桶里面，而漏桶的出口处会按照一个固定的速率将流量漏出到接收端（也就是服务接口）。
+如果流入的流量在某一段时间内大增，超过了漏桶的承受极限，那么多余的流量就会触发限流策略，被拒绝服务。
+经过了漏桶算法之后，随机产生的流量就会成为比较平滑的流量到达服务端，从而避免了突发的大流量对于服务接口的影响。</p>
+<p>异步框架：我们一般会使用消息队列作为漏桶的实现，流量首先被放入到消息队列中排队，由固定的几个队列处理程序来消费流量，如果消息队列中的流量溢出，那么后续的流量就会被拒绝。
+同步框架：根据限流配置文件计算每个请求之间的间隔时间，例如：限流每秒 10 个请求，那么每两个请求的间隔时间就必须 &gt;=100ms。用户请求到达限流器后，根据当前最近一个请求处理的时间和阻塞的请求线程数目，计算当前请求线程的 sleep 时间。每个请求线程的 sleep 时间不同，最后就可以实现每隔 100ms 唤醒一个请求线程去处理，从而达到漏桶限流的效果</p>
+<p>漏洞算法的问题：</p>
+<ol>
+<li>使用漏桶限流算法，即使系统资源很空闲，多个请求同时到达时，漏桶也是慢慢地一个接一个地去处理请求，这其实并不符合人们的期望，因为这样就是在浪费计算资源。因此除非有特别的场景需求，否则不推荐使用该算法。</li>
+<li>漏桶算法在面对突发流量的时候，采用的解决方式是缓存在漏桶中， 这样流量的响应时间就会增长，这就与互联网业务低延迟的要求不符。</li>
+</ol>
+<h3 id="令牌桶算法">令牌桶算法</h3>
+<ul>
+<li>如果我们需要在一秒内限制访问次数为 N 次，那么就每隔 1/N 的时间，往桶内放入一个令牌；</li>
+<li>在处理请求之前先要从桶中获得一个令牌，如果桶中已经没有了令牌，那么就需要等待新的令牌或者直接拒绝服务；</li>
+<li>桶中的令牌总数也要有一个限制，如果超过了限制就不能向桶中再增加新的令牌了。这样可以限制令牌的总数，一定程度上可以避免瞬时流量高峰的问题。</li>
+</ul>
+<p>单机上实现限流的话，可以在进程中使用一个变量来存储；但是如果在分布式环境下，不同的机器之间无法共享进程中的变量，我们就一般会使用 Redis 来存储这个令牌的数量。这样的话，每次请求的时候都需要请求一次 Redis 来获取一个令牌，会增加几毫秒的延迟，性能上会有一些损耗。
+因此，一个折中的思路是： 我们可以在每次取令牌的时候，不再只获取一个令牌，而是获取一批令牌，这样可以尽量减少请求 Redis 的次数。</p>
+<h2 id="总结">总结</h2>
+<p>限流策略是微服务治理中的标配策略，只是你很难在实际中确认限流的阈值是多少，设置的小了容易误伤正常的请求，设置的大了则达不到限流的目的。所以，一般在实际项目中，我们会把阈值放置在配置中心中方便动态调整；同时，我们可以通过定期的压力测试得到整体系统以及每个微服务的实际承载能力，然后再依据这个压测出来的值设置合适的阈值。</p>
+
+        </div>
+
+        
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/post/redis%E5%AE%9E%E7%8E%B0%E5%85%B3%E6%B3%A8%E6%A8%A1%E5%9E%8B/">redis实现关注模型</a></li>
+        
+        <li><a href="/post/zookeeper%E7%9A%84zap%E5%8D%8F%E8%AE%AE/">zookeeper的zap协议</a></li>
+        
+        <li><a href="/post/%E4%BA%8B%E5%8A%A1%E6%8B%86%E8%A7%A3/">事务拆解</a></li>
+        
+        <li><a href="/post/%E4%BF%A1%E6%81%AF%E6%B5%81%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/">信息流系统设计</a></li>
+        
+        <li><a href="/post/%E5%85%B3%E7%B3%BB%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/">关系系统设计</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='/tags/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1' target="_blank">系统设计</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    
+
+    
+    
+    
+    
+
+</div>
+
+                    <footer id="footer">
+    <br />
+</footer>
+
+
+    
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+<style type="text/css">
+div.highlight {
+    position: relative;
+    margin: 1em 0px;
+}
+
+.copy-code {
+    display: none;
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    color: rgba(255, 255, 255, 0.8);
+    background: rgba(78, 78, 78, 0.8);
+    border-radius: var(--radius);
+    padding: 0 5px;
+    font: inherit;
+    user-select: none;
+    cursor: pointer;
+    border: 0;
+    --radius: 8px;
+}
+
+div.highlight:hover .copy-code,pre:hover .copy-code {
+    display: block;
+}
+
+</style>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+
+
+
+
+
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='//www.google.com/search' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://bytewong123.github.io/">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title">Latest articles</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/benchmark/" title="benchmark" target="_blank">benchmark</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/b%E6%A0%91/" title="b树" target="_blank">b树</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0daemonset/" title="cka真题练习——daemonset" target="_blank">cka真题练习——daemonset</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0deploy/" title="cka真题练习——deploy" target="_blank">cka真题练习——deploy</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0etcd%E5%A4%87%E4%BB%BD%E8%BF%98%E5%8E%9F/" title="cka真题练习——etcd备份还原" target="_blank">cka真题练习——etcd备份还原</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0ingress/" title="cka真题练习——ingress" target="_blank">cka真题练习——ingress</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0networkpolicy/" title="cka真题练习——NetworkPolicy" target="_blank">cka真题练习——NetworkPolicy</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0node%E8%B0%83%E5%BA%A6/" title="cka真题练习——node调度" target="_blank">cka真题练习——node调度</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0pod/" title="cka真题练习——pod" target="_blank">cka真题练习——pod</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0pv/" title="cka真题练习——pv" target="_blank">cka真题练习——pv</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>Categories</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://bytewong123.github.io/categories/golang/">golang (12)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/k8s/">k8s (24)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/mysql/">mysql (10)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/redis/">redis (10)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/rust/">rust (1)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/sql/">sql (1)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统 (3)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E6%9E%81%E5%AE%A2%E6%97%B6%E9%97%B4/">极客时间 (5)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/">消息队列 (1)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B3%BB%E7%BB%9F/">深入理解计算机系统 (1)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E7%AE%97%E6%B3%95/">算法 (138)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/">系统设计 (19)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>Tags</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://bytewong123.github.io/tags/golang/">golang</a>
+    
+    <a href="https://bytewong123.github.io/tags/k8s/">k8s</a>
+    
+    <a href="https://bytewong123.github.io/tags/kafka/">kafka</a>
+    
+    <a href="https://bytewong123.github.io/tags/mysql/">mysql</a>
+    
+    <a href="https://bytewong123.github.io/tags/redis/">redis</a>
+    
+    <a href="https://bytewong123.github.io/tags/rust/">rust</a>
+    
+    <a href="https://bytewong123.github.io/tags/sql/">sql</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E6%9E%81%E5%AE%A2%E6%97%B6%E9%97%B4/">极客时间</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/">消息队列</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E7%AE%97%E6%B3%95/">算法</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/">系统设计</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/">读书笔记</a>
+    
+</div>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title">Links</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a target="_blank" href="http://yuedu.baidu.com/ebook/14a722970740be1e640e9a3e" title="Android Gradle权威指南">Android Gradle权威指南</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="http://mirrors.flysnow.org/" title="常用开发工具CDN镜像">常用开发工具CDN镜像</a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title">Meta</h3>
+        <ul class="widget-list">
+            <li><a href="https://bytewong123.github.io/index.xml">RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,533 @@
+<!doctype html>
+<html lang="en">
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+
+    <title>三数相加（附快速排序） | sheeks</title>
+    <meta property="og:title" content="三数相加（附快速排序） - sheeks">
+    <meta property="og:type" content="article">
+        
+    <meta property="article:published_time" content='2023-01-08T18:06:57&#43;08:00'>
+        
+        
+    <meta property="article:modified_time" content='2023-01-08T18:06:57&#43;08:00'>
+        
+    <meta name="Keywords" content="golang,go语言,go语言笔记,sheeks,java,android,博客,项目管理,python,软件架构,公众号,小程序">
+    <meta name="description" content="三数相加（附快速排序）">
+        
+    <meta name="author" content="sheeks">
+    <meta property="og:url" content="https://bytewong123.github.io/post/%E4%B8%89%E6%95%B0%E7%9B%B8%E5%8A%A0%E9%99%84%E5%BF%AB%E9%80%9F%E6%8E%92%E5%BA%8F/">
+    <link rel="shortcut icon" href='/favicon.ico'  type="image/x-icon">
+
+    <link rel="stylesheet" href='/css/normalize.css'>
+    <link rel="stylesheet" href='/css/style.css'>
+    <script type="text/javascript" src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    
+    
+    
+    
+    
+    
+</head>
+
+<body>
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://bytewong123.github.io/">
+                        sheeks
+                    </a>
+                
+                <p class="description">dev</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://bytewong123.github.io/">Home</a>
+                    
+                    <a  href="https://bytewong123.github.io/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    
+    <article class="post">
+        <header>
+            <h1 class="post-title">三数相加（附快速排序）</h1>
+        </header>
+        
+  <time datetime="2023-01-08T10:06:57Z" class="post-meta meta-date dt-published">
+    2023-01-08
+  </time>
+
+
+<div class="post-meta meta-category">
+  <span>&nbsp;|</span>
+  
+    <a href='/categories/%E7%AE%97%E6%B3%95' target="_blank">算法</a>
+  
+</div>
+
+
+        
+        
+        <div class="post-content">
+            <h1 id="三数相加附快速排序">三数相加（附快速排序）</h1>
+<p>#算法/数组
+#算法/双指针
+#算法/仍然不会</p>
+<blockquote>
+<p>给你一个包含 n 个整数的数组 nums，判断 nums 中是否存在三个元素 a，b，c ，使得a + b + c = 0 ？请你找出所有满足条件且不重复的三元组。
+注意：答案中不可以包含重复的三元组。</p>
+</blockquote>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">threeSum</span>(<span style="color:#a6e22e">nums</span> []<span style="color:#66d9ef">int</span>) [][]<span style="color:#66d9ef">int</span> {
+	  <span style="color:#75715e">//参数检查
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">if</span> len(<span style="color:#a6e22e">nums</span>) &lt; <span style="color:#ae81ff">3</span> {
+        <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">nil</span>
+    }
+	  <span style="color:#75715e">//首先需要排序
+</span><span style="color:#75715e"></span>    <span style="color:#a6e22e">sort</span>(<span style="color:#a6e22e">nums</span>, <span style="color:#ae81ff">0</span> , len(<span style="color:#a6e22e">nums</span>) <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>)
+    <span style="color:#a6e22e">result</span> <span style="color:#f92672">:=</span> make([][]<span style="color:#66d9ef">int</span>, <span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">0</span>)
+
+	  <span style="color:#75715e">//双指针法，从头开始，左右指针分别为当前节点之后部分的第一个节点和最后一个节点
+</span><span style="color:#75715e"></span>	  <span style="color:#75715e">//每次将当前节点的值和左右指针对应的值进行求和
+</span><span style="color:#75715e"></span>	  <span style="color:#75715e">//若发现值&gt;0，则说明右指针大了，自减
+</span><span style="color:#75715e"></span>	  <span style="color:#75715e">//若发现值&lt;0，则说明左指针小了，自增
+</span><span style="color:#75715e"></span>	  <span style="color:#75715e">//若当前节点的值就&gt;0了，那么后面的值只会越来越大，不用再算了，直接continue掉
+</span><span style="color:#75715e"></span>	  <span style="color:#75715e">//去除重复解：
+</span><span style="color:#75715e"></span>	  <span style="color:#75715e">//左指针的下一个节点若与左指针相同，那么会有重复解，不用再算
+</span><span style="color:#75715e"></span>	  <span style="color:#75715e">//右指针的前一个节点若与右指针相同，也会有重复解，不用再算
+</span><span style="color:#75715e"></span>	  <span style="color:#75715e">//当前节点的下一个节点若与前一个节点相同，会有重复解，不用再算
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">for</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">:=</span> <span style="color:#ae81ff">0</span>; <span style="color:#a6e22e">i</span> &lt; len(<span style="color:#a6e22e">nums</span>) <span style="color:#f92672">-</span> <span style="color:#ae81ff">2</span>; <span style="color:#a6e22e">i</span><span style="color:#f92672">++</span> {
+        <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">nums</span>[<span style="color:#a6e22e">i</span>] &gt; <span style="color:#ae81ff">0</span> {
+            <span style="color:#66d9ef">continue</span>
+        }
+        <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">i</span> &gt; <span style="color:#ae81ff">0</span> <span style="color:#f92672">&amp;&amp;</span> <span style="color:#a6e22e">nums</span>[<span style="color:#a6e22e">i</span>] <span style="color:#f92672">==</span> <span style="color:#a6e22e">nums</span>[<span style="color:#a6e22e">i</span> <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>] {<span style="color:#75715e">//肯定会有一个重复的解[-3,-3,-2,5,6]
+</span><span style="color:#75715e"></span>            <span style="color:#66d9ef">continue</span>
+        }
+        <span style="color:#a6e22e">left</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>
+        <span style="color:#a6e22e">right</span> <span style="color:#f92672">:=</span> len(<span style="color:#a6e22e">nums</span>) <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>
+        <span style="color:#66d9ef">for</span> <span style="color:#a6e22e">left</span> &lt; <span style="color:#a6e22e">right</span> {
+            <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">nums</span>[<span style="color:#a6e22e">i</span>] <span style="color:#f92672">+</span> <span style="color:#a6e22e">nums</span>[<span style="color:#a6e22e">left</span>] <span style="color:#f92672">+</span> <span style="color:#a6e22e">nums</span>[<span style="color:#a6e22e">right</span>] &gt; <span style="color:#ae81ff">0</span> {
+                <span style="color:#a6e22e">right</span><span style="color:#f92672">--</span>
+            } <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">nums</span>[<span style="color:#a6e22e">i</span>] <span style="color:#f92672">+</span> <span style="color:#a6e22e">nums</span>[<span style="color:#a6e22e">left</span>] <span style="color:#f92672">+</span> <span style="color:#a6e22e">nums</span>[<span style="color:#a6e22e">right</span>] &lt; <span style="color:#ae81ff">0</span> {
+                <span style="color:#a6e22e">left</span><span style="color:#f92672">++</span>
+            } <span style="color:#66d9ef">else</span> {
+                <span style="color:#a6e22e">result</span> = append(<span style="color:#a6e22e">result</span>, []<span style="color:#66d9ef">int</span>{<span style="color:#a6e22e">nums</span>[<span style="color:#a6e22e">i</span>], <span style="color:#a6e22e">nums</span>[<span style="color:#a6e22e">left</span>], <span style="color:#a6e22e">nums</span>[<span style="color:#a6e22e">right</span>]})
+                <span style="color:#66d9ef">for</span> <span style="color:#a6e22e">left</span> &lt; <span style="color:#a6e22e">right</span> <span style="color:#f92672">&amp;&amp;</span> <span style="color:#a6e22e">nums</span>[<span style="color:#a6e22e">left</span>] <span style="color:#f92672">==</span> <span style="color:#a6e22e">nums</span>[<span style="color:#a6e22e">left</span><span style="color:#f92672">+</span><span style="color:#ae81ff">1</span>] {
+                    <span style="color:#a6e22e">left</span><span style="color:#f92672">++</span>
+                }
+                <span style="color:#66d9ef">for</span> <span style="color:#a6e22e">left</span> &lt; <span style="color:#a6e22e">right</span> <span style="color:#f92672">&amp;&amp;</span> <span style="color:#a6e22e">nums</span>[<span style="color:#a6e22e">right</span>] <span style="color:#f92672">==</span> <span style="color:#a6e22e">nums</span>[<span style="color:#a6e22e">right</span><span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>] {
+                    <span style="color:#a6e22e">right</span><span style="color:#f92672">--</span>
+                }
+                <span style="color:#a6e22e">left</span><span style="color:#f92672">++</span>
+                <span style="color:#a6e22e">right</span><span style="color:#f92672">--</span>
+            }
+        }
+    }
+    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">result</span>
+}
+
+<span style="color:#66d9ef">func</span> <span style="color:#a6e22e">sort</span>(<span style="color:#a6e22e">arr</span> []<span style="color:#66d9ef">int</span>, <span style="color:#a6e22e">low</span> <span style="color:#66d9ef">int</span>, <span style="color:#a6e22e">high</span> <span style="color:#66d9ef">int</span>) {
+      <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">low</span> &lt; <span style="color:#a6e22e">high</span> {
+          <span style="color:#a6e22e">middle</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">getMiddle</span>(<span style="color:#a6e22e">arr</span>, <span style="color:#a6e22e">low</span>, <span style="color:#a6e22e">high</span>)
+          <span style="color:#a6e22e">sort</span>(<span style="color:#a6e22e">arr</span>, <span style="color:#a6e22e">low</span>, <span style="color:#a6e22e">middle</span><span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>)
+          <span style="color:#a6e22e">sort</span>(<span style="color:#a6e22e">arr</span>, <span style="color:#a6e22e">middle</span><span style="color:#f92672">+</span><span style="color:#ae81ff">1</span>, <span style="color:#a6e22e">high</span>)
+      }
+  }
+
+  <span style="color:#66d9ef">func</span> <span style="color:#a6e22e">getMiddle</span>(<span style="color:#a6e22e">arr</span> []<span style="color:#66d9ef">int</span>, <span style="color:#a6e22e">low</span> <span style="color:#66d9ef">int</span>, <span style="color:#a6e22e">high</span> <span style="color:#66d9ef">int</span>) <span style="color:#66d9ef">int</span> {
+      <span style="color:#a6e22e">piviot</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">arr</span>[<span style="color:#a6e22e">low</span>]
+      <span style="color:#66d9ef">for</span> <span style="color:#a6e22e">low</span> &lt; <span style="color:#a6e22e">high</span> {
+          <span style="color:#66d9ef">for</span> <span style="color:#a6e22e">low</span> &lt; <span style="color:#a6e22e">high</span> <span style="color:#f92672">&amp;&amp;</span> <span style="color:#a6e22e">arr</span>[<span style="color:#a6e22e">high</span>] <span style="color:#f92672">&gt;=</span> <span style="color:#a6e22e">piviot</span> {
+              <span style="color:#a6e22e">high</span><span style="color:#f92672">--</span>
+          }
+          <span style="color:#a6e22e">arr</span>[<span style="color:#a6e22e">low</span>] = <span style="color:#a6e22e">arr</span>[<span style="color:#a6e22e">high</span>]
+          <span style="color:#66d9ef">for</span> <span style="color:#a6e22e">low</span> &lt; <span style="color:#a6e22e">high</span> <span style="color:#f92672">&amp;&amp;</span> <span style="color:#a6e22e">arr</span>[<span style="color:#a6e22e">low</span>] <span style="color:#f92672">&lt;=</span> <span style="color:#a6e22e">piviot</span> {
+              <span style="color:#a6e22e">low</span><span style="color:#f92672">++</span>
+          }
+          <span style="color:#a6e22e">arr</span>[<span style="color:#a6e22e">high</span>] = <span style="color:#a6e22e">arr</span>[<span style="color:#a6e22e">low</span>]
+      }
+      <span style="color:#a6e22e">arr</span>[<span style="color:#a6e22e">low</span>] = <span style="color:#a6e22e">piviot</span>
+      <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">low</span>
+  }
+</code></pre></div><p>本质是双指针法，首先排序，定位第一个元素后，第一个元素的后一个元素是左指针，数组的最后一个元素是右指针。
+注意重复解的去除：</p>
+<ol>
+<li>定位的第一个标靶元素，若后一个标靶元素与前一个元素相同，跳过</li>
+<li>移动一次之后左指针若与前一个左指针相同，跳过。因为标靶元素和第一个左指针如果相同，这可能是有答案的，例如：
+[-4,-1,-1,0,1,2]，[-1,-1,2]是其中一个解，标靶元素为-1，左指针为-1，这个情况不能跳过，必须左指针移动一次后（与标靶元素距离&gt;1），若左指针与前一个左指针相同，才有可能会是重复解</li>
+</ol>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">threeSum</span>(<span style="color:#a6e22e">nums</span> []<span style="color:#66d9ef">int</span>) [][]<span style="color:#66d9ef">int</span> {
+    <span style="color:#66d9ef">if</span> len(<span style="color:#a6e22e">nums</span>) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span> {
+        <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">nil</span>
+    }
+    <span style="color:#a6e22e">sort</span>(<span style="color:#a6e22e">nums</span>, <span style="color:#ae81ff">0</span>, len(<span style="color:#a6e22e">nums</span>) <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>)
+    <span style="color:#a6e22e">ans</span> <span style="color:#f92672">:=</span> make([][]<span style="color:#66d9ef">int</span>, <span style="color:#ae81ff">0</span>)
+    <span style="color:#66d9ef">for</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">:=</span> <span style="color:#ae81ff">0</span>; <span style="color:#a6e22e">i</span> &lt; len(<span style="color:#a6e22e">nums</span>) <span style="color:#f92672">-</span> <span style="color:#ae81ff">2</span>; <span style="color:#a6e22e">i</span><span style="color:#f92672">++</span> {
+        <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">i</span> &gt; <span style="color:#ae81ff">0</span> <span style="color:#f92672">&amp;&amp;</span> <span style="color:#a6e22e">nums</span>[<span style="color:#a6e22e">i</span>] <span style="color:#f92672">==</span> <span style="color:#a6e22e">nums</span>[<span style="color:#a6e22e">i</span> <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>] {
+            <span style="color:#66d9ef">continue</span>
+        }
+        <span style="color:#a6e22e">target</span> <span style="color:#f92672">:=</span> <span style="color:#ae81ff">0</span> <span style="color:#f92672">-</span> (<span style="color:#a6e22e">nums</span>[<span style="color:#a6e22e">i</span>])
+        <span style="color:#a6e22e">left</span>, <span style="color:#a6e22e">right</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>, len(<span style="color:#a6e22e">nums</span>) <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>
+        <span style="color:#66d9ef">for</span> <span style="color:#a6e22e">left</span> &lt; <span style="color:#a6e22e">right</span> {
+            <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">left</span> <span style="color:#f92672">-</span> <span style="color:#a6e22e">i</span> &gt; <span style="color:#ae81ff">1</span> <span style="color:#f92672">&amp;&amp;</span> <span style="color:#a6e22e">nums</span>[<span style="color:#a6e22e">left</span>] <span style="color:#f92672">==</span> <span style="color:#a6e22e">nums</span>[<span style="color:#a6e22e">left</span> <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>] {
+                <span style="color:#a6e22e">left</span><span style="color:#f92672">++</span>
+                <span style="color:#66d9ef">continue</span>
+            }
+            <span style="color:#a6e22e">total</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">nums</span>[<span style="color:#a6e22e">left</span>] <span style="color:#f92672">+</span> <span style="color:#a6e22e">nums</span>[<span style="color:#a6e22e">right</span>]
+            <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">total</span> <span style="color:#f92672">==</span> <span style="color:#a6e22e">target</span> {
+                <span style="color:#a6e22e">ans</span> = append(<span style="color:#a6e22e">ans</span>, []<span style="color:#66d9ef">int</span>{<span style="color:#a6e22e">nums</span>[<span style="color:#a6e22e">i</span>], <span style="color:#a6e22e">nums</span>[<span style="color:#a6e22e">left</span>], <span style="color:#a6e22e">nums</span>[<span style="color:#a6e22e">right</span>]})
+                <span style="color:#a6e22e">left</span><span style="color:#f92672">++</span>
+                <span style="color:#a6e22e">right</span><span style="color:#f92672">--</span>
+            } <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">total</span> &lt; <span style="color:#a6e22e">target</span> {
+                <span style="color:#a6e22e">left</span><span style="color:#f92672">++</span>
+            } <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">total</span> &gt; <span style="color:#a6e22e">target</span> {
+                <span style="color:#a6e22e">right</span><span style="color:#f92672">--</span>
+            }
+        }
+    }
+    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">ans</span>
+}
+
+<span style="color:#66d9ef">func</span> <span style="color:#a6e22e">sort</span>(<span style="color:#a6e22e">nums</span> []<span style="color:#66d9ef">int</span>, <span style="color:#a6e22e">low</span>, <span style="color:#a6e22e">high</span> <span style="color:#66d9ef">int</span>) {
+    <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">low</span> &lt; <span style="color:#a6e22e">high</span> {
+        <span style="color:#a6e22e">mid</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">partition</span>(<span style="color:#a6e22e">nums</span>, <span style="color:#a6e22e">low</span>, <span style="color:#a6e22e">high</span>)
+        <span style="color:#a6e22e">sort</span>(<span style="color:#a6e22e">nums</span>, <span style="color:#a6e22e">low</span>, <span style="color:#a6e22e">mid</span> <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>)
+        <span style="color:#a6e22e">sort</span>(<span style="color:#a6e22e">nums</span>, <span style="color:#a6e22e">mid</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>, <span style="color:#a6e22e">high</span>)
+    }
+}
+
+<span style="color:#66d9ef">func</span> <span style="color:#a6e22e">partition</span>(<span style="color:#a6e22e">nums</span> []<span style="color:#66d9ef">int</span>, <span style="color:#a6e22e">low</span>, <span style="color:#a6e22e">high</span> <span style="color:#66d9ef">int</span>) <span style="color:#66d9ef">int</span> {
+    <span style="color:#a6e22e">pivot</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">nums</span>[<span style="color:#a6e22e">low</span>]
+    <span style="color:#66d9ef">for</span> <span style="color:#a6e22e">low</span> &lt; <span style="color:#a6e22e">high</span> {
+        <span style="color:#66d9ef">for</span> <span style="color:#a6e22e">low</span> &lt; <span style="color:#a6e22e">high</span> <span style="color:#f92672">&amp;&amp;</span> <span style="color:#a6e22e">nums</span>[<span style="color:#a6e22e">high</span>] <span style="color:#f92672">&gt;=</span> <span style="color:#a6e22e">pivot</span> {
+            <span style="color:#a6e22e">high</span><span style="color:#f92672">--</span>
+        }
+        <span style="color:#a6e22e">nums</span>[<span style="color:#a6e22e">low</span>] = <span style="color:#a6e22e">nums</span>[<span style="color:#a6e22e">high</span>]
+        <span style="color:#66d9ef">for</span> <span style="color:#a6e22e">low</span> &lt; <span style="color:#a6e22e">high</span> <span style="color:#f92672">&amp;&amp;</span> <span style="color:#a6e22e">nums</span>[<span style="color:#a6e22e">low</span>] <span style="color:#f92672">&lt;=</span> <span style="color:#a6e22e">pivot</span> {
+            <span style="color:#a6e22e">low</span><span style="color:#f92672">++</span>
+        }
+        <span style="color:#a6e22e">nums</span>[<span style="color:#a6e22e">high</span>] = <span style="color:#a6e22e">nums</span>[<span style="color:#a6e22e">low</span>]
+    }
+    <span style="color:#a6e22e">nums</span>[<span style="color:#a6e22e">low</span>] = <span style="color:#a6e22e">pivot</span>
+    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">low</span>
+}
+</code></pre></div><p>刷题记录：
+2021-02-12</p>
+
+        </div>
+
+        
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/post/z%E5%AD%97%E5%9E%8B%E5%8F%98%E6%8D%A2/">Z字型变换</a></li>
+        
+        <li><a href="/post/b%E6%A0%91/">b树</a></li>
+        
+        <li><a href="/post/lru/">lru</a></li>
+        
+        <li><a href="/post/%E4%B8%8D%E5%90%8C%E7%9A%84%E4%BA%8C%E5%8F%89%E6%90%9C%E7%B4%A2%E6%A0%91/">不同的二叉搜索树</a></li>
+        
+        <li><a href="/post/%E4%B8%8D%E7%94%A8%E5%8A%A0%E5%87%8F%E6%B3%95%E5%81%9A%E5%8A%A0%E6%B3%95/">不用加减法做加法</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='/tags/%E7%AE%97%E6%B3%95' target="_blank">算法</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    
+
+    
+    
+    
+    
+
+</div>
+
+                    <footer id="footer">
+    <br />
+</footer>
+
+
+    
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+<style type="text/css">
+div.highlight {
+    position: relative;
+    margin: 1em 0px;
+}
+
+.copy-code {
+    display: none;
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    color: rgba(255, 255, 255, 0.8);
+    background: rgba(78, 78, 78, 0.8);
+    border-radius: var(--radius);
+    padding: 0 5px;
+    font: inherit;
+    user-select: none;
+    cursor: pointer;
+    border: 0;
+    --radius: 8px;
+}
+
+div.highlight:hover .copy-code,pre:hover .copy-code {
+    display: block;
+}
+
+</style>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+
+
+
+
+
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='//www.google.com/search' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://bytewong123.github.io/">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title">Latest articles</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/benchmark/" title="benchmark" target="_blank">benchmark</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/b%E6%A0%91/" title="b树" target="_blank">b树</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0daemonset/" title="cka真题练习——daemonset" target="_blank">cka真题练习——daemonset</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0deploy/" title="cka真题练习——deploy" target="_blank">cka真题练习——deploy</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0etcd%E5%A4%87%E4%BB%BD%E8%BF%98%E5%8E%9F/" title="cka真题练习——etcd备份还原" target="_blank">cka真题练习——etcd备份还原</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0ingress/" title="cka真题练习——ingress" target="_blank">cka真题练习——ingress</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0networkpolicy/" title="cka真题练习——NetworkPolicy" target="_blank">cka真题练习——NetworkPolicy</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0node%E8%B0%83%E5%BA%A6/" title="cka真题练习——node调度" target="_blank">cka真题练习——node调度</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0pod/" title="cka真题练习——pod" target="_blank">cka真题练习——pod</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0pv/" title="cka真题练习——pv" target="_blank">cka真题练习——pv</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>Categories</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://bytewong123.github.io/categories/golang/">golang (12)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/k8s/">k8s (24)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/mysql/">mysql (10)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/redis/">redis (10)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/rust/">rust (1)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/sql/">sql (1)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统 (3)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E6%9E%81%E5%AE%A2%E6%97%B6%E9%97%B4/">极客时间 (5)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/">消息队列 (1)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B3%BB%E7%BB%9F/">深入理解计算机系统 (1)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E7%AE%97%E6%B3%95/">算法 (138)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/">系统设计 (19)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>Tags</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://bytewong123.github.io/tags/golang/">golang</a>
+    
+    <a href="https://bytewong123.github.io/tags/k8s/">k8s</a>
+    
+    <a href="https://bytewong123.github.io/tags/kafka/">kafka</a>
+    
+    <a href="https://bytewong123.github.io/tags/mysql/">mysql</a>
+    
+    <a href="https://bytewong123.github.io/tags/redis/">redis</a>
+    
+    <a href="https://bytewong123.github.io/tags/rust/">rust</a>
+    
+    <a href="https://bytewong123.github.io/tags/sql/">sql</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E6%9E%81%E5%AE%A2%E6%97%B6%E9%97%B4/">极客时间</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/">消息队列</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E7%AE%97%E6%B3%95/">算法</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/">系统设计</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/">读书笔记</a>
+    
+</div>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title">Links</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a target="_blank" href="http://yuedu.baidu.com/ebook/14a722970740be1e640e9a3e" title="Android Gradle权威指南">Android Gradle权威指南</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="http://mirrors.flysnow.org/" title="常用开发工具CDN镜像">常用开发工具CDN镜像</a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title">Meta</h3>
+        <ul class="widget-list">
+            <li><a href="https://bytewong123.github.io/index.xml">RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

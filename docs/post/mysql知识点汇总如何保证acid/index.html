@@ -1,0 +1,441 @@
+<!doctype html>
+<html lang="en">
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+
+    <title>mysql知识点汇总——如何保证ACID | sheeks</title>
+    <meta property="og:title" content="mysql知识点汇总——如何保证ACID - sheeks">
+    <meta property="og:type" content="article">
+        
+    <meta property="article:published_time" content='2023-01-08T18:06:57&#43;08:00'>
+        
+        
+    <meta property="article:modified_time" content='2023-01-08T18:06:57&#43;08:00'>
+        
+    <meta name="Keywords" content="golang,go语言,go语言笔记,sheeks,java,android,博客,项目管理,python,软件架构,公众号,小程序">
+    <meta name="description" content="mysql知识点汇总——如何保证ACID">
+        
+    <meta name="author" content="sheeks">
+    <meta property="og:url" content="https://bytewong123.github.io/post/mysql%E7%9F%A5%E8%AF%86%E7%82%B9%E6%B1%87%E6%80%BB%E5%A6%82%E4%BD%95%E4%BF%9D%E8%AF%81acid/">
+    <link rel="shortcut icon" href='/favicon.ico'  type="image/x-icon">
+
+    <link rel="stylesheet" href='/css/normalize.css'>
+    <link rel="stylesheet" href='/css/style.css'>
+    <script type="text/javascript" src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    
+    
+    
+    
+    
+    
+</head>
+
+<body>
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://bytewong123.github.io/">
+                        sheeks
+                    </a>
+                
+                <p class="description">dev</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://bytewong123.github.io/">Home</a>
+                    
+                    <a  href="https://bytewong123.github.io/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    
+    <article class="post">
+        <header>
+            <h1 class="post-title">mysql知识点汇总——如何保证ACID</h1>
+        </header>
+        
+  <time datetime="2023-01-08T10:06:57Z" class="post-meta meta-date dt-published">
+    2023-01-08
+  </time>
+
+
+<div class="post-meta meta-category">
+  <span>&nbsp;|</span>
+  
+    <a href='/categories/mysql' target="_blank">mysql</a>
+  
+</div>
+
+
+        
+        
+        <div class="post-content">
+            <h1 id="mysql知识点汇总如何保证acid">mysql知识点汇总——如何保证ACID</h1>
+<p>#技术/数据库/mysql</p>
+<h2 id="a原子性">A原子性</h2>
+<p>利用InnoDB的undo log undo log（回滚日志）记录需要回滚的日志信息，是实现原子性的关键，当事务回滚时能够撤销所有已经成功执行的sql语句</p>
+<p>undo log记录了这些回滚需要的信息，当事务执行失败或调用了rollback，导致事务需要回滚，便可以利用undo log中的信息将数据回滚到修改之前的样子。</p>
+<ol>
+<li>undo log 包含两个隐藏字段 trx_id 和 roll_pointer。
+<ol>
+<li>trx_id 表示当前这个事务的 id，MySQL 会为每个事务分配一个 id，这个 id 是递增的。</li>
+<li>roll_pointer 是一个指针，指向这个事务之前的 undo log</li>
+</ol>
+</li>
+</ol>
+<blockquote>
+<p>现在有一个 id 为 10 的事务 A 正在执行，undo log 日志的roll_pointer指向一个空的undo log
+紧接着 id 为 18 的事务 B 开始执行，就会再生成一条 undo log 日志，同时新生成的日志的 roll_pointer 指向上一条 undo log 日志
+日志与日志之间通过 roll_pointer 指针连接，就形成了 undo log 版本链</p>
+</blockquote>
+<ol start="2">
+<li>在对数据库进行修改时，innoDB引擎除了会产生redo log，还会产生undo log。在操作任何数据之前，首先将数据备份到Undo Log中，然后进行数据修改。InnoDB实现回滚，靠的是undo log：当事务对数据库进行修改时，InnoDB会生成对应的undo log；如果事务执行失败导致事务需要回滚，就利用undo log中的信息将数据回滚到修改之前的样子</li>
+<li>undolog通过redolog持久化</li>
+</ol>
+<h2 id="d持久性">D持久性</h2>
+<p>依赖于innodb的redolog</p>
+<h3 id="update更新流程">update更新流程</h3>
+<ol>
+<li>更新buffer pool里页的数据</li>
+<li>生成一个redolog对象</li>
+<li>commit后，持久化redolog对象</li>
+</ol>
+<blockquote>
+<p>不直接把buffer pool脏页写回磁盘，而是使用redolog，主要是因为页写回磁盘是随机io</p>
+</blockquote>
+<h3 id="redolog细节">redolog细节</h3>
+<ol>
+<li>InnoDB 的 redo log 是固定大小的，比如可以配置为一组 4 个文件，每个文件的大小是 1GB，那么这块“粉板”总共就可以记录 4GB 的操作。从头开始写，写到末尾就又回到开头循环写</li>
+<li>write pos 是当前记录的位置，一边写一边后移，写到第 3 号文件末尾后就回到 0 号文件开头。checkpoint 是当前要擦除的位置，也是往后推移并且循环的，擦除记录前要把记录更新到数据文件</li>
+<li>write pos 和 checkpoint 之间的是“粉板”上还空着的部分，可以用来记录新的操作。如果 write pos 追上 checkpoint，表示“粉板”满了，这时候不能再执行新的更新，得停下来先擦掉一些记录，把 checkpoint 推进一下</li>
+<li>redo log文件数可以通过innodb_log_files_in_group控制；每个文件大小可以通过innodb_log_file_size控制</li>
+<li>innodb_flush_log_at_trx_commit
+<ol>
+<li>0：事务提交时，不立即对redolog持久化，这个任务交给后台线程去做</li>
+<li>1：事务提交时，立即对redolog持久化</li>
+<li>2：事务提交时，立即将redo log写到操作系统的缓冲区，并不会直接将redo log持久化，这种情况下，如果数据库挂了，操作系统没挂，那么事务的持久性还是可以保证</li>
+</ol>
+</li>
+</ol>
+<h2 id="i隔离性">I隔离性</h2>
+<p>利用锁和MVCC机制</p>
+<h2 id="c一致性">C一致性</h2>
+<p>一致性是目的，由AID三大特性一起保证</p>
+
+        </div>
+
+        
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/post/mysql%E7%9F%A5%E8%AF%86%E7%82%B9/">mysql知识点</a></li>
+        
+        <li><a href="/post/mysql%E7%9F%A5%E8%AF%86%E7%82%B9%E6%B1%87%E6%80%BBmvcc/">mysql知识点汇总——mvcc</a></li>
+        
+        <li><a href="/post/mysql%E7%9F%A5%E8%AF%86%E7%82%B9%E6%B1%87%E6%80%BBsql%E6%80%A7%E8%83%BD/">mysql知识点汇总——sql性能</a></li>
+        
+        <li><a href="/post/mysql%E7%9F%A5%E8%AF%86%E7%82%B9%E6%B1%87%E6%80%BB%E4%BA%8B%E5%8A%A1%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB/">mysql知识点汇总——事务隔离级别</a></li>
+        
+        <li><a href="/post/mysql%E7%9F%A5%E8%AF%86%E7%82%B9%E6%B1%87%E6%80%BB%E5%88%86%E5%BA%93%E5%88%86%E8%A1%A8/">mysql知识点汇总——分库分表</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='/tags/mysql' target="_blank">mysql</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    
+
+    
+    
+    
+    
+
+</div>
+
+                    <footer id="footer">
+    <br />
+</footer>
+
+
+    
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+<style type="text/css">
+div.highlight {
+    position: relative;
+    margin: 1em 0px;
+}
+
+.copy-code {
+    display: none;
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    color: rgba(255, 255, 255, 0.8);
+    background: rgba(78, 78, 78, 0.8);
+    border-radius: var(--radius);
+    padding: 0 5px;
+    font: inherit;
+    user-select: none;
+    cursor: pointer;
+    border: 0;
+    --radius: 8px;
+}
+
+div.highlight:hover .copy-code,pre:hover .copy-code {
+    display: block;
+}
+
+</style>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+
+
+
+
+
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='//www.google.com/search' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://bytewong123.github.io/">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title">Latest articles</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/benchmark/" title="benchmark" target="_blank">benchmark</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/b%E6%A0%91/" title="b树" target="_blank">b树</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0daemonset/" title="cka真题练习——daemonset" target="_blank">cka真题练习——daemonset</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0deploy/" title="cka真题练习——deploy" target="_blank">cka真题练习——deploy</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0etcd%E5%A4%87%E4%BB%BD%E8%BF%98%E5%8E%9F/" title="cka真题练习——etcd备份还原" target="_blank">cka真题练习——etcd备份还原</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0ingress/" title="cka真题练习——ingress" target="_blank">cka真题练习——ingress</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0networkpolicy/" title="cka真题练习——NetworkPolicy" target="_blank">cka真题练习——NetworkPolicy</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0node%E8%B0%83%E5%BA%A6/" title="cka真题练习——node调度" target="_blank">cka真题练习——node调度</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0pod/" title="cka真题练习——pod" target="_blank">cka真题练习——pod</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0pv/" title="cka真题练习——pv" target="_blank">cka真题练习——pv</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>Categories</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://bytewong123.github.io/categories/golang/">golang (12)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/k8s/">k8s (24)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/mysql/">mysql (10)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/redis/">redis (10)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/rust/">rust (1)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/sql/">sql (1)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统 (3)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E6%9E%81%E5%AE%A2%E6%97%B6%E9%97%B4/">极客时间 (5)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/">消息队列 (1)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B3%BB%E7%BB%9F/">深入理解计算机系统 (1)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E7%AE%97%E6%B3%95/">算法 (138)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/">系统设计 (19)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>Tags</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://bytewong123.github.io/tags/golang/">golang</a>
+    
+    <a href="https://bytewong123.github.io/tags/k8s/">k8s</a>
+    
+    <a href="https://bytewong123.github.io/tags/kafka/">kafka</a>
+    
+    <a href="https://bytewong123.github.io/tags/mysql/">mysql</a>
+    
+    <a href="https://bytewong123.github.io/tags/redis/">redis</a>
+    
+    <a href="https://bytewong123.github.io/tags/rust/">rust</a>
+    
+    <a href="https://bytewong123.github.io/tags/sql/">sql</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E6%9E%81%E5%AE%A2%E6%97%B6%E9%97%B4/">极客时间</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/">消息队列</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E7%AE%97%E6%B3%95/">算法</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/">系统设计</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/">读书笔记</a>
+    
+</div>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title">Links</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a target="_blank" href="http://yuedu.baidu.com/ebook/14a722970740be1e640e9a3e" title="Android Gradle权威指南">Android Gradle权威指南</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="http://mirrors.flysnow.org/" title="常用开发工具CDN镜像">常用开发工具CDN镜像</a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title">Meta</h3>
+        <ul class="widget-list">
+            <li><a href="https://bytewong123.github.io/index.xml">RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

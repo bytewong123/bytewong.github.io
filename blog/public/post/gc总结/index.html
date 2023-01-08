@@ -1,0 +1,435 @@
+<!doctype html>
+<html lang="en">
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+
+    <title>gc总结 | sheeks</title>
+    <meta property="og:title" content="gc总结 - sheeks">
+    <meta property="og:type" content="article">
+        
+    <meta property="article:published_time" content='2023-01-08T18:06:57&#43;08:00'>
+        
+        
+    <meta property="article:modified_time" content='2023-01-08T18:06:57&#43;08:00'>
+        
+    <meta name="Keywords" content="golang,go语言,go语言笔记,sheeks,java,android,博客,项目管理,python,软件架构,公众号,小程序">
+    <meta name="description" content="gc总结">
+        
+    <meta name="author" content="sheeks">
+    <meta property="og:url" content="https://bytewong123.github.io/post/gc%E6%80%BB%E7%BB%93/">
+    <link rel="shortcut icon" href='/favicon.ico'  type="image/x-icon">
+
+    <link rel="stylesheet" href='/css/normalize.css'>
+    <link rel="stylesheet" href='/css/style.css'>
+    <script type="text/javascript" src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    
+    
+    
+    
+    
+    
+</head>
+
+<body>
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://bytewong123.github.io/">
+                        sheeks
+                    </a>
+                
+                <p class="description">dev</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://bytewong123.github.io/">Home</a>
+                    
+                    <a  href="https://bytewong123.github.io/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    
+    <article class="post">
+        <header>
+            <h1 class="post-title">gc总结</h1>
+        </header>
+        
+  <time datetime="2023-01-08T10:06:57Z" class="post-meta meta-date dt-published">
+    2023-01-08
+  </time>
+
+
+<div class="post-meta meta-category">
+  <span>&nbsp;|</span>
+  
+    <a href='/categories/golang' target="_blank">golang</a>
+  
+</div>
+
+
+        
+        
+        <div class="post-content">
+            <h1 id="gc总结">gc总结</h1>
+<p>#技术/golang/gc</p>
+<h1 id="常见的gc算法">常见的GC算法</h1>
+<ol>
+<li>引用计数法
+根据对象自身的引用计数来回收，当引用计数归零时进行回收，但是计数频繁更新会带来更多开销，且无法解决循环引用的问题。</li>
+</ol>
+<ul>
+<li><strong>优点</strong>：简单直接，回收速度快</li>
+<li><strong>缺点</strong>：需要额外的空间存放计数，无法处理循环引用的情况；</li>
+</ul>
+<ol start="2">
+<li>标记清除法
+标记出所有不需要回收的对象，在标记完成后统一回收掉所有未被标记的对象。 [image:1A52A1DE-6520-428D-9854-9583FFCA470E-49645-0000A3D25675E408/1608188427502_de9df244bd7b6263abf7a5ccb80659b9.png]</li>
+</ol>
+<ul>
+<li><strong>优点</strong>：简单直接，速度快，适合可回收对象不多的场景</li>
+<li><strong>缺点</strong>：会造成不连续的内存空间（内存碎片），导致有大的对象创建的时候，明明内存中总内存是够的，但是空间不是连续的造成对象无法分配；</li>
+</ul>
+<ol start="3">
+<li>复制法
+复制法将内存分为大小相同的两块，每次使用其中的一块，当这一块的内存使用完后，将还存活的对象复制到另一块去，然后再把使用的空间一次清理掉 [image:B5DB9C40-2C26-4C81-9B97-D0E4A750DAA9-49645-0000A3D2563FFF7A/1608188507950_431681cdeef89a6f3903ed832696cb9d.png]</li>
+</ol>
+<ul>
+<li><strong>优点</strong>：解决了内存碎片的问题，每次清除针对的都是整块内存，但是因为移动对象需要耗费时间，效率低于标记清除法；</li>
+<li><strong>缺点</strong>：有部分内存总是利用不到，资源浪费，移动存活对象比较耗时，并且如果存活对象较多的时候，需要担保机制确保复制区有足够的空间可完成复制；</li>
+</ul>
+<ol start="4">
+<li>标记整理
+标记过程同标记清除法，结束后将存活对象压缩至一端，然后清除边界外的内容。 [image:35D1F78F-83DB-4B30-8F0B-5022F639F806-49645-0000A3D255FC6C6F/1608188518331_fe62c7a6a688269cb5815983a718ba2a.png]</li>
+</ol>
+<ul>
+<li><strong>优点</strong>：解决了内存碎片的问题，也不像标记复制法那样需要担保机制，存活对象较多的场景也使适用；</li>
+<li><strong>缺点</strong>：性能低，因为在移动对象的时候不仅需要移动对象还要维护对象的引用地址，可能需要对内存经过几次扫描才能完成；</li>
+</ul>
+<ol start="5">
+<li>分代式
+将对象根据存活时间的长短进行分类，存活时间小于某个值的为年轻代，存活时间大于某个值的为老年代，永远不会参与回收的对象为永久代。并根据分代假设（如果一个对象存活时间不长则倾向于被回收，如果一个对象已经存活很长时间则倾向于存活更长时间）对对象进行回收。</li>
+</ol>
+<h1 id="go的gc算法">go的GC算法</h1>
+<p>Golang GC 算法使用的是无无分代（对象没有代际之分）、不整理（回收过程中不对对象进行移动与整理）、并发（与用户代码并发执行）的三色标记清扫算法。原因在于：</p>
+<ul>
+<li>对象整理的优势是解决内存碎片问题以及“允许”使用顺序内存分配器。但 Go 运行时的分配算法基于 <strong>tcmalloc</strong>，基本上没有碎片问题。 并且顺序内存分配器在多线程的场景下并不适用。Go 使用的是基于 <strong>tcmalloc</strong> 的现代内存分配算法，对对象进行整理不会带来实质性的性能提升。</li>
+<li>分代 GC 依赖分代假设，即 GC 将主要的回收目标放在新创建的对象上（存活时间短，更倾向于被回收），而非频繁检查所有对象。但 Go 的编译器会通过逃逸分析将大部分新生对象存储在栈上（栈直接被回收），只有那些需要长期存在的对象才会被分配到需要进行垃圾回收的堆中。也就是说，分代 GC 回收的那些存活时间短的对象在 Go 中是直接被分配到栈上，当 goroutine 死亡后栈也会被直接回收，不需要 GC 的参与，进而分代假设并没有带来直接优势。并且 Go 的垃圾回收器与用户代码并发执行，使得 STW 的时间与对象的代际、对象的 size 没有关系。Go 团队更关注于如何更好地让 GC 与用户代码并发执行（使用适当的 CPU 来执行垃圾回收），而非减少停顿时间这一单一目标上。</li>
+</ul>
+
+        </div>
+
+        
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/post/benchmark/">benchmark</a></li>
+        
+        <li><a href="/post/go-module%E7%89%88%E6%9C%AC%E9%80%89%E6%8B%A9/">go module版本选择</a></li>
+        
+        <li><a href="/post/golang-gc%E4%BC%98%E5%8C%96/">golang gc优化</a></li>
+        
+        <li><a href="/post/golang%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/">golang内存管理</a></li>
+        
+        <li><a href="/post/gorm-scanner-value/">gorm scanner value</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='/tags/golang' target="_blank">golang</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    
+
+    
+    
+    
+    
+
+</div>
+
+                    <footer id="footer">
+    <br />
+</footer>
+
+
+    
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+<style type="text/css">
+div.highlight {
+    position: relative;
+    margin: 1em 0px;
+}
+
+.copy-code {
+    display: none;
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    color: rgba(255, 255, 255, 0.8);
+    background: rgba(78, 78, 78, 0.8);
+    border-radius: var(--radius);
+    padding: 0 5px;
+    font: inherit;
+    user-select: none;
+    cursor: pointer;
+    border: 0;
+    --radius: 8px;
+}
+
+div.highlight:hover .copy-code,pre:hover .copy-code {
+    display: block;
+}
+
+</style>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+
+
+
+
+
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='//www.google.com/search' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://bytewong123.github.io/">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title">Latest articles</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/benchmark/" title="benchmark" target="_blank">benchmark</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/b%E6%A0%91/" title="b树" target="_blank">b树</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0daemonset/" title="cka真题练习——daemonset" target="_blank">cka真题练习——daemonset</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0deploy/" title="cka真题练习——deploy" target="_blank">cka真题练习——deploy</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0etcd%E5%A4%87%E4%BB%BD%E8%BF%98%E5%8E%9F/" title="cka真题练习——etcd备份还原" target="_blank">cka真题练习——etcd备份还原</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0ingress/" title="cka真题练习——ingress" target="_blank">cka真题练习——ingress</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0networkpolicy/" title="cka真题练习——NetworkPolicy" target="_blank">cka真题练习——NetworkPolicy</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0node%E8%B0%83%E5%BA%A6/" title="cka真题练习——node调度" target="_blank">cka真题练习——node调度</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0pod/" title="cka真题练习——pod" target="_blank">cka真题练习——pod</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0pv/" title="cka真题练习——pv" target="_blank">cka真题练习——pv</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>Categories</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://bytewong123.github.io/categories/golang/">golang (12)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/k8s/">k8s (24)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/mysql/">mysql (10)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/redis/">redis (10)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/rust/">rust (1)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/sql/">sql (1)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统 (3)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E6%9E%81%E5%AE%A2%E6%97%B6%E9%97%B4/">极客时间 (5)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/">消息队列 (1)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B3%BB%E7%BB%9F/">深入理解计算机系统 (1)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E7%AE%97%E6%B3%95/">算法 (138)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/">系统设计 (19)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>Tags</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://bytewong123.github.io/tags/golang/">golang</a>
+    
+    <a href="https://bytewong123.github.io/tags/k8s/">k8s</a>
+    
+    <a href="https://bytewong123.github.io/tags/kafka/">kafka</a>
+    
+    <a href="https://bytewong123.github.io/tags/mysql/">mysql</a>
+    
+    <a href="https://bytewong123.github.io/tags/redis/">redis</a>
+    
+    <a href="https://bytewong123.github.io/tags/rust/">rust</a>
+    
+    <a href="https://bytewong123.github.io/tags/sql/">sql</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E6%9E%81%E5%AE%A2%E6%97%B6%E9%97%B4/">极客时间</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/">消息队列</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E7%AE%97%E6%B3%95/">算法</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/">系统设计</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/">读书笔记</a>
+    
+</div>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title">Links</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a target="_blank" href="http://yuedu.baidu.com/ebook/14a722970740be1e640e9a3e" title="Android Gradle权威指南">Android Gradle权威指南</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="http://mirrors.flysnow.org/" title="常用开发工具CDN镜像">常用开发工具CDN镜像</a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title">Meta</h3>
+        <ul class="widget-list">
+            <li><a href="https://bytewong123.github.io/index.xml">RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

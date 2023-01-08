@@ -1,0 +1,763 @@
+<!doctype html>
+<html lang="en">
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+
+    <title>kubebuilder初体验 | sheeks</title>
+    <meta property="og:title" content="kubebuilder初体验 - sheeks">
+    <meta property="og:type" content="article">
+        
+    <meta property="article:published_time" content='2023-01-08T18:06:57&#43;08:00'>
+        
+        
+    <meta property="article:modified_time" content='2023-01-08T18:06:57&#43;08:00'>
+        
+    <meta name="Keywords" content="golang,go语言,go语言笔记,sheeks,java,android,博客,项目管理,python,软件架构,公众号,小程序">
+    <meta name="description" content="kubebuilder初体验">
+        
+    <meta name="author" content="sheeks">
+    <meta property="og:url" content="https://bytewong123.github.io/post/kubebuilder%E5%88%9D%E4%BD%93%E9%AA%8C/">
+    <link rel="shortcut icon" href='/favicon.ico'  type="image/x-icon">
+
+    <link rel="stylesheet" href='/css/normalize.css'>
+    <link rel="stylesheet" href='/css/style.css'>
+    <script type="text/javascript" src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    
+    
+    
+    
+    
+    
+</head>
+
+<body>
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://bytewong123.github.io/">
+                        sheeks
+                    </a>
+                
+                <p class="description">dev</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://bytewong123.github.io/">Home</a>
+                    
+                    <a  href="https://bytewong123.github.io/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    
+    <article class="post">
+        <header>
+            <h1 class="post-title">kubebuilder初体验</h1>
+        </header>
+        
+  <time datetime="2023-01-08T10:06:57Z" class="post-meta meta-date dt-published">
+    2023-01-08
+  </time>
+
+
+<div class="post-meta meta-category">
+  <span>&nbsp;|</span>
+  
+    <a href='/categories/k8s' target="_blank">k8s</a>
+  
+</div>
+
+
+        
+        
+        <div class="post-content">
+            <h1 id="kubebuilder初体验">kubebuilder初体验</h1>
+<p>#k8s</p>
+<p>最近在学习k8s operator扩展的开发，查阅资料发现kubebuilder是当前比较成熟并且方便的方式来进行自定义资源类型的开发，因此查询资料、跟着文档走了一遍，对此进行一个简要的记录</p>
+<h2 id="为什么需要开发operator">为什么需要开发Operator</h2>
+<p>k8s内置了很多常见的api资源类型，例如pod、deployment、job、cronjob等。但有可能有时候这些资源不能完全满足我们的需求，我们需要自定义一些资源类型，满足我们自身的业务逻辑，此时就可以使用到k8s operator的功能。</p>
+<h2 id="概念">概念</h2>
+<ul>
+<li>CRD
+定制资源的API定义</li>
+<li>CR
+<em>资源（Resource）</em> 是  <a href="https://kubernetes.io/zh/docs/concepts/overview/kubernetes-api/">Kubernetes API</a>  中的一个端点， 其中存储的是某个类别的  <a href="https://kubernetes.io/zh/docs/concepts/overview/working-with-objects/kubernetes-objects/">API 对象</a>  的一个集合。 例如内置的 <em>pods</em> 资源包含一组 Pod 对象。
+<em>定制资源（Custom Resource）</em> 是对 Kubernetes API 的扩展，不一定在默认的 Kubernetes 安装中就可用。定制资源所代表的是对特定 Kubernetes 安装的一种定制</li>
+<li>CC
+就定制资源本身而言，它只能用来存取结构化的数据。 当你将定制资源与 <em>定制控制器（Custom Controller）</em> 相结合时，定制资源就能够 提供真正的 <em>声明式 API（Declarative API）</em>
+你可以在一个运行中的集群上部署和更新定制控制器，这类操作与集群的生命周期无关。 定制控制器可以用于任何类别的资源，不过它们与定制资源结合起来时最为有效。  <a href="https://kubernetes.io/zh/docs/concepts/extend-kubernetes/operator/">Operator 模式</a> 就是将定制资源 与定制控制器相结合的</li>
+</ul>
+<h2 id="kubebuilder">kubebuilder</h2>
+<p>kubebuilder是一个快速构建定制资源的工具。它可以为用户生成一个定制资源的脚手架，用户不用关心太多和k8s集群交互、权限管理的复杂逻辑，而只需要关注如何定义自己的资源与定制控制器的处理逻辑即可。</p>
+<h2 id="实战">实战</h2>
+<p>完成一个简单的demo，创建一个定制资源，这个资源管理k8s的job资源，每5秒根据yaml定义的job模版创建一个job，并且创建的job都与该定制资源进行绑定</p>
+<h3 id="初始化项目">初始化项目</h3>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">mkdir mycronjob
+cd mycronjob
+<span style="color:#75715e"># we&#39;ll use a domain of tutorial.kubebuilder.io,</span>
+<span style="color:#75715e"># so all API groups will be &lt;group&gt;.tutorial.kubebuilder.io.</span>
+kubebuilder init --domain wzj.kubebuilder.io --repo wzj.kubebuilder.io/project
+</code></pre></div><p>kubebuilder工具帮助我们初始化好了一个脚手架，里面的内容如下：</p>
+<pre><code>➜  mycronjob tree
+.
+├── Dockerfile
+├── Makefile
+├── PROJECT
+├── bin
+│   ├── controller-gen
+│   └── kustomize
+├── config
+│   ├── crd
+│   │   ├── bases
+│   │   │   └── batch.wzj.kubebuilder.io_mycronjobs.yaml
+│   │   ├── kustomization.yaml
+│   │   ├── kustomizeconfig.yaml
+│   │   └── patches
+│   │       ├── cainjection_in_mycronjobs.yaml
+│   │       └── webhook_in_mycronjobs.yaml
+│   ├── default
+│   │   ├── kustomization.yaml
+│   │   ├── manager_auth_proxy_patch.yaml
+│   │   └── manager_config_patch.yaml
+│   ├── manager
+│   │   ├── controller_manager_config.yaml
+│   │   ├── kustomization.yaml
+│   │   └── manager.yaml
+│   ├── prometheus
+│   │   ├── kustomization.yaml
+│   │   └── monitor.yaml
+│   ├── rbac
+│   │   ├── auth_proxy_client_clusterrole.yaml
+│   │   ├── auth_proxy_role.yaml
+│   │   ├── auth_proxy_role_binding.yaml
+│   │   ├── auth_proxy_service.yaml
+│   │   ├── kustomization.yaml
+│   │   ├── leader_election_role.yaml
+│   │   ├── leader_election_role_binding.yaml
+│   │   ├── mycronjob_editor_role.yaml
+│   │   ├── mycronjob_viewer_role.yaml
+│   │   ├── role.yaml
+│   │   ├── role_binding.yaml
+│   │   └── service_account.yaml
+│   └── samples
+│       └── batch_v1_mycronjob.yaml
+├── go.mod
+├── go.sum
+├── hack
+│   └── boilerplate.go.txt
+└── main.go
+
+14 directories, 40 files
+</code></pre><p>可以看到，里面有一个main.go，这是我们之后要完成的定制控制器的函数入口。
+里面还有很多yaml文件，这些yaml文件主要是控制器在集群中运行所需用到的。</p>
+<h3 id="创建api和controller">创建API和Controller</h3>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">kubebuilder create api --group batch --version v1 --kind MyCronJob
+</code></pre></div><h4 id="api">API</h4>
+<p><code>api/v1/</code>目录被创建，它还为我们的MyCronJobKind添加了一个文件， api/v1/mycronjob_types.go。</p>
+<pre><code>➜  mycronjob tree api
+api
+└── v1
+    ├── groupversion_info.go
+    ├── mycronjob_types.go
+    └── zz_generated.deepcopy.go
+
+1 directory, 3 files
+</code></pre><p>我们目前暂时只需要关心mycronjob_types.go文件即可</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#75715e">// MyCronJobSpec defines the desired state of MyCronJob
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">MyCronJobSpec</span> <span style="color:#66d9ef">struct</span> {
+	<span style="color:#75715e">// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
+</span><span style="color:#75715e"></span>	<span style="color:#75715e">// Important: Run &#34;make&#34; to regenerate code after modifying this file
+</span><span style="color:#75715e"></span>
+	<span style="color:#a6e22e">Foo</span> <span style="color:#66d9ef">string</span> <span style="color:#e6db74">`json:&#34;foo&#34;`</span>
+}
+
+<span style="color:#75715e">// MyCronJobStatus defines the observed state of MyCronJob
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">MyCronJobStatus</span> <span style="color:#66d9ef">struct</span> {
+	<span style="color:#75715e">// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
+</span><span style="color:#75715e"></span>	<span style="color:#75715e">// Important: Run &#34;make&#34; to regenerate code after modifying this file
+</span><span style="color:#75715e"></span>}
+
+<span style="color:#75715e">//+kubebuilder:object:root=true
+</span><span style="color:#75715e">//+kubebuilder:subresource:status
+</span><span style="color:#75715e"></span>
+<span style="color:#75715e">// MyCronJob is the Schema for the mycronjobs API
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">MyCronJob</span> <span style="color:#66d9ef">struct</span> {
+	<span style="color:#a6e22e">metav1</span>.<span style="color:#a6e22e">TypeMeta</span>   <span style="color:#e6db74">`json:&#34;,inline&#34;`</span>
+	<span style="color:#a6e22e">metav1</span>.<span style="color:#a6e22e">ObjectMeta</span> <span style="color:#e6db74">`json:&#34;metadata,omitempty&#34;`</span>
+
+	<span style="color:#a6e22e">Spec</span>   <span style="color:#a6e22e">MyCronJobSpec</span>   <span style="color:#e6db74">`json:&#34;spec,omitempty&#34;`</span>
+	<span style="color:#a6e22e">Status</span> <span style="color:#a6e22e">MyCronJobStatus</span> <span style="color:#e6db74">`json:&#34;status,omitempty&#34;`</span>
+}
+</code></pre></div><p>可以看到，生成的代码有我们需要的API类型MyCronJob。但是目前的字段都只是一些基础的字段，需要我们根据自己的需求来对其进行填充。</p>
+<p>MyCronJobSpec是该API需要的字段，MyCronJobStatus描述该API对象的状态</p>
+<p>MyCronJob代表该API对象的实体</p>
+<p>此时我们根据自己的需求填充即可，因为我们需要该API对象管理Job，因此该对象需要支持在其声明中定义Job模版。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#75715e">// MyCronJobSpec defines the desired state of MyCronJob
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">MyCronJobSpec</span> <span style="color:#66d9ef">struct</span> {
+	<span style="color:#75715e">// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
+</span><span style="color:#75715e"></span>	<span style="color:#75715e">// Important: Run &#34;make&#34; to regenerate code after modifying this file
+</span><span style="color:#75715e"></span>
+	<span style="color:#75715e">// Specifies the job that will be created when executing a CronJob.
+</span><span style="color:#75715e"></span>	<span style="color:#a6e22e">JobTemplate</span> <span style="color:#a6e22e">v1</span>.<span style="color:#a6e22e">JobTemplateSpec</span> <span style="color:#e6db74">`json:&#34;jobTemplate&#34;`</span>
+}
+
+</code></pre></div><p>而对于MyCronJobStatus而言，目前我们暂时用不到。</p>
+<h4 id="controller">Controller</h4>
+<p>controller的代码生成在</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">➜  mycronjob tree controllers
+controllers
+├── mycronjob_controller.go
+└── suite_test.go
+
+<span style="color:#ae81ff">0</span> directories, <span style="color:#ae81ff">2</span> files
+</code></pre></div><p>此时也只有一个框架</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#66d9ef">func</span> (<span style="color:#a6e22e">r</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">MyCronJobReconciler</span>) <span style="color:#a6e22e">Reconcile</span>(<span style="color:#a6e22e">ctx</span> <span style="color:#a6e22e">context</span>.<span style="color:#a6e22e">Context</span>, <span style="color:#a6e22e">req</span> <span style="color:#a6e22e">ctrl</span>.<span style="color:#a6e22e">Request</span>) (<span style="color:#a6e22e">ctrl</span>.<span style="color:#a6e22e">Result</span>, <span style="color:#66d9ef">error</span>) {
+    <span style="color:#a6e22e">_</span> = <span style="color:#a6e22e">log</span>.<span style="color:#a6e22e">FromContext</span>(<span style="color:#a6e22e">ctx</span>)
+
+    <span style="color:#75715e">// your logic here
+</span><span style="color:#75715e"></span>
+    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">ctrl</span>.<span style="color:#a6e22e">Result</span>{}, <span style="color:#66d9ef">nil</span>
+}
+
+<span style="color:#66d9ef">func</span> (<span style="color:#a6e22e">r</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">CronJobReconciler</span>) <span style="color:#a6e22e">SetupWithManager</span>(<span style="color:#a6e22e">mgr</span> <span style="color:#a6e22e">ctrl</span>.<span style="color:#a6e22e">Manager</span>) <span style="color:#66d9ef">error</span> {
+    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">ctrl</span>.<span style="color:#a6e22e">NewControllerManagedBy</span>(<span style="color:#a6e22e">mgr</span>).
+        <span style="color:#a6e22e">For</span>(<span style="color:#f92672">&amp;</span><span style="color:#a6e22e">batchv1</span>.<span style="color:#a6e22e">CronJob</span>{}).
+        <span style="color:#a6e22e">Complete</span>(<span style="color:#a6e22e">r</span>)
+}
+</code></pre></div><p>我们的逻辑主要在Reconcile中完成，SetupWithManager的作用之后学习补充，本次实验暂时用不上。</p>
+<p>我们可以开始写我们的控制器逻辑了。
+需求非常简单：我们自定义的mycronjob，提交给集群后，它可以每5秒根据自己的模版创建一个job</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#66d9ef">func</span> (<span style="color:#a6e22e">r</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">MyCronJobReconciler</span>) <span style="color:#a6e22e">Reconcile</span>(<span style="color:#a6e22e">ctx</span> <span style="color:#a6e22e">context</span>.<span style="color:#a6e22e">Context</span>, <span style="color:#a6e22e">req</span> <span style="color:#a6e22e">ctrl</span>.<span style="color:#a6e22e">Request</span>) (<span style="color:#a6e22e">ctrl</span>.<span style="color:#a6e22e">Result</span>, <span style="color:#66d9ef">error</span>) {
+	<span style="color:#a6e22e">log</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">log</span>.<span style="color:#a6e22e">FromContext</span>(<span style="color:#a6e22e">ctx</span>)
+	<span style="color:#66d9ef">var</span> <span style="color:#a6e22e">cronJob</span> <span style="color:#a6e22e">batchv1</span>.<span style="color:#a6e22e">MyCronJob</span>
+	<span style="color:#a6e22e">log</span>.<span style="color:#a6e22e">Info</span>(<span style="color:#e6db74">&#34;my cron job namespacedName&#34;</span>, <span style="color:#e6db74">&#34;req.NamespacedName&#34;</span>, <span style="color:#a6e22e">req</span>.<span style="color:#a6e22e">NamespacedName</span>)
+	<span style="color:#66d9ef">if</span> <span style="color:#a6e22e">err</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">r</span>.<span style="color:#a6e22e">Get</span>(<span style="color:#a6e22e">ctx</span>, <span style="color:#a6e22e">req</span>.<span style="color:#a6e22e">NamespacedName</span>, <span style="color:#f92672">&amp;</span><span style="color:#a6e22e">cronJob</span>); <span style="color:#a6e22e">err</span> <span style="color:#f92672">!=</span> <span style="color:#66d9ef">nil</span> {
+		<span style="color:#a6e22e">log</span>.<span style="color:#a6e22e">Error</span>(<span style="color:#a6e22e">err</span>, <span style="color:#e6db74">&#34;unable to fetch CronJob&#34;</span>)
+		<span style="color:#75715e">// we&#39;ll ignore not-found errors, since they can&#39;t be fixed by an immediate
+</span><span style="color:#75715e"></span>		<span style="color:#75715e">// requeue (we&#39;ll need to wait for a new notification), and we can get them
+</span><span style="color:#75715e"></span>		<span style="color:#75715e">// on deleted requests.
+</span><span style="color:#75715e"></span>		<span style="color:#66d9ef">return</span> <span style="color:#a6e22e">ctrl</span>.<span style="color:#a6e22e">Result</span>{}, <span style="color:#a6e22e">client</span>.<span style="color:#a6e22e">IgnoreNotFound</span>(<span style="color:#a6e22e">err</span>)
+	}
+	 <span style="color:#a6e22e">constructJobForCronJob</span> <span style="color:#f92672">:=</span> <span style="color:#66d9ef">func</span>(<span style="color:#a6e22e">cronJob</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">batchv1</span>.<span style="color:#a6e22e">MyCronJob</span>, <span style="color:#a6e22e">scheduledTime</span> <span style="color:#a6e22e">time</span>.<span style="color:#a6e22e">Time</span>) (<span style="color:#f92672">*</span><span style="color:#a6e22e">v1</span>.<span style="color:#a6e22e">Job</span>, <span style="color:#66d9ef">error</span>) {
+		<span style="color:#75715e">// We want job names for a given nominal start time to have a deterministic name to avoid the same job being created twice
+</span><span style="color:#75715e"></span>		<span style="color:#a6e22e">name</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Sprintf</span>(<span style="color:#e6db74">&#34;%s-%d&#34;</span>, <span style="color:#a6e22e">cronJob</span>.<span style="color:#a6e22e">Name</span>, <span style="color:#a6e22e">scheduledTime</span>.<span style="color:#a6e22e">Unix</span>())
+
+		<span style="color:#a6e22e">job</span> <span style="color:#f92672">:=</span> <span style="color:#f92672">&amp;</span><span style="color:#a6e22e">v1</span>.<span style="color:#a6e22e">Job</span>{
+			<span style="color:#a6e22e">ObjectMeta</span>: <span style="color:#a6e22e">metav1</span>.<span style="color:#a6e22e">ObjectMeta</span>{
+				<span style="color:#a6e22e">Labels</span>:      make(<span style="color:#66d9ef">map</span>[<span style="color:#66d9ef">string</span>]<span style="color:#66d9ef">string</span>),
+				<span style="color:#a6e22e">Annotations</span>: make(<span style="color:#66d9ef">map</span>[<span style="color:#66d9ef">string</span>]<span style="color:#66d9ef">string</span>),
+				<span style="color:#a6e22e">Name</span>:        <span style="color:#a6e22e">name</span>,
+				<span style="color:#a6e22e">Namespace</span>:   <span style="color:#a6e22e">cronJob</span>.<span style="color:#a6e22e">Namespace</span>,
+			},
+			<span style="color:#a6e22e">Spec</span>: <span style="color:#f92672">*</span><span style="color:#a6e22e">cronJob</span>.<span style="color:#a6e22e">Spec</span>.<span style="color:#a6e22e">JobTemplate</span>.<span style="color:#a6e22e">Spec</span>.<span style="color:#a6e22e">DeepCopy</span>(),
+		}
+		<span style="color:#66d9ef">for</span> <span style="color:#a6e22e">k</span>, <span style="color:#a6e22e">v</span> <span style="color:#f92672">:=</span> <span style="color:#66d9ef">range</span> <span style="color:#a6e22e">cronJob</span>.<span style="color:#a6e22e">Spec</span>.<span style="color:#a6e22e">JobTemplate</span>.<span style="color:#a6e22e">Annotations</span> {
+			<span style="color:#a6e22e">job</span>.<span style="color:#a6e22e">Annotations</span>[<span style="color:#a6e22e">k</span>] = <span style="color:#a6e22e">v</span>
+		}
+		<span style="color:#75715e">//job.Annotations[scheduledTimeAnnotation] = scheduledTime.Format(time.RFC3339)
+</span><span style="color:#75715e"></span>		<span style="color:#66d9ef">for</span> <span style="color:#a6e22e">k</span>, <span style="color:#a6e22e">v</span> <span style="color:#f92672">:=</span> <span style="color:#66d9ef">range</span> <span style="color:#a6e22e">cronJob</span>.<span style="color:#a6e22e">Spec</span>.<span style="color:#a6e22e">JobTemplate</span>.<span style="color:#a6e22e">Labels</span> {
+			<span style="color:#a6e22e">job</span>.<span style="color:#a6e22e">Labels</span>[<span style="color:#a6e22e">k</span>] = <span style="color:#a6e22e">v</span>
+		}
+		<span style="color:#66d9ef">if</span> <span style="color:#a6e22e">err</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">ctrl</span>.<span style="color:#a6e22e">SetControllerReference</span>(<span style="color:#a6e22e">cronJob</span>, <span style="color:#a6e22e">job</span>, <span style="color:#a6e22e">r</span>.<span style="color:#a6e22e">Scheme</span>); <span style="color:#a6e22e">err</span> <span style="color:#f92672">!=</span> <span style="color:#66d9ef">nil</span> {
+			<span style="color:#a6e22e">log</span>.<span style="color:#a6e22e">Info</span>(<span style="color:#e6db74">&#34;create job&#34;</span>, <span style="color:#e6db74">&#34;success&#34;</span>, <span style="color:#66d9ef">false</span>)
+			<span style="color:#66d9ef">return</span> <span style="color:#66d9ef">nil</span>, <span style="color:#a6e22e">err</span>
+		}
+
+		<span style="color:#66d9ef">if</span> <span style="color:#a6e22e">err</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">r</span>.<span style="color:#a6e22e">Create</span>(<span style="color:#a6e22e">ctx</span>, <span style="color:#a6e22e">job</span>); <span style="color:#a6e22e">err</span> <span style="color:#f92672">!=</span> <span style="color:#66d9ef">nil</span> {
+			<span style="color:#a6e22e">log</span>.<span style="color:#a6e22e">Error</span>(<span style="color:#a6e22e">err</span>, <span style="color:#e6db74">&#34;unable to create Job for CronJob&#34;</span>, <span style="color:#e6db74">&#34;job&#34;</span>, <span style="color:#a6e22e">job</span>)
+			<span style="color:#66d9ef">return</span> <span style="color:#66d9ef">nil</span>, <span style="color:#a6e22e">err</span>
+		}
+		<span style="color:#a6e22e">log</span>.<span style="color:#a6e22e">Info</span>(<span style="color:#e6db74">&#34;create job&#34;</span>, <span style="color:#e6db74">&#34;success&#34;</span>, <span style="color:#66d9ef">true</span>)
+		<span style="color:#66d9ef">return</span> <span style="color:#a6e22e">job</span>, <span style="color:#66d9ef">nil</span>
+	}
+	<span style="color:#a6e22e">constructJobForCronJob</span>(<span style="color:#f92672">&amp;</span><span style="color:#a6e22e">cronJob</span>, <span style="color:#a6e22e">time</span>.<span style="color:#a6e22e">Now</span>())
+
+	<span style="color:#66d9ef">return</span> <span style="color:#a6e22e">ctrl</span>.<span style="color:#a6e22e">Result</span>{<span style="color:#a6e22e">RequeueAfter</span>: <span style="color:#ae81ff">5</span> <span style="color:#f92672">*</span> <span style="color:#a6e22e">time</span>.<span style="color:#a6e22e">Second</span>}, <span style="color:#66d9ef">nil</span>
+}
+
+</code></pre></div><ul>
+<li>r.Get方法，能获取到mycronjob API的一个mycronjob实体</li>
+<li>constructJobForCronJob闭包根据当前mycronjob的job模版创建一个新的job，并且将其与当前mycronjob绑定，由mycronjob来管理其生命周期，最后提交给集群创建</li>
+<li>最后返回给集群的信息是，下一次Reconcile请求将会是5秒后</li>
+</ul>
+<h3 id="安装controller">安装controller</h3>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">make install
+</code></pre></div><h3 id="启动controller">启动controller</h3>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">make run
+</code></pre></div><h3 id="创建一个mycronjob-api对象">创建一个mycronjob API对象</h3>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml"><span style="color:#f92672">apiVersion</span>: <span style="color:#ae81ff">batch.wzj.kubebuilder.io/v1</span>
+<span style="color:#f92672">kind</span>: <span style="color:#ae81ff">MyCronJob</span>
+<span style="color:#f92672">metadata</span>:
+  <span style="color:#f92672">name</span>: <span style="color:#ae81ff">mycronjob-sample</span>
+<span style="color:#f92672">spec</span>:
+  <span style="color:#f92672">jobTemplate</span>:
+    <span style="color:#f92672">spec</span>:
+      <span style="color:#f92672">template</span>:
+        <span style="color:#f92672">spec</span>:
+          <span style="color:#f92672">containers</span>:
+            - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">hello</span>
+              <span style="color:#f92672">image</span>: <span style="color:#ae81ff">busybox</span>
+              <span style="color:#f92672">args</span>:
+                - <span style="color:#ae81ff">/bin/sh</span>
+                - -<span style="color:#ae81ff">c</span>
+                - <span style="color:#ae81ff">date; echo Hello from the Kubernetes cluster</span>
+          <span style="color:#f92672">restartPolicy</span>: <span style="color:#ae81ff">OnFailure</span>
+</code></pre></div><p>该文件也是由kubebuilder自动生成的，但是crd新增的字段需要我们自己补充，例如本例的jobTemplate</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">➜  mycronjob kubectl apply -f config/samples/batch_v1_mycronjob.yaml
+</code></pre></div><p>观察可以发现，每5秒生成了一个job</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">➜  mycronjob kubectl get job
+NAME                          COMPLETIONS   DURATION   AGE
+mycronjob-sample-1641736135   1/1           5s         16s
+mycronjob-sample-1641736140   1/1           4s         11s
+mycronjob-sample-1641736145   1/1           4s         6s
+mycronjob-sample-1641736150   0/1           1s         1s
+</code></pre></div><h1 id="webhook">webhook</h1>
+<p>Operator中的webhook，在外部对CRD资源的变更，在Controller处理之前，会先交给webhook提前处理。
+webhook可以做两种类型的事：</p>
+<ul>
+<li>修改（mutating）</li>
+<li>验证（validating）
+基于kubebuilder制作的webhook和controller，在同一个进程中</li>
+</ul>
+<h2 id="创建webhook">创建webhook</h2>
+<pre><code>kubebuilder create webhook --group bytewang123-redis --version v1 --kind RedisCluster --defaulting --programmatic-validation
+</code></pre><p>创建完成后，会在api/v1 目录下生成rediscluster_webhook.go脚手架文件</p>
+<h2 id="编写逻辑">编写逻辑</h2>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#66d9ef">func</span> (<span style="color:#a6e22e">r</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">RedisCluster</span>) <span style="color:#a6e22e">Default</span>() {
+	<span style="color:#a6e22e">redisclusterlog</span>.<span style="color:#a6e22e">Info</span>(<span style="color:#e6db74">&#34;default&#34;</span>, <span style="color:#e6db74">&#34;name&#34;</span>, <span style="color:#a6e22e">r</span>.<span style="color:#a6e22e">Name</span>)
+	<span style="color:#75715e">// TODO(user)
+</span><span style="color:#75715e"></span>}
+
+<span style="color:#75715e">// ValidateCreate implements webhook.Validator so a webhook will be registered for the type
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">func</span> (<span style="color:#a6e22e">r</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">RedisCluster</span>) <span style="color:#a6e22e">ValidateCreate</span>() <span style="color:#66d9ef">error</span> {
+	<span style="color:#a6e22e">redisclusterlog</span>.<span style="color:#a6e22e">Info</span>(<span style="color:#e6db74">&#34;validate create&#34;</span>, <span style="color:#e6db74">&#34;name&#34;</span>, <span style="color:#a6e22e">r</span>.<span style="color:#a6e22e">Name</span>)
+	<span style="color:#75715e">// TODO(user)
+</span><span style="color:#75715e"></span>}
+
+<span style="color:#75715e">// ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">func</span> (<span style="color:#a6e22e">r</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">RedisCluster</span>) <span style="color:#a6e22e">ValidateUpdate</span>(<span style="color:#a6e22e">old</span> <span style="color:#a6e22e">runtime</span>.<span style="color:#a6e22e">Object</span>) <span style="color:#66d9ef">error</span> {
+	<span style="color:#a6e22e">redisclusterlog</span>.<span style="color:#a6e22e">Info</span>(<span style="color:#e6db74">&#34;validate update&#34;</span>, <span style="color:#e6db74">&#34;name&#34;</span>, <span style="color:#a6e22e">r</span>.<span style="color:#a6e22e">Name</span>)
+
+	<span style="color:#75715e">// TODO(user): fill in your validation logic upon object update.
+</span><span style="color:#75715e"></span>	<span style="color:#66d9ef">return</span> <span style="color:#66d9ef">nil</span>
+}
+
+<span style="color:#75715e">// ValidateDelete implements webhook.Validator so a webhook will be registered for the type
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">func</span> (<span style="color:#a6e22e">r</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">RedisCluster</span>) <span style="color:#a6e22e">ValidateDelete</span>() <span style="color:#66d9ef">error</span> {
+	<span style="color:#a6e22e">redisclusterlog</span>.<span style="color:#a6e22e">Info</span>(<span style="color:#e6db74">&#34;validate delete&#34;</span>, <span style="color:#e6db74">&#34;name&#34;</span>, <span style="color:#a6e22e">r</span>.<span style="color:#a6e22e">Name</span>)
+
+	<span style="color:#75715e">// TODO(user): fill in your validation logic upon object deletion.
+</span><span style="color:#75715e"></span>	<span style="color:#66d9ef">return</span> <span style="color:#66d9ef">nil</span>
+}
+
+</code></pre></div><p>可以看到有如上几个重要的方法：</p>
+<ol>
+<li>Default
+这是提交cr资源时，会执行的方法。如果我们希望提交资源时，默认给该资源加上一些特定的逻辑（修改属性、增加sidecar容器等），那我们可以把逻辑写在这个函数中</li>
+<li>ValidateCreate/ValidateUpdate/ValidateDelete
+这三个方法，是资源分别在创建/更新/删除时进行校验</li>
+</ol>
+<h2 id="创建cert-manager">创建cert-manager</h2>
+<p>和controller类似，webhook既能在kubernetes环境中运行，也能在kubernetes环境之外运行；
+如果webhook在kubernetes环境之外运行，是有些麻烦的，需要将证书放在所在环境，默认地址是：
+<code>/tmp/k8s-webhook-server/serving-certs/tls.{crt,key}</code></p>
+<p>为了省事儿，也为了更接近生产环境的用法，接下来的实战的做法是将webhook部署在kubernetes环境中
+为了让webhook在kubernetes环境中运行，咱们要做一点准备工作安装cert- manager，执行以下操作：</p>
+<pre><code>kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v1.4.0/cert-manager.yaml
+</code></pre><p>这个命令会创建cert-manager相关的所有资源，创建完成后，我们需要让kubuilder工具使用certmanager，因此需要修改相关的配置文件，将之前本地调试模式的一些配置给打开，详情可见：<a href="https://book.kubebuilder.io/cronjob-tutorial/running-webhook.html">Deploying webhooks - The Kubebuilder Book</a></p>
+<h2 id="创建controller的镜像推送到docker-hub">创建controller的镜像，推送到docker hub</h2>
+<pre><code>make docker-build IMG=bytewang123/rediscluster:v0.0.6
+make docker-push IMG=bytewang123/rediscluster:v0.0.6
+</code></pre><h2 id="以pod的形式部署controller">以pod的形式部署controller</h2>
+<p>部署controller</p>
+<pre><code>make deploy IMG=bytewang123/rediscluster:v0.0.6
+</code></pre><p>如果controller成功运行，说明部署成功，webhook和controller的逻辑都在该pod中</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">➜  redisclusterV2 kubectl get pod --all-namespaces -l control-plane<span style="color:#f92672">=</span>controller-manager
+NAMESPACE               NAME                                                READY   STATUS    RESTARTS   AGE
+redisclusterv2-system   redisclusterv2-controller-manager-b6fffc6c5-lnggm   2/2     Running   <span style="color:#ae81ff">0</span>          96m
+</code></pre></div><h2 id="提交资源">提交资源</h2>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">kubectl apply -f config/samples/bytewang123-redis_v1_rediscluster.yaml
+</code></pre></div><h2 id="试验">试验</h2>
+<p>如果我们要求自定义的RedisCluster资源的addr属性必须是ip:port，但是提交的资源addr是空，此时会报错。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">➜  redisclusterV2 kubectl apply -f config/samples/bytewang123-redis_v1_rediscluster.yaml
+The RedisCluster <span style="color:#e6db74">&#34;rediscluster-sample&#34;</span> is invalid: spec.addr: Invalid value: <span style="color:#e6db74">&#34;&#34;</span>: invalid ip port, ip:port
+</code></pre></div><p>实现方式是Validate</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#75715e">// ValidateCreate implements webhook.Validator so a webhook will be registered for the type
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">func</span> (<span style="color:#a6e22e">r</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">RedisCluster</span>) <span style="color:#a6e22e">ValidateCreate</span>() <span style="color:#66d9ef">error</span> {
+
+	<span style="color:#a6e22e">redisclusterlog</span>.<span style="color:#a6e22e">Info</span>(<span style="color:#e6db74">&#34;validate create&#34;</span>, <span style="color:#e6db74">&#34;name&#34;</span>, <span style="color:#a6e22e">r</span>.<span style="color:#a6e22e">Name</span>)
+	<span style="color:#a6e22e">allErrList</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">field</span>.<span style="color:#a6e22e">ErrorList</span>{}
+	<span style="color:#66d9ef">if</span> <span style="color:#a6e22e">err</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">validate</span>(
+		<span style="color:#a6e22e">r</span>.<span style="color:#a6e22e">Spec</span>.<span style="color:#a6e22e">Addr</span>,
+		<span style="color:#a6e22e">field</span>.<span style="color:#a6e22e">NewPath</span>(<span style="color:#e6db74">&#34;spec&#34;</span>).<span style="color:#a6e22e">Child</span>(<span style="color:#e6db74">&#34;addr&#34;</span>)); <span style="color:#a6e22e">err</span> <span style="color:#f92672">!=</span> <span style="color:#66d9ef">nil</span> {
+		<span style="color:#a6e22e">allErrList</span> = append(<span style="color:#a6e22e">allErrList</span>, <span style="color:#a6e22e">err</span>)
+	}
+	<span style="color:#66d9ef">if</span> len(<span style="color:#a6e22e">allErrList</span>) <span style="color:#f92672">!=</span> <span style="color:#ae81ff">0</span> {
+		<span style="color:#66d9ef">return</span> <span style="color:#a6e22e">errors</span>.<span style="color:#a6e22e">NewInvalid</span>(
+			<span style="color:#a6e22e">schema</span>.<span style="color:#a6e22e">GroupKind</span>{<span style="color:#a6e22e">Group</span>: <span style="color:#e6db74">&#34;bytewang123-redis&#34;</span>, <span style="color:#a6e22e">Kind</span>: <span style="color:#e6db74">&#34;RedisCluster&#34;</span>},
+			<span style="color:#a6e22e">r</span>.<span style="color:#a6e22e">Name</span>, <span style="color:#a6e22e">allErrList</span>)
+	}
+	<span style="color:#66d9ef">return</span> <span style="color:#66d9ef">nil</span>
+}
+
+<span style="color:#66d9ef">func</span> <span style="color:#a6e22e">validate</span>(<span style="color:#a6e22e">addr</span> <span style="color:#66d9ef">string</span>, <span style="color:#a6e22e">fldPath</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">field</span>.<span style="color:#a6e22e">Path</span>) <span style="color:#f92672">*</span><span style="color:#a6e22e">field</span>.<span style="color:#a6e22e">Error</span> {
+	<span style="color:#a6e22e">ipPort</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">strings</span>.<span style="color:#a6e22e">Split</span>(<span style="color:#a6e22e">addr</span>, <span style="color:#e6db74">&#34;:&#34;</span>)
+	<span style="color:#66d9ef">if</span> len(<span style="color:#a6e22e">ipPort</span>) <span style="color:#f92672">!=</span> <span style="color:#ae81ff">2</span> {
+		<span style="color:#66d9ef">return</span> <span style="color:#a6e22e">field</span>.<span style="color:#a6e22e">Invalid</span>(<span style="color:#a6e22e">fldPath</span>, <span style="color:#a6e22e">addr</span>, <span style="color:#e6db74">&#34;invalid ip port, ip:port&#34;</span>)
+	}
+	<span style="color:#66d9ef">return</span> <span style="color:#66d9ef">nil</span>
+}
+</code></pre></div><p>如果我们提交的资源，size是3，但是需要将其改为至少为6，这个逻辑可以放在Default中做</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#75715e">// Default implements webhook.Defaulter so a webhook will be registered for the type
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">func</span> (<span style="color:#a6e22e">r</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">RedisCluster</span>) <span style="color:#a6e22e">Default</span>() {
+	<span style="color:#a6e22e">redisclusterlog</span>.<span style="color:#a6e22e">Info</span>(<span style="color:#e6db74">&#34;default&#34;</span>, <span style="color:#e6db74">&#34;name&#34;</span>, <span style="color:#a6e22e">r</span>.<span style="color:#a6e22e">Name</span>)
+	<span style="color:#66d9ef">if</span> <span style="color:#a6e22e">r</span>.<span style="color:#a6e22e">Spec</span>.<span style="color:#a6e22e">Size</span> &lt; <span style="color:#ae81ff">6</span> {
+		<span style="color:#a6e22e">r</span>.<span style="color:#a6e22e">Spec</span>.<span style="color:#a6e22e">Size</span> = <span style="color:#ae81ff">6</span>
+	}
+}
+</code></pre></div><p>此时可以看到，虽然我们提交yaml时，size是3，但是最终生成的cr size是6。在RedisCluster的controller中，逻辑是如果该资源所属的pod小于期望size，那么会创建pod直到满足需求，所以最终也会创建出6个pod。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">➜  redisclusterV2 kubectl get pod -l app<span style="color:#f92672">=</span>redis
+NAME               READY   STATUS    RESTARTS   AGE
+redis-1642314756   1/1     Running   <span style="color:#ae81ff">0</span>          108m
+redis-1642314757   1/1     Running   <span style="color:#ae81ff">0</span>          108m
+redis-1642314758   1/1     Running   <span style="color:#ae81ff">0</span>          108m
+redis-1642314759   1/1     Running   <span style="color:#ae81ff">0</span>          108m
+redis-1642314760   1/1     Running   <span style="color:#ae81ff">0</span>          108m
+redis-1642314761   1/1     Running   <span style="color:#ae81ff">0</span>          108m
+</code></pre></div><h1 id="todo">TODO</h1>
+<ol>
+<li>k8s的插件机制是怎么样的？只需编写客户端代码就可以在集群中创建
+<ol>
+<li>crd提交到集群，告诉集群自定义资源有哪些字段</li>
+<li>controller需要单独启动
+<ol>
+<li>控制器要做的第一件事，是从 Kubernetes 的 APIServer 里获取它所关心的对象，也就是用户自定义的CR对象。</li>
+<li>这个操作，依靠的是一个叫作 Informer（可以翻译为：通知器）的代码库完成的。Informer 与 API 对象是一一对应的，所以初始化自定义控制器时传递了一个 CR 对象的 Informer。这个informer有一个CR对应的client，跟 APIServer 建立了连接。不过，真正负责维护这个连接的，则是 Informer 所使用的 Reflector 包。更具体地说，Reflector 使用的是一种叫作 ListAndWatch 的方法，来“获取”并“监听”这些 Network 对象实例的变化</li>
+<li>在 ListAndWatch 机制下，一旦 APIServer 端有新的 Network 实例被创建、删除或者更新，Reflector 都会收到“事件通知”。这时，该事件及它对应的 API 对象这个组合，就被称为增量（Delta），它会被放进一个 Delta FIFO Queue（即：增量先进先出队列）中。而另一方面，Informe 会不断地从这个 Delta FIFO Queue 里读取（Pop）增量。每拿到一个增量，Informer 就会判断这个增量里的事件类型，然后创建或者更新本地对象的缓存。这个缓存，在 Kubernetes 里一般被叫作 Store</li>
+<li>比如，如果事件类型是 Added（添加对象），那么 Informer 就会通过一个叫作 Indexer 的库把这个增量里的 API 对象保存在本地缓存中，并为它创建索引。相反，如果增量的事件类型是 Deleted（删除对象），那么 Informer 就会从本地缓存中删除这个对象。</li>
+<li>这个同步本地缓存的工作，是 Informer 的第一个职责，也是它最重要的职责。而 Informer 的第二个职责，则是根据这些事件的类型，触发事先注册好的 ResourceEventHandler。这些 Handler，需要在创建控制器的时候注册给它对应的 Informer。</li>
+<li>controller去api server查找自定义资源的前提，是集群里已经创建了对应的crd</li>
+</ol>
+</li>
+</ol>
+</li>
+<li>controller的SetupWithManager函数如何使用？</li>
+<li>crd的MyCronJobStatus字段如何使用</li>
+</ol>
+
+        </div>
+
+        
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0networkpolicy/">cka真题练习——NetworkPolicy</a></li>
+        
+        <li><a href="/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0daemonset/">cka真题练习——daemonset</a></li>
+        
+        <li><a href="/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0deploy/">cka真题练习——deploy</a></li>
+        
+        <li><a href="/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0etcd%E5%A4%87%E4%BB%BD%E8%BF%98%E5%8E%9F/">cka真题练习——etcd备份还原</a></li>
+        
+        <li><a href="/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0ingress/">cka真题练习——ingress</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='/tags/k8s' target="_blank">k8s</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    
+
+    
+    
+    
+    
+
+</div>
+
+                    <footer id="footer">
+    <br />
+</footer>
+
+
+    
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+<style type="text/css">
+div.highlight {
+    position: relative;
+    margin: 1em 0px;
+}
+
+.copy-code {
+    display: none;
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    color: rgba(255, 255, 255, 0.8);
+    background: rgba(78, 78, 78, 0.8);
+    border-radius: var(--radius);
+    padding: 0 5px;
+    font: inherit;
+    user-select: none;
+    cursor: pointer;
+    border: 0;
+    --radius: 8px;
+}
+
+div.highlight:hover .copy-code,pre:hover .copy-code {
+    display: block;
+}
+
+</style>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+
+
+
+
+
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='//www.google.com/search' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://bytewong123.github.io/">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title">Latest articles</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/benchmark/" title="benchmark" target="_blank">benchmark</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/b%E6%A0%91/" title="b树" target="_blank">b树</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0daemonset/" title="cka真题练习——daemonset" target="_blank">cka真题练习——daemonset</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0deploy/" title="cka真题练习——deploy" target="_blank">cka真题练习——deploy</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0etcd%E5%A4%87%E4%BB%BD%E8%BF%98%E5%8E%9F/" title="cka真题练习——etcd备份还原" target="_blank">cka真题练习——etcd备份还原</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0ingress/" title="cka真题练习——ingress" target="_blank">cka真题练习——ingress</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0networkpolicy/" title="cka真题练习——NetworkPolicy" target="_blank">cka真题练习——NetworkPolicy</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0node%E8%B0%83%E5%BA%A6/" title="cka真题练习——node调度" target="_blank">cka真题练习——node调度</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0pod/" title="cka真题练习——pod" target="_blank">cka真题练习——pod</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0pv/" title="cka真题练习——pv" target="_blank">cka真题练习——pv</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>Categories</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://bytewong123.github.io/categories/golang/">golang (12)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/k8s/">k8s (24)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/mysql/">mysql (10)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/redis/">redis (10)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/rust/">rust (1)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/sql/">sql (1)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统 (3)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E6%9E%81%E5%AE%A2%E6%97%B6%E9%97%B4/">极客时间 (5)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/">消息队列 (1)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B3%BB%E7%BB%9F/">深入理解计算机系统 (1)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E7%AE%97%E6%B3%95/">算法 (138)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/">系统设计 (19)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>Tags</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://bytewong123.github.io/tags/golang/">golang</a>
+    
+    <a href="https://bytewong123.github.io/tags/k8s/">k8s</a>
+    
+    <a href="https://bytewong123.github.io/tags/kafka/">kafka</a>
+    
+    <a href="https://bytewong123.github.io/tags/mysql/">mysql</a>
+    
+    <a href="https://bytewong123.github.io/tags/redis/">redis</a>
+    
+    <a href="https://bytewong123.github.io/tags/rust/">rust</a>
+    
+    <a href="https://bytewong123.github.io/tags/sql/">sql</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E6%9E%81%E5%AE%A2%E6%97%B6%E9%97%B4/">极客时间</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/">消息队列</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E7%AE%97%E6%B3%95/">算法</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/">系统设计</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/">读书笔记</a>
+    
+</div>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title">Links</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a target="_blank" href="http://yuedu.baidu.com/ebook/14a722970740be1e640e9a3e" title="Android Gradle权威指南">Android Gradle权威指南</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="http://mirrors.flysnow.org/" title="常用开发工具CDN镜像">常用开发工具CDN镜像</a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title">Meta</h3>
+        <ul class="widget-list">
+            <li><a href="https://bytewong123.github.io/index.xml">RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

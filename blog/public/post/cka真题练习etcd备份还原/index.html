@@ -1,0 +1,429 @@
+<!doctype html>
+<html lang="en">
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+
+    <title>cka真题练习——etcd备份还原 | sheeks</title>
+    <meta property="og:title" content="cka真题练习——etcd备份还原 - sheeks">
+    <meta property="og:type" content="article">
+        
+    <meta property="article:published_time" content='2023-01-08T18:06:57&#43;08:00'>
+        
+        
+    <meta property="article:modified_time" content='2023-01-08T18:06:57&#43;08:00'>
+        
+    <meta name="Keywords" content="golang,go语言,go语言笔记,sheeks,java,android,博客,项目管理,python,软件架构,公众号,小程序">
+    <meta name="description" content="cka真题练习——etcd备份还原">
+        
+    <meta name="author" content="sheeks">
+    <meta property="og:url" content="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0etcd%E5%A4%87%E4%BB%BD%E8%BF%98%E5%8E%9F/">
+    <link rel="shortcut icon" href='/favicon.ico'  type="image/x-icon">
+
+    <link rel="stylesheet" href='/css/normalize.css'>
+    <link rel="stylesheet" href='/css/style.css'>
+    <script type="text/javascript" src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    
+    
+    
+    
+    
+    
+</head>
+
+<body>
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://bytewong123.github.io/">
+                        sheeks
+                    </a>
+                
+                <p class="description">dev</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://bytewong123.github.io/">Home</a>
+                    
+                    <a  href="https://bytewong123.github.io/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    
+    <article class="post">
+        <header>
+            <h1 class="post-title">cka真题练习——etcd备份还原</h1>
+        </header>
+        
+  <time datetime="2023-01-08T10:06:57Z" class="post-meta meta-date dt-published">
+    2023-01-08
+  </time>
+
+
+<div class="post-meta meta-category">
+  <span>&nbsp;|</span>
+  
+    <a href='/categories/k8s' target="_blank">k8s</a>
+  
+</div>
+
+
+        
+        
+        <div class="post-content">
+            <h1 id="cka真题练习etcd备份还原">cka真题练习——etcd备份还原</h1>
+<pre><code>First,create a snapshot of the existing etcd instance running at https://127.0.0.1:2379, SAVING THE SNAPSHOT TO /var/lib/backup/etcd-snapshot.db.Creating a snapshot of the given instance is expected to complete in seconds. if the operation seems to hang,something's likely wrong with your command.Use CTRL + C to cancel the operation and try again.
+Next, restore an existing,previous snapshot located at /data/backup/etcd-snapshot-previous.db。The following TLS certificates/key are supplied for connecting to the server with etcdctl:
+CA certificate:
+/opt/xxxxx/ca.crt
+Client certificate:
+/opt/xxxxx/etcd-client.crt
+Client key:
+/opt/xxxxx/etcd-client.key
+</code></pre><p>首先把当前运行的etcd快照保存到指定路径；然后从指定路径的快照恢复到etcd</p>
+<h2 id="1-首先从docker中拷贝一个etcdctl客户端">1. 首先从docker中拷贝一个etcdctl客户端</h2>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">controlplane $ docker ps -a | grep etcd
+2996113909c7        303ce5db0e90             <span style="color:#e6db74">&#34;etcd --advertise-cl…&#34;</span>   <span style="color:#ae81ff">13</span> minutes ago      Up <span style="color:#ae81ff">13</span> minutes                                   k8s_etcd_etcd-controlplane_kube-system_f55b1127bacf8b74e06aeec3179004c2_1
+87a845c131b4        303ce5db0e90             <span style="color:#e6db74">&#34;etcd --advertise-cl…&#34;</span>   <span style="color:#ae81ff">13</span> minutes ago      Exited <span style="color:#f92672">(</span>1<span style="color:#f92672">)</span> <span style="color:#ae81ff">13</span> minutes ago                       k8s_etcd_etcd-controlplane_kube-system_f55b1127bacf8b74e06aeec3179004c2_0
+d80be976101b        k8s.gcr.io/pause:3.2     <span style="color:#e6db74">&#34;/pause&#34;</span>                 <span style="color:#ae81ff">13</span> minutes ago      Up <span style="color:#ae81ff">13</span> minutes                                   k8s_POD_etcd-controlplane_kube-system_f55b1127bacf8b74e06aeec3179004c2_0
+
+controlplane $ docker cp 2996113909c7:/usr/local/bin/etcdctl /usr/bin
+</code></pre></div><h2 id="2-务必将etcdctl的api版本指定为v3">2. 务必将etcdctl的api版本指定为v3</h2>
+<p>若不指定，默认使用v2的etcdctl版本</p>
+<pre><code>controlplane $ export ETCDCTL_API=3
+</code></pre><h2 id="3-生成快照">3. 生成快照</h2>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">controlplane $ etcdctl --endpoints<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;https://127.0.0.1:2379&#39;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>&gt; --cacert<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;/etc/kubernetes/pki/etcd/ca.crt&#39;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>&gt; --cert<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;/etc/kubernetes/pki/apiserver-etcd-client.crt&#39;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>&gt; --key<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;/etc/kubernetes/pki/apiserver-etcd-client.key&#39;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>&gt; snapshot save /etcd.snapshot.db
+Snapshot saved at /etcd.snapshot.db
+</code></pre></div><h2 id="3-查看快照状态">3. 查看快照状态</h2>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">&gt; etcdctl --endpoints<span style="color:#f92672">=</span>https://127.0.0.1:2379 --cacert<span style="color:#f92672">=</span>/etc/kubernetes/pki/etcd/ca.crt --cert<span style="color:#f92672">=</span>/etc/kubernetes/pki/apiserver-etcd-client.crt --key<span style="color:#f92672">=</span>/etc/kubernetes/pki/apiserver-etcd-client.key snapshot status /etcd.snapshot.db -wtable
++----------+----------+------------+------------+
+|   HASH   | REVISION | TOTAL KEYS | TOTAL SIZE |
++----------+----------+------------+------------+
+| 8e02c2c0 |     <span style="color:#ae81ff">2051</span> |       <span style="color:#ae81ff">2062</span> |     2.8 MB |
++----------+----------+------------+------------+
+</code></pre></div><h2 id="4-恢复快照">4. 恢复快照</h2>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">etcdctl --endpoints<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;https://127.0.0.1:2379&#39;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span> --cacert<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;/etc/kubernetes/pki/etcd/ca.crt&#39;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span> --cert<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;/etc/kubernetes/pki/apiserver-etcd-client.crt&#39;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span> --key<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;/etc/kubernetes/pki/apiserver-etcd-client.key&#39;</span> snapshot restore /etcd.snapshot.db
+</code></pre></div>
+        </div>
+
+        
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0networkpolicy/">cka真题练习——NetworkPolicy</a></li>
+        
+        <li><a href="/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0daemonset/">cka真题练习——daemonset</a></li>
+        
+        <li><a href="/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0deploy/">cka真题练习——deploy</a></li>
+        
+        <li><a href="/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0ingress/">cka真题练习——ingress</a></li>
+        
+        <li><a href="/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0node%E8%B0%83%E5%BA%A6/">cka真题练习——node调度</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='/tags/k8s' target="_blank">k8s</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    
+
+    
+    
+    
+    
+
+</div>
+
+                    <footer id="footer">
+    <br />
+</footer>
+
+
+    
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+<style type="text/css">
+div.highlight {
+    position: relative;
+    margin: 1em 0px;
+}
+
+.copy-code {
+    display: none;
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    color: rgba(255, 255, 255, 0.8);
+    background: rgba(78, 78, 78, 0.8);
+    border-radius: var(--radius);
+    padding: 0 5px;
+    font: inherit;
+    user-select: none;
+    cursor: pointer;
+    border: 0;
+    --radius: 8px;
+}
+
+div.highlight:hover .copy-code,pre:hover .copy-code {
+    display: block;
+}
+
+</style>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+
+
+
+
+
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='//www.google.com/search' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://bytewong123.github.io/">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title">Latest articles</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/benchmark/" title="benchmark" target="_blank">benchmark</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/b%E6%A0%91/" title="b树" target="_blank">b树</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0daemonset/" title="cka真题练习——daemonset" target="_blank">cka真题练习——daemonset</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0deploy/" title="cka真题练习——deploy" target="_blank">cka真题练习——deploy</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0etcd%E5%A4%87%E4%BB%BD%E8%BF%98%E5%8E%9F/" title="cka真题练习——etcd备份还原" target="_blank">cka真题练习——etcd备份还原</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0ingress/" title="cka真题练习——ingress" target="_blank">cka真题练习——ingress</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0networkpolicy/" title="cka真题练习——NetworkPolicy" target="_blank">cka真题练习——NetworkPolicy</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0node%E8%B0%83%E5%BA%A6/" title="cka真题练习——node调度" target="_blank">cka真题练习——node调度</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0pod/" title="cka真题练习——pod" target="_blank">cka真题练习——pod</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0pv/" title="cka真题练习——pv" target="_blank">cka真题练习——pv</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>Categories</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://bytewong123.github.io/categories/golang/">golang (12)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/k8s/">k8s (24)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/mysql/">mysql (10)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/redis/">redis (10)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/rust/">rust (1)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/sql/">sql (1)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统 (3)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E6%9E%81%E5%AE%A2%E6%97%B6%E9%97%B4/">极客时间 (5)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/">消息队列 (1)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B3%BB%E7%BB%9F/">深入理解计算机系统 (1)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E7%AE%97%E6%B3%95/">算法 (138)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/">系统设计 (19)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>Tags</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://bytewong123.github.io/tags/golang/">golang</a>
+    
+    <a href="https://bytewong123.github.io/tags/k8s/">k8s</a>
+    
+    <a href="https://bytewong123.github.io/tags/kafka/">kafka</a>
+    
+    <a href="https://bytewong123.github.io/tags/mysql/">mysql</a>
+    
+    <a href="https://bytewong123.github.io/tags/redis/">redis</a>
+    
+    <a href="https://bytewong123.github.io/tags/rust/">rust</a>
+    
+    <a href="https://bytewong123.github.io/tags/sql/">sql</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E6%9E%81%E5%AE%A2%E6%97%B6%E9%97%B4/">极客时间</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/">消息队列</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E7%AE%97%E6%B3%95/">算法</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/">系统设计</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/">读书笔记</a>
+    
+</div>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title">Links</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a target="_blank" href="http://yuedu.baidu.com/ebook/14a722970740be1e640e9a3e" title="Android Gradle权威指南">Android Gradle权威指南</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="http://mirrors.flysnow.org/" title="常用开发工具CDN镜像">常用开发工具CDN镜像</a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title">Meta</h3>
+        <ul class="widget-list">
+            <li><a href="https://bytewong123.github.io/index.xml">RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

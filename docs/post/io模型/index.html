@@ -1,0 +1,577 @@
+<!doctype html>
+<html lang="en">
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+
+    <title>io模型 | sheeks</title>
+    <meta property="og:title" content="io模型 - sheeks">
+    <meta property="og:type" content="article">
+        
+    <meta property="article:published_time" content='2023-01-08T18:06:57&#43;08:00'>
+        
+        
+    <meta property="article:modified_time" content='2023-01-08T18:06:57&#43;08:00'>
+        
+    <meta name="Keywords" content="golang,go语言,go语言笔记,sheeks,java,android,博客,项目管理,python,软件架构,公众号,小程序">
+    <meta name="description" content="io模型">
+        
+    <meta name="author" content="sheeks">
+    <meta property="og:url" content="https://bytewong123.github.io/post/io%E6%A8%A1%E5%9E%8B/">
+    <link rel="shortcut icon" href='/favicon.ico'  type="image/x-icon">
+
+    <link rel="stylesheet" href='/css/normalize.css'>
+    <link rel="stylesheet" href='/css/style.css'>
+    <script type="text/javascript" src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    
+    
+    
+    
+    
+    
+</head>
+
+<body>
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://bytewong123.github.io/">
+                        sheeks
+                    </a>
+                
+                <p class="description">dev</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://bytewong123.github.io/">Home</a>
+                    
+                    <a  href="https://bytewong123.github.io/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    
+    <article class="post">
+        <header>
+            <h1 class="post-title">io模型</h1>
+        </header>
+        
+  <time datetime="2023-01-08T10:06:57Z" class="post-meta meta-date dt-published">
+    2023-01-08
+  </time>
+
+
+<div class="post-meta meta-category">
+  <span>&nbsp;|</span>
+  
+    <a href='/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F' target="_blank">操作系统</a>
+  
+</div>
+
+
+        
+        
+        <div class="post-content">
+            <h1 id="io模型">io模型</h1>
+<p>#技术/io模型</p>
+<h2 id="同步io">同步io</h2>
+<ul>
+<li>
+<p>阻塞io
+如果内核中数据没有准备好，阻塞用户进程直到数据准备完成</p>
+</li>
+<li>
+<p>非阻塞io
+如果内核中数据没有准备好，不会阻塞用户进程，而是立刻返回一个error
+典型应用：socket设置nonblock
+缺点：进程轮询调用，消耗cpu资源</p>
+</li>
+<li>
+<p>io多路复用</p>
+<ol>
+<li>多个进程的io可以注册到一个复用器（select）上</li>
+<li>当用户调用该select，select会监听所有注册进来的io</li>
+<li>如果select所有监听的io在内核缓冲区都没有可读取的数据，select调用进程会被阻塞</li>
+<li>任一io有数据，select就会返回</li>
+<li>复制数据到内存缓冲区期间，进程阻塞</li>
+<li>IO复用模型中，对于每一个socket，一般都设置成为非阻塞。但是整个用户的进程其实是一直被阻塞的，只不过进程是被select这个函数阻塞、而不是被socket IO给阻塞</li>
+</ol>
+<p>优缺点：
+1. 事实上比阻塞io性能更差一些，因为需要有两次系统调用select,recvfrom，阻塞io只需要一次recvfrom
+2. 优势在于可以同时处理多个连接
+3. 专一进程解决多个进程IO的阻塞问题，适用高并发服务应用开发，一个进程/线程响应多个请求</p>
+<p>典型应用：
+Java NIO、Nginx（epoll、poll、select）</p>
+</li>
+<li>
+<p>信号驱动io</p>
+<ol>
+<li>进程预先告知内核、向内核注册一个信号处理函数</li>
+<li>用户进程返回不阻塞，当内核数据就绪时会发送一个信号给进程，用户进程便在信号处理函数中调用IO读取数据</li>
+<li>IO内核拷贝到用户进程的过程还是阻塞的，信号驱动式IO并没有实现真正的异步，因为通知到用户进程之后，依然是由进程来完成IO操作</li>
+</ol>
+<p>优缺点：
+半异步，并且实际中并不常用
+回调机制</p>
+</li>
+</ul>
+<h2 id="异步io">异步io</h2>
+<ul>
+<li>异步io
+用户进程只需要发起一个IO操作然后立即返回，等IO操作真正的完成以后，应用程序会得到IO操作完成的通知，此时用户进程只需要对数据进行处理就好了，不需要进行实际的IO读写操作，因为真正的IO读取或者写入操作已经由内核完成了</li>
+</ul>
+<h2 id="reactor模式和proactor模式">Reactor模式和Proactor模式</h2>
+<p><strong>Reactor模式应用于同步I/O的场景。我们分别以读操作和写操作为例来看看Reactor中的具体步骤：</strong>
+读取操作：</p>
+<ol>
+<li>应用程序注册读就绪事件和相关联的事件处理器</li>
+<li>事件分离器等待事件的发生</li>
+<li>当发生读就绪事件的时候，事件分离器调用第一步注册的事件处理器</li>
+<li>事件处理器首先执行实际的读取操作，然后根据读取到的内容进行进一步的处理
+写入操作类似于读取操作，只不过第一步注册的是写就绪事件。</li>
+</ol>
+<p><strong>Proactor模式中读取操作和写入操作的过程：</strong>
+读取操作：</p>
+<ol>
+<li>应用程序初始化一个异步读取操作，然后注册相应的事件处理器，此时事件处理器不关注读取就绪事件，而是关注读取完成事件，这是区别于Reactor的关键。</li>
+<li>事件分离器等待读取操作完成事件</li>
+<li>在事件分离器等待读取操作完成的时候，操作系统调用内核线程完成读取操作（异步IO都是操作系统负责将数据读写到应用传递进来的缓冲区供应用程序操作，操作系统扮演了重要角色），并将读取的内容放入用户传递过来的缓存区中。这也是区别于Reactor的一点，Proactor中，应用程序需要传递缓存区。</li>
+<li>事件分离器捕获到读取完成事件后，激活应用程序注册的事件处理器，事件处理器直接从缓存区读取数据，而不需要进行实际的读取操作。</li>
+</ol>
+<p>从上面可以看出，Reactor和Proactor模式的主要区别就是真正的读取和写入操作是有谁来完成的，Reactor中需要应用程序自己读取或者写入数据，而Proactor模式中，应用程序不需要进行实际的读写过程，它只需要从缓存区读取或者写入即可，操作系统会读取缓存区或者写入缓存区到真正的IO设备.</p>
+<h2 id="几个区别">几个区别</h2>
+<h3 id="同步io和异步io的区别">同步io和异步io的区别</h3>
+<p>同异步IO的根本区别在于、同步IO主动的调用recvfrom来将数据拷贝到用户内存、而异步则完全不同、它就像是用户进程将整个IO操作交给了他人（内核）完成、然后他人做完后发信号通知、在此期间、用户进程不需要去检查IO操作的状态、也不需要主动的去拷贝数据</p>
+<h3 id="阻塞io和非阻塞io的区别">阻塞io和非阻塞io的区别</h3>
+<p>阻塞和非阻塞关注的是进程在等待调用结果时的状态、阻塞是指调用结果返回之前、当前进程会被挂起、调用进程只有在得到结果才会返回；非阻塞调用指不能立刻得到结果、该调用不会阻塞当前进程。</p>
+<h3 id="同步和异步的区别">同步和异步的区别</h3>
+<ul>
+<li>当一个同步调用发出去后，调用者要一直等待调用结果的通知后，才能进行后续的执行。</li>
+<li>当一个异步调用发出去后，调用者不能立即得到调用结果的返回
+<ul>
+<li>主动轮询异步调用的结果</li>
+<li>被调用方通过callback来通知调用方调用结果</li>
+</ul>
+</li>
+</ul>
+<h2 id="io多路复用详解">io多路复用详解</h2>
+<h3 id="select">select</h3>
+<p>函数原型：</p>
+<pre><code>int select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *exceptfds, struct timeval *timeout);
+</code></pre><ul>
+<li>nfds，bitmap的最大长度
+监控的所有文件描述符中，序号最大的一个描述符n的值+1，以便开辟n+1长度的bitmap，每一个位对应第0~n个文件描述符，若监听了则将其置为1，未监听将其置为0，这样每一位就代表监听的描述符。使用这个长度，主要是select函数通过这个长度去截断传入的bitmap</li>
+<li>readfds，读描述符集合
+若select发现某个描述符有数据了，那么给这个bitmap对应的位置1</li>
+<li>writefds，写描述符集合</li>
+<li>exceptfds，异常描述符集合</li>
+<li>timeout，阻塞时间</li>
+</ul>
+<p>缺点：</p>
+<ul>
+<li>bitmap的限制为1024</li>
+<li>每次调用select，会把bitmap从用户态拷贝到内核态</li>
+<li>每次读取bitmap结果，会遍历去查看是否有数据，复杂度为O(n)</li>
+<li>bitmap不可重用，因为每次select函数返回后就将其置1了，改变了内容，每次调用select需要新建bitmap</li>
+</ul>
+<h3 id="poll">poll</h3>
+<p>函数原型：</p>
+<pre><code>int poll(struct pollfd *fds, nfds_t nfds, int timeout);
+</code></pre><ul>
+<li>pollfd数组
+<ul>
+<li>pollfd
+<ul>
+<li>fd</li>
+<li>events：期望的监听事件</li>
+<li>revents：poll返回时给该描述符置的事件</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>监听的fd数量</li>
+<li>超时时间</li>
+</ul>
+<p>优点：</p>
+<ol>
+<li>fd可重用，因为每次poll函数返回了会改变pollfd.revents的结果，此时判断该结果，并做业务逻辑后，将revents置回0还原即可，下次还能继续使用该pollfd</li>
+<li>pollfds是个数组，容量不只限于1024</li>
+</ol>
+<h3 id="epoll">epoll</h3>
+<p>涉及三个函数</p>
+<ul>
+<li>
+<p>epoll_create
+创建一个eventpoll对象</p>
+<ul>
+<li>rb_root，红黑树，存放需要监听的socket fd列表。在epollctl中往红黑树添加、修改、删除socket fd会很快</li>
+<li>rdlist，双向链表，保存了事件已经到来的socket fd就绪列表
+创建完成后，返回epollfd</li>
+</ul>
+</li>
+<li>
+<p>epoll_ctl
+根据epollfd，给eventpoll对象增删改查具体的需要监听的描述符以及监听事件
+函数原型：</p>
+</li>
+</ul>
+<pre><code>int epoll_ctl(int epfd, int op, int fd, struct event *event);
+</code></pre><pre><code>- epfd为eventpoll对象的fd，即epollfd
+- op为此次要对socket fd进行关联到epollfd的何种操作
+- fd是这次要操作的socket fd
+- event，告诉内核该socket需要监听的事件。添加到eventpoll中的事件都会与设备（如网卡）建立回调关系，事件发生时，会将事件放到rdlist中
+</code></pre>
+<p>op</p>
+<ul>
+<li>
+<p>EPOLL_CTL_ADD：注册新的socket到epollfd</p>
+</li>
+<li>
+<p>EPOLL_CTL_MOD：修改已经注册的socket的监听事件</p>
+</li>
+<li>
+<p>EPOLL_CTL_DEL：从epollfd中删除一个socket</p>
+</li>
+<li>
+<p>epoll_wait
+传入epollfd，代表这次系统调用监听的socketfd集合是eventpoll中指定的socket</p>
+</li>
+</ul>
+<p>函数原型：</p>
+<pre><code>int epoll_wait(int epfd, struct epoll_event *events, int maxevents, int timeout)
+</code></pre><pre><code>- epfd，epoll create创建的eventpoll的描述符
+- events，期望从内核得到的事件集合
+- max events，告知内核期望得到的返回events的大小
+- timeout，超时时间
+</code></pre>
+<p>开始阻塞等待描述符的数据
+与select,epoll区别</p>
+<ul>
+<li>epollfd不会由用户态拷贝到内核态，用户态和内核态共享这块内存</li>
+<li>一旦epollfd注册的某一个socket描述符有数据了，由于在epollctl中已经建立了回调关系，一旦有数据设备就会回调，将事件加入到rdlist中</li>
+<li>当到了epollwai的超时时间，检查rdlist，若不为空则将其拷贝到入参中的events数组即可，这里使用了共享内存</li>
+<li>epoll_wait函数会返回，带有返回值，返回值即为有数据的描述符个数n，因此只需遍历前n个events即可</li>
+</ul>
+<p>两种触发方式：</p>
+<ul>
+<li>水平触发
+只要这个文件描述符还有数据可读，每次 epoll_wait都会返回它的事件，提醒用户程序去操作</li>
+<li>边缘触发
+通知之后进程必须立即处理事件。下次再调用 epoll_wait() 时不会再得到事件到达的通知。这种模式比水平触发效率高，系统不会充斥大量你不关心的就绪文件描述符。</li>
+</ul>
+
+        </div>
+
+        
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/post/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E6%80%BB%E7%BB%93/">内存管理总结</a></li>
+        
+        <li><a href="/post/%E7%94%A8%E6%88%B7%E6%80%81%E5%86%85%E6%A0%B8%E6%80%81/">用户态、内核态</a></li>
+        
+        <li><a href="/post/z%E5%AD%97%E5%9E%8B%E5%8F%98%E6%8D%A2/">Z字型变换</a></li>
+        
+        <li><a href="/post/benchmark/">benchmark</a></li>
+        
+        <li><a href="/post/b%E6%A0%91/">b树</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F' target="_blank">操作系统</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    
+
+    
+    
+    
+    
+
+</div>
+
+                    <footer id="footer">
+    <br />
+</footer>
+
+
+    
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+<style type="text/css">
+div.highlight {
+    position: relative;
+    margin: 1em 0px;
+}
+
+.copy-code {
+    display: none;
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    color: rgba(255, 255, 255, 0.8);
+    background: rgba(78, 78, 78, 0.8);
+    border-radius: var(--radius);
+    padding: 0 5px;
+    font: inherit;
+    user-select: none;
+    cursor: pointer;
+    border: 0;
+    --radius: 8px;
+}
+
+div.highlight:hover .copy-code,pre:hover .copy-code {
+    display: block;
+}
+
+</style>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+
+
+
+
+
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='//www.google.com/search' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://bytewong123.github.io/">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title">Latest articles</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/benchmark/" title="benchmark" target="_blank">benchmark</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/b%E6%A0%91/" title="b树" target="_blank">b树</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0daemonset/" title="cka真题练习——daemonset" target="_blank">cka真题练习——daemonset</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0deploy/" title="cka真题练习——deploy" target="_blank">cka真题练习——deploy</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0etcd%E5%A4%87%E4%BB%BD%E8%BF%98%E5%8E%9F/" title="cka真题练习——etcd备份还原" target="_blank">cka真题练习——etcd备份还原</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0ingress/" title="cka真题练习——ingress" target="_blank">cka真题练习——ingress</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0networkpolicy/" title="cka真题练习——NetworkPolicy" target="_blank">cka真题练习——NetworkPolicy</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0node%E8%B0%83%E5%BA%A6/" title="cka真题练习——node调度" target="_blank">cka真题练习——node调度</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0pod/" title="cka真题练习——pod" target="_blank">cka真题练习——pod</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0pv/" title="cka真题练习——pv" target="_blank">cka真题练习——pv</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>Categories</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://bytewong123.github.io/categories/golang/">golang (12)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/k8s/">k8s (24)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/mysql/">mysql (10)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/redis/">redis (10)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/rust/">rust (1)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/sql/">sql (1)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统 (3)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E6%9E%81%E5%AE%A2%E6%97%B6%E9%97%B4/">极客时间 (5)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/">消息队列 (1)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B3%BB%E7%BB%9F/">深入理解计算机系统 (1)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E7%AE%97%E6%B3%95/">算法 (138)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/">系统设计 (19)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>Tags</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://bytewong123.github.io/tags/golang/">golang</a>
+    
+    <a href="https://bytewong123.github.io/tags/k8s/">k8s</a>
+    
+    <a href="https://bytewong123.github.io/tags/kafka/">kafka</a>
+    
+    <a href="https://bytewong123.github.io/tags/mysql/">mysql</a>
+    
+    <a href="https://bytewong123.github.io/tags/redis/">redis</a>
+    
+    <a href="https://bytewong123.github.io/tags/rust/">rust</a>
+    
+    <a href="https://bytewong123.github.io/tags/sql/">sql</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E6%9E%81%E5%AE%A2%E6%97%B6%E9%97%B4/">极客时间</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/">消息队列</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E7%AE%97%E6%B3%95/">算法</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/">系统设计</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/">读书笔记</a>
+    
+</div>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title">Links</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a target="_blank" href="http://yuedu.baidu.com/ebook/14a722970740be1e640e9a3e" title="Android Gradle权威指南">Android Gradle权威指南</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="http://mirrors.flysnow.org/" title="常用开发工具CDN镜像">常用开发工具CDN镜像</a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title">Meta</h3>
+        <ul class="widget-list">
+            <li><a href="https://bytewong123.github.io/index.xml">RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

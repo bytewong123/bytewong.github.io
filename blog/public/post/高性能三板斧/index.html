@@ -1,0 +1,427 @@
+<!doctype html>
+<html lang="en">
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+
+    <title>高性能三板斧 | sheeks</title>
+    <meta property="og:title" content="高性能三板斧 - sheeks">
+    <meta property="og:type" content="article">
+        
+    <meta property="article:published_time" content='2023-01-08T18:06:57&#43;08:00'>
+        
+        
+    <meta property="article:modified_time" content='2023-01-08T18:06:57&#43;08:00'>
+        
+    <meta name="Keywords" content="golang,go语言,go语言笔记,sheeks,java,android,博客,项目管理,python,软件架构,公众号,小程序">
+    <meta name="description" content="高性能三板斧">
+        
+    <meta name="author" content="sheeks">
+    <meta property="og:url" content="https://bytewong123.github.io/post/%E9%AB%98%E6%80%A7%E8%83%BD%E4%B8%89%E6%9D%BF%E6%96%A7/">
+    <link rel="shortcut icon" href='/favicon.ico'  type="image/x-icon">
+
+    <link rel="stylesheet" href='/css/normalize.css'>
+    <link rel="stylesheet" href='/css/style.css'>
+    <script type="text/javascript" src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    
+    
+    
+    
+    
+    
+</head>
+
+<body>
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://bytewong123.github.io/">
+                        sheeks
+                    </a>
+                
+                <p class="description">dev</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://bytewong123.github.io/">Home</a>
+                    
+                    <a  href="https://bytewong123.github.io/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    
+    <article class="post">
+        <header>
+            <h1 class="post-title">高性能三板斧</h1>
+        </header>
+        
+  <time datetime="2023-01-08T10:06:57Z" class="post-meta meta-date dt-published">
+    2023-01-08
+  </time>
+
+
+<div class="post-meta meta-category">
+  <span>&nbsp;|</span>
+  
+    <a href='/categories/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1' target="_blank">系统设计</a>
+  
+</div>
+
+
+        
+        
+        <div class="post-content">
+            <h1 id="高性能三板斧">高性能三板斧</h1>
+<p>#技术/系统设计</p>
+<ul>
+<li>通过分布式集群扩展系统的服务器，降低单一服务器的负载压力；</li>
+<li>通过缓存的方式降低系统的读负载压力；</li>
+<li>通过消息队列降低系统的写负载压力。</li>
+</ul>
+<p>对应的技术方案分别是：负载均衡、分布式缓存、消息队列，称之为高性能架构的三板斧。</p>
+<h2 id="负载均衡">负载均衡</h2>
+<h3 id="应用层负载均衡">应用层负载均衡</h3>
+<p>用户的 HTTP 请求先到达应用层负载均衡服务器，负载均衡服务器从应用服务器集群中选择一台服务器的 IP 地址 (10.0.0.3)，然后将 HTTP 请求转发给该服务器。该服务器处理完成后，将响应内容返回给负载均衡服务器，再由负载均衡服务器返回给用户。
+所有请求、响应 HTTP 通信都需要通过负载均衡服务器，而 HTTP 协议又是一个比较重的应用层协议，协议的处理需要消耗比较多的计算资源。也就是说，应用层负载均衡服务器将会是整个应用服务器集群的瓶颈</p>
+<h3 id="ip层负载均衡">ip层负载均衡</h3>
+<p>IP 层是网络通讯协议的网络层，所以有时候 IP 层负载均衡也叫网络层负载均衡。它的主要工作原理是用户的请求到达负载均衡服务器后，负载均衡服务器会对网络层数据包的 IP 地址进行转换，将其修改为应用服务器的 IP 地址，然后把数据包重新发送出去，请求数据就会到达应用服务器
+IP 负载均衡不需要在 HTTP 协议层工作，可以在操作系统内核直接修改 IP 数据包的地址，所以效率比应用层负载均衡高得多。但不管是请求还是响应的数据包，都要通过负载均衡服务器进行 IP 地址转换，而响应的数据通常都会比较大，甚至会超过 IP 负载均衡服务器网卡带宽。因此对于大规模的应用服务器集群，IP 层负载均衡服务器还是会成为响应的流量瓶颈</p>
+<h3 id="链路层负载均衡">链路层负载均衡</h3>
+<p>链路层负载均衡服务器并不修改请求数据包的 IP 地址，而是修改数据链路层里的网卡 mac 地址为后端服务器的网卡mac地址，在数据链路层实现负载均衡。应用服务器返回响应数据的时候，因为 IP 地址没有修改过，所以这个响应会直接到达用户的设备，而不会再经过负载均衡服务器（请求经过负载均衡服务器，返回不会经过）
+链路层负载均衡避免响应数据再经过负载均衡服务器，因而可以承受较大的数据传输压力，目前大型互联网应用大多使用链路层负载均衡</p>
+<h2 id="分布式缓存">分布式缓存</h2>
+<h3 id="cdn">CDN</h3>
+<p>CDN（Content Delivery Network）即内容分发网络。我们上网的时候，App 或者浏览器想要连接到互联网应用的服务器，需要移动、电信这样的网络服务商为我们提供网络服务，建立网络连接才可以上网。而这些服务商需要在全国范围内部署骨干网络、交换机机房，才能完成网络连接服务。
+因为这些交换机机房可能会离用户非常近，所以我们自然想到了，互联网应用能不能在这些交换机机房中部署缓存服务器呢？这样的话，用户就可以近距离获得自己需要的数据，既提高了响应速度，又节约了网络带宽和服务器资源。
+答案是当然可以。这个部署在网络服务商机房中的缓存就是 CDN，因为距离用户非常近，又被称作网络连接的第一跳。目前很多互联网应用大约 80% 以上的网络流量都是通过 CDN 返回的。</p>
+<h3 id="反向代理缓存">反向代理缓存</h3>
+<p>反向代理则是代理服务器，所有的网络请求都需要通过反向代理才能到达应用程序服务器。那么在这里加一个缓存，尽快将数据返回给用户，而不是发送给应用服务器，这就是反向代理缓存
+用户请求到达反向代理缓存服务器，反向代理检查本地是否有需要的数据，如果有就直接返回；如果没有，就请求应用服务器，得到需要的数据后缓存在本地，然后返回给用户。同时，只要将后面的应用服务器部署为一个集群，反向代理服务器在请求后面的应用服务器的时候，进行负载均衡选择，那么这个反向代理缓存服务器也就同时成为了前面讨论的应用层负载均衡服务器。也就是说，一台服务器，既做反向代理服务器，也做负载均衡服务器</p>
+<h3 id="分布式对象缓存">分布式对象缓存</h3>
+<p>多台缓存服务器构成一个缓存集群，缓存数据存储在每台服务器的内存中。每个程序需要依赖一个缓存客户端 SDK，通过 SDK 的 API 来访问缓存服务器。应用程序先调用 API，由 API 调用 SDK 的路由算法，路由算法根据缓存的 key 值，计算这个 key 应该访问哪台缓存服务器。路由算法计算得到目标服务器的 IP 地址和端口号后，API 再调用 SDK 的通信模块，将 值以及缓存操作命令发送给具体的某台缓存服务器，最终由这台服务器完成缓存操作。</p>
+<h2 id="消息队列">消息队列</h2>
+<p>优化写操作性能的主要手段是使用消息队列，将写操作异步化。
+应用服务器收到用户写操作请求后，调用数据库操作接口，完成数据写入数据库的操作。但是数据库处理速度比较慢，同时又对并发压力比较敏感。大量操作请求同时提交到数据库，可能会导致数据库负载压力太大而崩溃。
+应用服务器收到用户写操作请求后，不是直接调用数据库，而是将写操作请求发送给消息队列服务器，再由消息消费者服务器从消息队列服务器消费消息，完成对数据库的写操作。
+这样会带来两个好处。</p>
+<ul>
+<li>一方面，用户请求发送给消息队列就可以直接返回响应给用户了，而消息队列服务器的处理速度要远远快于数据库，用户端的响应时间可以极大缩短；</li>
+<li>另一方面，消息队列写数据库的时候，可以根据数据库的负载能力控制写入的速度，即使用户请求并发很高，也不会导致数据库崩溃，消息队列可以使系统运行在一个性能最优的负载压力范围内。</li>
+</ul>
+
+        </div>
+
+        
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/post/redis%E5%AE%9E%E7%8E%B0%E5%85%B3%E6%B3%A8%E6%A8%A1%E5%9E%8B/">redis实现关注模型</a></li>
+        
+        <li><a href="/post/zookeeper%E7%9A%84zap%E5%8D%8F%E8%AE%AE/">zookeeper的zap协议</a></li>
+        
+        <li><a href="/post/%E4%BA%8B%E5%8A%A1%E6%8B%86%E8%A7%A3/">事务拆解</a></li>
+        
+        <li><a href="/post/%E4%BF%A1%E6%81%AF%E6%B5%81%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/">信息流系统设计</a></li>
+        
+        <li><a href="/post/%E5%85%B3%E7%B3%BB%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/">关系系统设计</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='/tags/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1' target="_blank">系统设计</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    
+
+    
+    
+    
+    
+
+</div>
+
+                    <footer id="footer">
+    <br />
+</footer>
+
+
+    
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+<style type="text/css">
+div.highlight {
+    position: relative;
+    margin: 1em 0px;
+}
+
+.copy-code {
+    display: none;
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    color: rgba(255, 255, 255, 0.8);
+    background: rgba(78, 78, 78, 0.8);
+    border-radius: var(--radius);
+    padding: 0 5px;
+    font: inherit;
+    user-select: none;
+    cursor: pointer;
+    border: 0;
+    --radius: 8px;
+}
+
+div.highlight:hover .copy-code,pre:hover .copy-code {
+    display: block;
+}
+
+</style>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+
+
+
+
+
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='//www.google.com/search' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://bytewong123.github.io/">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title">Latest articles</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/benchmark/" title="benchmark" target="_blank">benchmark</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/b%E6%A0%91/" title="b树" target="_blank">b树</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0daemonset/" title="cka真题练习——daemonset" target="_blank">cka真题练习——daemonset</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0deploy/" title="cka真题练习——deploy" target="_blank">cka真题练习——deploy</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0etcd%E5%A4%87%E4%BB%BD%E8%BF%98%E5%8E%9F/" title="cka真题练习——etcd备份还原" target="_blank">cka真题练习——etcd备份还原</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0ingress/" title="cka真题练习——ingress" target="_blank">cka真题练习——ingress</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0networkpolicy/" title="cka真题练习——NetworkPolicy" target="_blank">cka真题练习——NetworkPolicy</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0node%E8%B0%83%E5%BA%A6/" title="cka真题练习——node调度" target="_blank">cka真题练习——node调度</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0pod/" title="cka真题练习——pod" target="_blank">cka真题练习——pod</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0pv/" title="cka真题练习——pv" target="_blank">cka真题练习——pv</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>Categories</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://bytewong123.github.io/categories/golang/">golang (12)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/k8s/">k8s (24)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/mysql/">mysql (10)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/redis/">redis (10)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/rust/">rust (1)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/sql/">sql (1)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统 (3)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E6%9E%81%E5%AE%A2%E6%97%B6%E9%97%B4/">极客时间 (5)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/">消息队列 (1)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B3%BB%E7%BB%9F/">深入理解计算机系统 (1)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E7%AE%97%E6%B3%95/">算法 (138)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/">系统设计 (19)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>Tags</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://bytewong123.github.io/tags/golang/">golang</a>
+    
+    <a href="https://bytewong123.github.io/tags/k8s/">k8s</a>
+    
+    <a href="https://bytewong123.github.io/tags/kafka/">kafka</a>
+    
+    <a href="https://bytewong123.github.io/tags/mysql/">mysql</a>
+    
+    <a href="https://bytewong123.github.io/tags/redis/">redis</a>
+    
+    <a href="https://bytewong123.github.io/tags/rust/">rust</a>
+    
+    <a href="https://bytewong123.github.io/tags/sql/">sql</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E6%9E%81%E5%AE%A2%E6%97%B6%E9%97%B4/">极客时间</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/">消息队列</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E7%AE%97%E6%B3%95/">算法</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/">系统设计</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/">读书笔记</a>
+    
+</div>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title">Links</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a target="_blank" href="http://yuedu.baidu.com/ebook/14a722970740be1e640e9a3e" title="Android Gradle权威指南">Android Gradle权威指南</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="http://mirrors.flysnow.org/" title="常用开发工具CDN镜像">常用开发工具CDN镜像</a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title">Meta</h3>
+        <ul class="widget-list">
+            <li><a href="https://bytewong123.github.io/index.xml">RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

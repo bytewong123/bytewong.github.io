@@ -1,0 +1,574 @@
+<!doctype html>
+<html lang="en">
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+
+    <title>benchmark | sheeks</title>
+    <meta property="og:title" content="benchmark - sheeks">
+    <meta property="og:type" content="article">
+        
+    <meta property="article:published_time" content='2023-01-08T18:06:57&#43;08:00'>
+        
+        
+    <meta property="article:modified_time" content='2023-01-08T18:06:57&#43;08:00'>
+        
+    <meta name="Keywords" content="golang,go语言,go语言笔记,sheeks,java,android,博客,项目管理,python,软件架构,公众号,小程序">
+    <meta name="description" content="benchmark">
+        
+    <meta name="author" content="sheeks">
+    <meta property="og:url" content="https://bytewong123.github.io/post/benchmark/">
+    <link rel="shortcut icon" href='/favicon.ico'  type="image/x-icon">
+
+    <link rel="stylesheet" href='/css/normalize.css'>
+    <link rel="stylesheet" href='/css/style.css'>
+    <script type="text/javascript" src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    
+    
+    
+    
+    
+    
+</head>
+
+<body>
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://bytewong123.github.io/">
+                        sheeks
+                    </a>
+                
+                <p class="description">dev</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://bytewong123.github.io/">Home</a>
+                    
+                    <a  href="https://bytewong123.github.io/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    
+    <article class="post">
+        <header>
+            <h1 class="post-title">benchmark</h1>
+        </header>
+        
+  <time datetime="2023-01-08T10:06:57Z" class="post-meta meta-date dt-published">
+    2023-01-08
+  </time>
+
+
+<div class="post-meta meta-category">
+  <span>&nbsp;|</span>
+  
+    <a href='/categories/golang' target="_blank">golang</a>
+  
+</div>
+
+
+        
+        
+        <div class="post-content">
+            <h1 id="benchmark">benchmark</h1>
+<p>#技术/golang</p>
+<h1 id="介绍">介绍</h1>
+<p>基准测试是测量一个程序在固定工作负载下的性能</p>
+<p>在Golang中，基准测试函数以Benchmark为前缀并且带有一个 *testing.B 类型的参数</p>
+<h1 id="规则">规则</h1>
+<ol>
+<li>基准测试的代码文件必须以_test.go结尾</li>
+<li>基准测试的函数必须以Benchmark开头</li>
+<li>基准测试函数必须接受一个指向Benchmark类型的指针作为唯一参数，即比如func BenchmarkMapkeys1(b *testing.B)</li>
+<li>基准测试函数不能有返回值</li>
+<li>b.ResetTimer是重置计时器，这样可以避免for循环之前的初始化代码的干扰</li>
+<li>最后的for循环很重要，被测试的代码要放到循环里</li>
+<li>b.N是基准测试框架提供的，表示循环的次数，因为需要反复调用测试的代码，才可以评估性能</li>
+</ol>
+<h1 id="注意事项">注意事项</h1>
+<h2 id="resettimer">ResetTimer</h2>
+<p>If a benchmark needs some expensive setup before running, the timer may be reset</p>
+<p>如果在整个 benchmark 执行前，需要一些耗时的准备工作，我们需要将这部分耗时忽略掉</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">BenchmarkFib</span>(<span style="color:#a6e22e">b</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">testing</span>.<span style="color:#a6e22e">B</span>) {
+	<span style="color:#a6e22e">time</span>.<span style="color:#a6e22e">Sleep</span>(<span style="color:#ae81ff">3</span> <span style="color:#f92672">*</span> <span style="color:#a6e22e">time</span>.<span style="color:#a6e22e">Second</span>) <span style="color:#75715e">// 模拟耗时的准备工作
+</span><span style="color:#75715e"></span>	<span style="color:#a6e22e">b</span>.<span style="color:#a6e22e">ResetTimer</span>() <span style="color:#75715e">// 重置计时器，忽略前面的准备时间
+</span><span style="color:#75715e"></span>	<span style="color:#66d9ef">for</span> <span style="color:#a6e22e">n</span> <span style="color:#f92672">:=</span> <span style="color:#ae81ff">0</span>; <span style="color:#a6e22e">n</span> &lt; <span style="color:#a6e22e">b</span>.<span style="color:#a6e22e">N</span>; <span style="color:#a6e22e">n</span><span style="color:#f92672">++</span> {
+		<span style="color:#a6e22e">fib</span>(<span style="color:#ae81ff">10</span>)
+	}
+}
+</code></pre></div><h2 id="stoptimer--starttimer">StopTimer &amp; StartTimer</h2>
+<p>StopTimer stops timing a test. This can be used to pause the timer while performing complex initialization that you don&rsquo;t want to measure.</p>
+<p>StartTimer starts timing a test. This function is called automatically before a benchmark starts, but it can also be used to resume timing after a call to StopTimer.</p>
+<p>如果在被测函数每次执行前，需要一些准备工作，我们可以使用 StopTimer 暂停计时，准备工作完成后，使用 StartTimer 继续计时。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">BenchmarkFib</span>(<span style="color:#a6e22e">b</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">testing</span>.<span style="color:#a6e22e">B</span>) {
+	<span style="color:#66d9ef">for</span> <span style="color:#a6e22e">n</span> <span style="color:#f92672">:=</span> <span style="color:#ae81ff">0</span>; <span style="color:#a6e22e">n</span> &lt; <span style="color:#a6e22e">b</span>.<span style="color:#a6e22e">N</span>; <span style="color:#a6e22e">n</span><span style="color:#f92672">++</span> {
+		<span style="color:#a6e22e">b</span>.<span style="color:#a6e22e">StopTimer</span>()  <span style="color:#75715e">// 暂停计时
+</span><span style="color:#75715e"></span>		<span style="color:#a6e22e">prepare</span>()      <span style="color:#75715e">// 每次函数执行前的准备工作
+</span><span style="color:#75715e"></span>		<span style="color:#a6e22e">b</span>.<span style="color:#a6e22e">StartTimer</span>() <span style="color:#75715e">// 继续计时
+</span><span style="color:#75715e"></span>
+		<span style="color:#a6e22e">funcUnderTest</span>() <span style="color:#75715e">// 被测函数
+</span><span style="color:#75715e"></span>	}
+}
+</code></pre></div><h1 id="参数介绍">参数介绍</h1>
+<p><code>go test -bench=. -benchmem -count=3</code></p>
+<p><code>go test adapter.go circuitbreaker.go  adapter_benchmark_test.go -bench=BenchmarkFuse -benchmem -count=10 -cpuprofile=cpu.out</code></p>
+<ol>
+<li>
+<p>参数-bench，它指明要测试的函数；点字符意思是测试当前所有以Benchmark为前缀函数</p>
+</li>
+<li>
+<p>参数-benchmem，性能测试的时候显示测试函数的内存分配大小，内存分配次数的统计信息</p>
+</li>
+<li>
+<p>参数-count n,运行测试和性能多少次，默认一次</p>
+</li>
+</ol>
+<h2 id="更多参数">更多参数</h2>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>-bench regexp</td>
+<td>性能测试，支持表达式对测试函数进行筛选。</td>
+</tr>
+<tr>
+<td>-bench</td>
+<td>. 则是对所有的benchmark函数测试，指定名称则只执行具体测试方法而不是全部</td>
+</tr>
+<tr>
+<td>-benchmem</td>
+<td>性能测试的时候显示测试函数的内存分配的统计信息</td>
+</tr>
+<tr>
+<td>－count n</td>
+<td>运行测试和性能多少次，默认一次</td>
+</tr>
+<tr>
+<td>-run regexp</td>
+<td>只运行特定的测试函数， 比如-run ABC只测试函数名中包含ABC的测试函数</td>
+</tr>
+<tr>
+<td>-timeout t</td>
+<td>测试时间如果超过t, panic,默认10分钟</td>
+</tr>
+<tr>
+<td>-v</td>
+<td>显示测试的详细信息，也会把Log、Logf方法的日志显示出来</td>
+</tr>
+</tbody>
+</table>
+<h1 id="测试结果分析">测试结果分析</h1>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">goos: darwin
+goarch: amd64
+pkg: godemo/circuit_breaker
+cpu: Intel<span style="color:#f92672">(</span>R<span style="color:#f92672">)</span> Core<span style="color:#f92672">(</span>TM<span style="color:#f92672">)</span> i7-1068NG7 CPU @ 2.30GHz
+BenchmarkIsAllowed-8   	38678893	        30.17 ns/op	       <span style="color:#ae81ff">0</span> B/op	       <span style="color:#ae81ff">0</span> allocs/op
+BenchmarkIsAllowed-8   	41858949	        30.09 ns/op	       <span style="color:#ae81ff">0</span> B/op	       <span style="color:#ae81ff">0</span> allocs/op
+BenchmarkIsAllowed-8   	41888743	        28.25 ns/op	       <span style="color:#ae81ff">0</span> B/op	       <span style="color:#ae81ff">0</span> allocs/op
+BenchmarkSucceed-8     	18539643	        64.84 ns/op	       <span style="color:#ae81ff">0</span> B/op	       <span style="color:#ae81ff">0</span> allocs/op
+BenchmarkSucceed-8     	18441639	        64.92 ns/op	       <span style="color:#ae81ff">0</span> B/op	       <span style="color:#ae81ff">0</span> allocs/op
+BenchmarkSucceed-8     	18286372	        65.42 ns/op	       <span style="color:#ae81ff">0</span> B/op	       <span style="color:#ae81ff">0</span> allocs/op
+BenchmarkFail-8        	 5031613	       247.0 ns/op	       <span style="color:#ae81ff">0</span> B/op	       <span style="color:#ae81ff">0</span> allocs/op
+BenchmarkFail-8        	 4884055	       243.7 ns/op	       <span style="color:#ae81ff">0</span> B/op	       <span style="color:#ae81ff">0</span> allocs/op
+BenchmarkFail-8        	 4904302	       243.1 ns/op	       <span style="color:#ae81ff">0</span> B/op	       <span style="color:#ae81ff">0</span> allocs/op
+PASS
+ok  	godemo/circuit_breaker	11.878s
+</code></pre></div><p>以测试结果的第一行为例</p>
+<ol>
+<li>
+<p>BenchmarkIsAllowed-8 表测试的函数名，-8 表示GOMAXPROCS（线程数）的值为8</p>
+</li>
+<li>
+<p>38678893 表示一共执行了38678893次，即B.N的值</p>
+</li>
+<li>
+<p>30.17 ns/op表示平均每次操作花费了30.17纳秒</p>
+</li>
+<li>
+<p>0 B/op 表示每次操作申请了0Byte的内存申请</p>
+</li>
+<li>
+<p>0 allocs/op 表每次操作申请了0次内存</p>
+</li>
+</ol>
+<h1 id="结合pprof分析">结合pprof分析</h1>
+<table>
+<thead>
+<tr>
+<th>参数含义</th>
+<th>命令示例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>-cpuprofile [file]输出cpu性能文件</td>
+<td>go test -bench=. -benchmem -cpuprofile=cpu.out-memprofile</td>
+</tr>
+<tr>
+<td>[file]输出mem内存性能文件go test -bench=. -benchmem -memprofile=cpu.out</td>
+<td></td>
+</tr>
+<tr>
+<td>生成的CPU、内存文件</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>可以通过go tool pprof [file]进行查看，然后在pprof中通过list [file]方法查看CPU、内存的耗时情况</p>
+<h3 id="内存情况">内存情况</h3>
+<pre><code>(pprof) list BenchmarkArrayAppend
+Total: 36.49GB
+ROUTINE ======================== program/benchmark.BenchmarkArrayAppend in /Users/guanjian/workspace/go/program/benchmark/benchmark_test.go
+   11.98GB    11.98GB (flat, cum) 32.83% of Total
+         .          .      7://Array
+         .          .      8:func BenchmarkArrayAppend(b *testing.B) {
+         .          .      9:   for i := 0; i &lt; b.N; i++ {
+         .          .     10:           var arr []int
+         .          .     11:           for i := 0; i &lt; 10000; i++ {
+   11.98GB    11.98GB     12:                   arr = append(arr, i)
+         .          .     13:           }
+         .          .     14:   }
+         .          .     15:}
+</code></pre><h3 id="cpu情况">CPU情况</h3>
+<pre><code>(pprof) list BenchmarkArrayAppend
+Total: 8.86s
+ROUTINE ======================== program/benchmark.BenchmarkArrayAppend in /Users/guanjian/workspace/go/program/benchmark/benchmark_test.go
+      10ms      640ms (flat, cum)  7.22% of Total
+         .          .      6:
+         .          .      7://Array
+         .          .      8:func BenchmarkArrayAppend(b *testing.B) {
+         .          .      9:   for i := 0; i &lt; b.N; i++ {
+         .          .     10:           var arr []int
+      10ms       10ms     11:           for i := 0; i &lt; 10000; i++ {
+         .      630ms     12:                   arr = append(arr, i)
+         .          .     13:           }
+         .          .     14:   }
+         .          .     15:}
+
+</code></pre>
+        </div>
+
+        
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/post/gc%E6%80%BB%E7%BB%93/">gc总结</a></li>
+        
+        <li><a href="/post/go-module%E7%89%88%E6%9C%AC%E9%80%89%E6%8B%A9/">go module版本选择</a></li>
+        
+        <li><a href="/post/golang-gc%E4%BC%98%E5%8C%96/">golang gc优化</a></li>
+        
+        <li><a href="/post/golang%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/">golang内存管理</a></li>
+        
+        <li><a href="/post/gorm-scanner-value/">gorm scanner value</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='/tags/golang' target="_blank">golang</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    
+
+    
+    
+    
+    
+
+</div>
+
+                    <footer id="footer">
+    <br />
+</footer>
+
+
+    
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+<style type="text/css">
+div.highlight {
+    position: relative;
+    margin: 1em 0px;
+}
+
+.copy-code {
+    display: none;
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    color: rgba(255, 255, 255, 0.8);
+    background: rgba(78, 78, 78, 0.8);
+    border-radius: var(--radius);
+    padding: 0 5px;
+    font: inherit;
+    user-select: none;
+    cursor: pointer;
+    border: 0;
+    --radius: 8px;
+}
+
+div.highlight:hover .copy-code,pre:hover .copy-code {
+    display: block;
+}
+
+</style>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+
+
+
+
+
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='//www.google.com/search' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://bytewong123.github.io/">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title">Latest articles</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/benchmark/" title="benchmark" target="_blank">benchmark</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/b%E6%A0%91/" title="b树" target="_blank">b树</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0daemonset/" title="cka真题练习——daemonset" target="_blank">cka真题练习——daemonset</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0deploy/" title="cka真题练习——deploy" target="_blank">cka真题练习——deploy</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0etcd%E5%A4%87%E4%BB%BD%E8%BF%98%E5%8E%9F/" title="cka真题练习——etcd备份还原" target="_blank">cka真题练习——etcd备份还原</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0ingress/" title="cka真题练习——ingress" target="_blank">cka真题练习——ingress</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0networkpolicy/" title="cka真题练习——NetworkPolicy" target="_blank">cka真题练习——NetworkPolicy</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0node%E8%B0%83%E5%BA%A6/" title="cka真题练习——node调度" target="_blank">cka真题练习——node调度</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0pod/" title="cka真题练习——pod" target="_blank">cka真题练习——pod</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0pv/" title="cka真题练习——pv" target="_blank">cka真题练习——pv</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>Categories</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://bytewong123.github.io/categories/golang/">golang (12)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/k8s/">k8s (24)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/mysql/">mysql (10)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/redis/">redis (10)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/rust/">rust (1)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/sql/">sql (1)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统 (3)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E6%9E%81%E5%AE%A2%E6%97%B6%E9%97%B4/">极客时间 (5)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/">消息队列 (1)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B3%BB%E7%BB%9F/">深入理解计算机系统 (1)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E7%AE%97%E6%B3%95/">算法 (138)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/">系统设计 (19)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>Tags</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://bytewong123.github.io/tags/golang/">golang</a>
+    
+    <a href="https://bytewong123.github.io/tags/k8s/">k8s</a>
+    
+    <a href="https://bytewong123.github.io/tags/kafka/">kafka</a>
+    
+    <a href="https://bytewong123.github.io/tags/mysql/">mysql</a>
+    
+    <a href="https://bytewong123.github.io/tags/redis/">redis</a>
+    
+    <a href="https://bytewong123.github.io/tags/rust/">rust</a>
+    
+    <a href="https://bytewong123.github.io/tags/sql/">sql</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E6%9E%81%E5%AE%A2%E6%97%B6%E9%97%B4/">极客时间</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/">消息队列</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E7%AE%97%E6%B3%95/">算法</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/">系统设计</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/">读书笔记</a>
+    
+</div>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title">Links</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a target="_blank" href="http://yuedu.baidu.com/ebook/14a722970740be1e640e9a3e" title="Android Gradle权威指南">Android Gradle权威指南</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="http://mirrors.flysnow.org/" title="常用开发工具CDN镜像">常用开发工具CDN镜像</a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title">Meta</h3>
+        <ul class="widget-list">
+            <li><a href="https://bytewong123.github.io/index.xml">RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

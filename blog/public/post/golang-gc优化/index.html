@@ -1,0 +1,554 @@
+<!doctype html>
+<html lang="en">
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+
+    <title>golang gc优化 | sheeks</title>
+    <meta property="og:title" content="golang gc优化 - sheeks">
+    <meta property="og:type" content="article">
+        
+    <meta property="article:published_time" content='2023-01-08T18:06:57&#43;08:00'>
+        
+        
+    <meta property="article:modified_time" content='2023-01-08T18:06:57&#43;08:00'>
+        
+    <meta name="Keywords" content="golang,go语言,go语言笔记,sheeks,java,android,博客,项目管理,python,软件架构,公众号,小程序">
+    <meta name="description" content="golang gc优化">
+        
+    <meta name="author" content="sheeks">
+    <meta property="og:url" content="https://bytewong123.github.io/post/golang-gc%E4%BC%98%E5%8C%96/">
+    <link rel="shortcut icon" href='/favicon.ico'  type="image/x-icon">
+
+    <link rel="stylesheet" href='/css/normalize.css'>
+    <link rel="stylesheet" href='/css/style.css'>
+    <script type="text/javascript" src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    
+    
+    
+    
+    
+    
+</head>
+
+<body>
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://bytewong123.github.io/">
+                        sheeks
+                    </a>
+                
+                <p class="description">dev</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://bytewong123.github.io/">Home</a>
+                    
+                    <a  href="https://bytewong123.github.io/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    
+    <article class="post">
+        <header>
+            <h1 class="post-title">golang gc优化</h1>
+        </header>
+        
+  <time datetime="2023-01-08T10:06:57Z" class="post-meta meta-date dt-published">
+    2023-01-08
+  </time>
+
+
+<div class="post-meta meta-category">
+  <span>&nbsp;|</span>
+  
+    <a href='/categories/golang' target="_blank">golang</a>
+  
+</div>
+
+
+        
+        
+        <div class="post-content">
+            <h1 id="golang-gc优化">golang gc优化</h1>
+<p>#技术/golang/gc</p>
+<p>本文转载自Twitch工程师Ross Engers的文章《 <a href="https://medium.com/twitch-news/go-memory-ballast-how-i-learnt-to-stop-worrying-and-love-the-heap-26c2462549a2">Go memory ballast: How I learned to stop worrying and love the heap</a> 》，这篇文章所用的优化思路很有意思但又分析得非常到位，因此与大家分享。</p>
+<p>我非常喜欢能引起巨大影响的少量代码改动。这似乎是显而易见的事情，但请让我解释一下：</p>
+<ol>
+<li>这种改动通常需要深入探究并理解一个自己并不熟悉的事物</li>
+<li>即使是非常完善的代码，你添加的每一个优化都有它的维护成本，而且它通常（虽然不总是）随着你最终添加/修改的代码总量呈线性关系。
+我们最近推出了一个改动，它把我们的API前端服务器的CPU利用率减少了大约30%，也把高负载时的整体的99分位API延时降低了45%。
+这篇博文阐述了相关改动、发现问题的过程以及解释它是如何工作的。</li>
+</ol>
+<h2 id="故事背景">故事背景</h2>
+<p>我们在Twitch有一个服务叫做Visage，它的功能相当于我们的API前端。Visage是所有外部来源的API流量的中心网关。它负责一堆事情，从授权到请求路由，再到服务器侧的GraphQL（最近的）。因此，它需要扩容以处理某些我们无法控制的用户流量模式。</p>
+<p>例如，我们常见的一个流量模式是“刷新风暴”。这会在一个热门主播由于网络波动而掉线的时候发生；此时，主播重新开始推流，这通常会导致观众反复地刷新页面，然后突然间我们就有大量的API流量需要处理。</p>
+<p>Visage是一个Go应用程序，在改动的时候以Go 1.11构建，运行在Amazon EC2之上并部署在一个负载均衡器之后。由于在EC2上，它大多数时候都可以很好地水平扩容。</p>
+<p>然而，即使有了EC2和Auto Scaling组的魔法，我们仍然在处理非常大的流量高峰的时候遇到问题。在刷新风暴期间，我们经常会在几秒间有剧增上百万个请求，这是我们平时负载的20倍。在此之上，我们会看到当我们的前端服务器在重负载之下，API延迟有显著的增加。</p>
+<p>解决这个问题的一个方法就是永远保持你的集群有足够的规模，但这样不仅浪费，而且昂贵。为了减少这个不断增加的成本，我们决定花一些时间去探索一些触手可得的方法，希望当主机处于负载之中时，它不仅可以改进单机的吞吐量，也可以提供更可靠的单请求处理。</p>
+<h2 id="查找问题">查找问题</h2>
+<p>幸运的是，我们在我们的生产环境运行了 <a href="https://golang.org/pkg/runtime/pprof/">pprof</a> ，所以获取真实生产流量的性能分析是非常平常的事情。如果你没有在运行pprof，我非常鼓励你去做。大多数情况下，这个性能分析器只有非常小的CPU开销。执行追踪器（Execution Tracer）会有小的开销，但仍然足够小，使得我们可以高兴地在生产环境中每小时就运行几秒。
+所以，在查看了我们Go应用程序的性能分析之后，我们做出以下的观察结论：</p>
+<ol>
+<li>在稳定状态，我们的应用程序每秒钟触发大约8-10次垃圾收集（GC）（每分钟400-600次）</li>
+<li>大于30%的CPU周期被花费在了与GC相关的函数调用中</li>
+<li>在流量高峰时，GC的周期数会增加</li>
+<li>我们的平均堆大小很小（小于450MiB）</li>
+</ol>
+<p>你可能还没有猜到，我们在应用程序中已经做了的与性能有关的改进是垃圾收集。在我提到这些改进之前，下面是关于什么是GC以及它做什么的快速入门与概述。如果你对这些概念熟悉，可以随时跳过。</p>
+<h2 id="什么是垃圾收集gc">什么是垃圾收集（GC）？</h2>
+<p>在现代的应用程序中，分配内存有两种常用的方法：栈和堆。绝大多数程序员是从第一次写出导致 <a href="https://stackoverflow.com/questions/26158/how-does-a-stack-overflow-occur-and-how-do-you-prevent-it">栈溢出</a> 的递归程序时熟悉栈的。另一方面，堆是一个可以用作动态分配的内存池。
+栈分配很好，因为它只在它们所属的函数的生命周期内有效；然而，堆分配不会在它们离开定义域之后被自动回收。为了防止堆无限制地增长，我们必须显式地取消分配，或者在一些有内存管理的编程语言中（例如Go）依赖垃圾收集器去寻找并删除那些不再被引用的对象。
+一般来说，在有GC的语言中，在栈中存储对象越多就越好，因为这些分配从来都不会被GC看到。编译器使用一种叫做逃逸分析（Escape Analysis）的技术去决定一个对象是否可以在栈中分配，或者必须要放在堆中。
+在实践中，编写强制编译器只在栈中分配空间的程序是非常受限的，因此在Go中，我们利用它的绝妙的GC去保持我们堆整洁干净。</p>
+<p><strong>Go的GC</strong>
+GC是一个软件中复杂的部分，所以我将尽力保证这部分的相关性。
+自从1.5开始，Go并入了一个并发的“标记-清除GC”（Mark-and-Sweep GC）。这种GC正如它的名字一样，分为两个阶段：标记和清除。“并发”只意味着它在整个GC周期里不会“停止这个世界”（Stop-the-World，STW），而是<strong>尽可能地</strong>与我们应用程序的代码并发运行。在标记阶段，GC运行时会遍历所有的应用程序在堆中引用的对象并标记它们仍然在使用。这个对象的集合称为<strong>实时内存（Live Memory）</strong>。在这个阶段之后，在堆中没有被标记的其它对象都被认为是垃圾，然后在接下来的清理阶段，他们会被清理器回收。
+总结以下术语：</p>
+<ul>
+<li>堆大小——包括所有在堆中的内存分配；一些是有用的，一些是垃圾</li>
+<li>实时内存——指当前被正在运行的应用程序引用的所有内存分配；不是垃圾
+事实证明，在现代的操作系统中，清理（释放内存）是一个非常快的操作，所以Go的标记-清除GC的GC时间很大程度上由标记组件主导，而不是清理组件。
+<strong>标记包括遍历应用程序当前指向的所有对象，所以时间与系统中的实时内存总数成比例，而不是堆的总大小。换句话说，堆中有额外的垃圾不会增加标记的时间，因此也不会显著地增加一个GC周期的计算时间。</strong></li>
+</ul>
+<p><strong>综上所述，更低频率的GC意味着更少的标记过程，也意味着更少的CPU花费，这看起来说合理的，但代价是什么呢？内存。运行时等待GC越久，系统内存中就会积累越多的垃圾。</strong>
+正如我们在前面提到的，运行在拥有64GiB物理内存的VM上的Visage程序运行GC非常频繁，使得它大约只使用400MiB的物理内存。为了了解其中的原因，我们需要深入研究Go是如何解决GC的运行频率和内存的权衡问题，并讨论调度器（pacer）。</p>
+<p><strong>调度器（Pacer)</strong>
+Go GC使用一个调度器去决定下一个GC周期何时触发。调度被建模成一个类似于控制问题的模型，它试图找到合适的时间去触发GC周期，以使它可以达到预期的堆大小目标。<strong>Go的默认调度器会在堆的大小是原来的两倍时尝试触发GC周期。</strong> 它是通过在当前的GC周期的标记（Mark）阶段的终止阶段设置下一次触发的堆大小实现的。因此在标记完所有的实时内存之后，它就能做出当下一次的堆大小达到当前实时集的2倍时就运行GC的决定。2倍这个数字来自于一个GOGC的环境变量，运行时用它来设置触发比例。
+在我们的案例中，调度器在保持我们堆中垃圾最小化过程中做了非常出色的工作，但也带来了很多由于不必要工作带来的代价，毕竟我们只使用了大约0.6%的系统内存。</p>
+<h2 id="引入压舱物">引入压舱物</h2>
+<p>压舱物（Ballast）——暂时或永久携带在船上以提供需要的吃水深度以及稳定性的重物。——来源：directory.com
+在我们的应用程序中，压舱物是分配得很大的一块内存，它为堆提供稳定性。
+我们通过在应用程序启动时分配一块非常大的byte数组去实现它：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">main</span>() {
+
+	<span style="color:#75715e">// 分配一块 10GiB 的巨大的堆内存
+</span><span style="color:#75715e"></span>	<span style="color:#a6e22e">ballast</span> <span style="color:#f92672">:=</span> make([]<span style="color:#66d9ef">byte</span>, <span style="color:#ae81ff">10</span><span style="color:#f92672">&lt;&lt;</span><span style="color:#ae81ff">30</span>)
+
+	<span style="color:#75715e">// 程序继续执行
+</span><span style="color:#75715e"></span>	<span style="color:#75715e">// …
+</span><span style="color:#75715e"></span>}
+</code></pre></div><p>看完上面的代码，你可能马上就想问两个问题：</p>
+<ol>
+<li>你到底为什么要这样做？</li>
+<li>这样会不会消耗我10GiB的宝贵内存？</li>
+</ol>
+<p>让我们先从 <strong>1.你到底为什么要这样做？</strong> 开始。我们之前提到，GC会在每次堆大小翻倍的时候触发。堆的大小是堆分配空间的总大小。因此，如果一个10GiB的压舱物被分配出来，下一次GC只会在堆大小上涨至20GiB的时候触发。届时，程序中会有大约10GiB的压舱物+10GiB的其它内存分配。</p>
+<p><strong>当GC运行的时候，这个压舱物不会被当作垃圾被清理掉，因为我们仍然在main函数中持有它的一个引用，因此实际上它被考虑成实时内存的一部分</strong>。因为我们程序中的大多数内存分配只在一个API请求中存活很短的时间，所以分配的这10GiB内存的中的大多数会被清理，从而将堆大小重新减少到10GiB左右（即，这10GiB的压舱物加上正在处理的请求所分配的内存，这些内存会被认为是实时内存）。现在，下一个GC周期会在堆大小（现在刚好大于10GiB）再次翻倍的时候发生。
+因此，总之，压舱物增加了堆的基准大小，从而使GC延迟触发，同时总体的GC周期数也下降了。
+如果你好奇为什么我们用一个byte数组作为压舱物，这是为了确保我们在标记阶段只添加了一个额外的对象。因为一个byte数组不包含任何指针（对象本身除外），GC可以在O(1)的时间内标记整个对象。
+改动的效果符合我们的预期——我们看到GC周期数减少了99%：</p>
+<p>现在我们看 <strong>2.这样会不会消耗我10GiB的宝贵内存？</strong>。放心，答案是：不会，除非你有意这样做。*nix（甚至Windows）系统的内存都是虚拟地址并通过页表映射。当上述代码运行时，这个压舱物切片指向的数组会在程序的虚拟地址空间中被分配。只有当我们尝试读写这个切片时，缺页错误产生，虚拟地址背后的物理内存才会被分配。
+我们可以用下面一段简单的程序去确认它：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">main</span>() {
+	<span style="color:#a6e22e">_</span> = make([]<span style="color:#66d9ef">byte</span>, <span style="color:#ae81ff">100</span><span style="color:#f92672">&lt;&lt;</span><span style="color:#ae81ff">20</span>)
+	<span style="color:#f92672">&lt;-</span><span style="color:#a6e22e">time</span>.<span style="color:#a6e22e">After</span>(<span style="color:#a6e22e">time</span>.<span style="color:#a6e22e">Duration</span>(<span style="color:#a6e22e">math</span>.<span style="color:#a6e22e">MaxInt64</span>))
+}
+</code></pre></div><p>我们运行这个程序，然后用ps查看它：</p>
+<pre><code>ps -eo pmem,comm,pid,maj_flt,min_flt,rss,vsz —sort -rss | numfmt —header —to=iec —field 4-5 | numfmt —header —from-unit=1024 —to=iec —field 6-7 | column -t | egrep “[t]est|[P]ID”
+%MEM  COMMAND          PID    MAJFL  MINFL  RSS   VSZ
+0.2   test_alloc       27826  0      1003   4.8M  108M
+</code></pre><p>这里显示只有超过100MiB的虚拟内存被分配给进程，即虚拟大小（Virtual Size,  <a href="https://elinux.org/Runtime_Memory_Measurement">VSZ</a> ）；而只有大约5MiB的驻留集被分配，即驻留集大小（Resident Set Size,  <a href="https://en.wikipedia.org/wiki/Resident_set_size">RSS</a> ），即物理内存。</p>
+<p>现在，让我们修改这个程序，我们在切片背后的byte数组写入一半内容：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">main</span>() {
+	<span style="color:#a6e22e">ballast</span> <span style="color:#f92672">:=</span> make([]<span style="color:#66d9ef">byte</span>, <span style="color:#ae81ff">100</span><span style="color:#f92672">&lt;&lt;</span><span style="color:#ae81ff">20</span>)
+	<span style="color:#66d9ef">for</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">:=</span> <span style="color:#ae81ff">0</span>; <span style="color:#a6e22e">i</span> &lt; len(<span style="color:#a6e22e">ballast</span>)<span style="color:#f92672">/</span><span style="color:#ae81ff">2</span>; <span style="color:#a6e22e">i</span><span style="color:#f92672">++</span> {
+		<span style="color:#a6e22e">ballast</span>[<span style="color:#a6e22e">i</span>] = byte(<span style="color:#960050;background-color:#1e0010">‘</span><span style="color:#a6e22e">A</span><span style="color:#960050;background-color:#1e0010">’</span>)
+	}
+	<span style="color:#f92672">&lt;-</span><span style="color:#a6e22e">time</span>.<span style="color:#a6e22e">After</span>(<span style="color:#a6e22e">time</span>.<span style="color:#a6e22e">Duration</span>(<span style="color:#a6e22e">math</span>.<span style="color:#a6e22e">MaxInt64</span>))
+}
+</code></pre></div><p>同样，用ps观察：</p>
+<pre><code>%MEM  COMMAND          PID    MAJFL  MINFL  RSS   VSZ
+2.7   test_alloc       28331  0      1.5K   57M   108M
+</code></pre><p>正如想象的那样，byte数组的一半已处于RSS中，正在占用物理内存。VSZ没有发生变化，因为两个程序都分配了相同的虚拟内存大小。
+对于那些感兴趣的人：MINFL这一列是次要缺页错误数——也就是这个进程引起的需要从存储中加载页面的缺页错误数。如果我们的操作系统管理分配我们的物理内存优良并连续，那么每一次缺页错误都能映射存储中的一个以上的页面，从而减少出现的缺页错误总数。
+所以，只要我们不去读写这个压舱物，我们就能保证它只会作为一个虚拟内存分配并留在堆中。</p>
+<h2 id="api延迟如何">API延迟如何？</h2>
+<p>正如之前提到的，因为GC运行得更少，我们可以看到API延迟的改进（特别是在高负载的时候）。最初，我们以为这是由于GC暂停时间减少导致的——这是GC在一个GC周期中“停止这个世界”的总时间。然而，GC暂停时间在前后没有发生明显的变化。此外，我们的暂停时间大约只有个位数毫秒，而不是在峰值负载下有上百毫秒的改善。
+为了搞清楚延时的改进从何而来，我们需要谈论一点有关Go GC的特性，它叫做协助（assists）。</p>
+<p><strong>GC协助（assists）</strong>
+GC协助将一个GC周期的内存分配负荷放在goroutine上，这个goroutine负责内存分配。没有这个机制，运行时将无法阻止堆在一个GC周期中无限增长。
+因为Go已经有一个后台的GC工人，因此“<strong>协助</strong>”一词指的是我们的goroutine会帮助后台工人，特别是在<strong>标记</strong>工作中有所帮助。
+为了进一步了解这一点，让我们举个例子：
+<code>someObject := make([]int, 5)</code>
+当这段代码执行之后，经过一系列的符号转换以及类型检查，goroutines生成一个 runtime.makeslice 的调用，它最终会调用 runtime.mallocgc 去申请分配一些内存给我们的切片。
+查看 runtime.mallocgc 函数的内部，它展现了这个有趣的代码路径。
+注意，我已经移除了这个函数的大部分内容，只在下面展示了相关部分：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#75715e">// 分配一个字节大小的对象
+</span><span style="color:#75715e">// 小的对象会在每个P的缓存空闲列表被分配
+</span><span style="color:#75715e">// 大的对象（&gt; 32 kB）会在堆中直接被分配
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">mallocgc</span>(<span style="color:#a6e22e">size</span> <span style="color:#66d9ef">uintptr</span>, <span style="color:#a6e22e">typ</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">_type</span>, <span style="color:#a6e22e">needzero</span> <span style="color:#66d9ef">bool</span>) <span style="color:#a6e22e">unsafe</span>.<span style="color:#a6e22e">Pointer</span> {
+
+	<span style="color:#75715e">// 一些错误检查和调试代码，在此省略
+</span><span style="color:#75715e"></span>
+	<span style="color:#75715e">// assistG是本次分配中用于消费的G
+</span><span style="color:#75715e"></span>	<span style="color:#75715e">// 如果GC当前未启动，则为nil
+</span><span style="color:#75715e"></span>	<span style="color:#66d9ef">var</span> <span style="color:#a6e22e">assistG</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">g</span>
+	<span style="color:#66d9ef">if</span> <span style="color:#a6e22e">gcBlackenEnabled</span> <span style="color:#f92672">!=</span> <span style="color:#ae81ff">0</span> {
+		<span style="color:#75715e">// 为本次分配向当前用户G收费
+</span><span style="color:#75715e"></span>		<span style="color:#a6e22e">assistG</span> = <span style="color:#a6e22e">getg</span>()
+		<span style="color:#66d9ef">if</span> <span style="color:#a6e22e">assistG</span>.<span style="color:#a6e22e">m</span>.<span style="color:#a6e22e">curg</span> <span style="color:#f92672">!=</span> <span style="color:#66d9ef">nil</span> {
+			<span style="color:#a6e22e">assistG</span> = <span style="color:#a6e22e">assistG</span>.<span style="color:#a6e22e">m</span>.<span style="color:#a6e22e">curg</span>
+		}
+		<span style="color:#75715e">// 对G的分配收费
+</span><span style="color:#75715e"></span>		<span style="color:#75715e">// 我们会在 mallocgc 的最后结算内部碎片
+</span><span style="color:#75715e"></span>		<span style="color:#a6e22e">assistG</span>.<span style="color:#a6e22e">gcAssistBytes</span> <span style="color:#f92672">-=</span> int64(<span style="color:#a6e22e">size</span>)
+
+		<span style="color:#66d9ef">if</span> <span style="color:#a6e22e">assistG</span>.<span style="color:#a6e22e">gcAssistBytes</span> &lt; <span style="color:#ae81ff">0</span> {
+			<span style="color:#75715e">// 这个G处于欠债状态
+</span><span style="color:#75715e"></span>			<span style="color:#75715e">// 在内存分配之前，它需要帮助GC去修正这些欠债
+</span><span style="color:#75715e"></span>			<span style="color:#75715e">// 这必须要在禁用抢占之前发生
+</span><span style="color:#75715e"></span>			<span style="color:#a6e22e">gcAssistAlloc</span>(<span style="color:#a6e22e">assistG</span>)
+		}
+	}
+	
+	<span style="color:#75715e">// 实际的分配内存代码，下文省略
+</span><span style="color:#75715e"></span>}
+</code></pre></div><p>在上面的代码中，<code>if assistG.gcAssistBytes &lt; 0</code> 这一行用于检查我们的goroutine是否处于分配欠债状态。“分配欠债”是一个花哨的说法，它表示这个goroutine在GC周期内分配的资源量超过了它的GC工作量。
+你可以把它想象成在一个GC周期中你的goroutine必须要为它的分配所交的“税”，除非这个税在内存实际分配之前已经预先支付过。此外，这个税款与这个goroutine尝试申请的资源总量成正比。这提供了一定程度的公平性，使得申请很大空间的goroutine需要为它申请的那些空间买单。
+所以，假设我们的goroutine在当前的GC周期中第一次申请空间，它会被强制去做GC协助的工作。这里有一行有趣的代码就是调用gcAssistAlloc。
+这个函数负责一些内部管理的工作，然后最终会调用到gcAssistAlloc去完成真正的GC协助的工作。我不会详细介绍gcAssistAlloc函数，但从本质上说，它做了以下事情：</p>
+<ol>
+<li>确认这个goroutine没有在做一些不可抢占的工作（即系统goroutine）</li>
+<li>进行GC标记的工作</li>
+<li>检查这个goroutine是否仍有分配欠债，如果没有则返回</li>
+<li>跳转至2
+现在应该已经很清楚了，任何goroutine<strong>在一个GC分配周期中</strong>执行包含<strong>内存分配</strong>的工作将会导致GCAssist的罚时。由于这项工作必须要在分配之前完成，因此这会导致goroutine在真正想要做的工作上呈现出延迟或者缓慢的现象。
+在我们的API前端中，这意味着在GC周期中API的响应延迟会上升。正如之前提到的，每个服务器的负载上升，内存分配率也会上升，这又会反过来增加GC的速率（通常是每秒十几或二十几个周期）。我们现在知道，更多的GC周期意味着服务于API的goroutine会有更多的GC协助工作，然后，产生更高的API延迟。</li>
+</ol>
+<p>所以，通过简单地降低GC频率，我们看到标记协助的工作减少了接近99%，它最终转化成在高峰流量中99分位API延迟的一个接近45%的改进。</p>
+<p>你可能会感到很奇怪为什么Go会为它的GC选择一个如此奇怪的策略（使用协助），但是这确实有用。GC的主函数用于确保堆在一个合理的大小中，并保证垃圾不会无限增长。这在“停止这个世界”（STW）的GC中非常容易做到，但在并发的GC中，我们需要有一个机制去确保在GC周期中发生的内存分配不会无限增长。在我看来，在GC周期中，让每个goroutine为它所要申请的内存支付呈线性比例的分配税是一个非常优雅的设计。
+对于该设计和选择过程的详细记录，可以查看 <a href="https://docs.google.com/document/d/1wmjrocXIWTr1JxU-3EQBI6BK6KgtiFArkG47XK73xIQ/">这个Google文档</a> 。</p>
+<h2 id="简单总结">简单总结</h2>
+<ol>
+<li>我们注意到我们的应用程序正在做大量的GC工作</li>
+<li>我们部署了一个内存压舱物</li>
+<li>因为允许堆增长得更大，所以GC周期减少了</li>
+<li>因为Go GC协助更少地推迟我们的工作，API延时也降低了</li>
+<li>压舱物的内存分配基本上是无需关心的，因为它只会驻留在虚拟内存中</li>
+<li>设置压舱物比设置GOGC值更加合理</li>
+<li>实践中，先从一个小的压舱物开始，然后在测试中慢慢增加它的大小</li>
+</ol>
+<h2 id="一些最后的想法">一些最后的想法</h2>
+<p>Go在为程序员抽离许多运行时细节的方面做得很棒，这对于大部分的程序员和应用程序来说可能已经足够有用。
+有时当你开始突破应用程序环境的边界时（无论是运算、内存、IO），你可能会发现没有可以打开引擎盖去看一眼的工具，也不能找出为什么引擎没能高效地运行。当你需要做这些事情的时候，如果能像Go语言一样有一组可以让你快速发现瓶颈的工具，这肯定会对你有所帮助。
+致谢 我要感谢Rhys Hiltner在调查和挖掘许多Go运行时以及GC复杂细节方面提供的宝贵帮助。同样也要感谢 Jaco Le Roux、Daniel Bauman、Spencer Nelson，并再次感谢Rhys，感谢他们在编辑和校对这篇文章时提供的帮助。
+参考文献 Richard L. Hudson -  <a href="https://blog.golang.org/ismmkeynote">Go 的垃圾收集之旅</a>  Mark Pusher -  <a href="https://making.pusher.com/golangs-real-time-gc-in-theory-and-practice/index.html">Golang 实时 GC 的理论与实践</a>  Austin Clements -  <a href="https://docs.google.com/document/d/1wmjrocXIWTr1JxU-3EQBI6BK6KgtiFArkG47XK73xIQ/">Go 1.5 并发垃圾收集调度器</a></p>
+
+        </div>
+
+        
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/post/benchmark/">benchmark</a></li>
+        
+        <li><a href="/post/gc%E6%80%BB%E7%BB%93/">gc总结</a></li>
+        
+        <li><a href="/post/go-module%E7%89%88%E6%9C%AC%E9%80%89%E6%8B%A9/">go module版本选择</a></li>
+        
+        <li><a href="/post/golang%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/">golang内存管理</a></li>
+        
+        <li><a href="/post/gorm-scanner-value/">gorm scanner value</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='/tags/golang' target="_blank">golang</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    
+
+    
+    
+    
+    
+
+</div>
+
+                    <footer id="footer">
+    <br />
+</footer>
+
+
+    
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+<style type="text/css">
+div.highlight {
+    position: relative;
+    margin: 1em 0px;
+}
+
+.copy-code {
+    display: none;
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    color: rgba(255, 255, 255, 0.8);
+    background: rgba(78, 78, 78, 0.8);
+    border-radius: var(--radius);
+    padding: 0 5px;
+    font: inherit;
+    user-select: none;
+    cursor: pointer;
+    border: 0;
+    --radius: 8px;
+}
+
+div.highlight:hover .copy-code,pre:hover .copy-code {
+    display: block;
+}
+
+</style>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+
+
+
+
+
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='//www.google.com/search' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://bytewong123.github.io/">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title">Latest articles</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/benchmark/" title="benchmark" target="_blank">benchmark</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/b%E6%A0%91/" title="b树" target="_blank">b树</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0daemonset/" title="cka真题练习——daemonset" target="_blank">cka真题练习——daemonset</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0deploy/" title="cka真题练习——deploy" target="_blank">cka真题练习——deploy</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0etcd%E5%A4%87%E4%BB%BD%E8%BF%98%E5%8E%9F/" title="cka真题练习——etcd备份还原" target="_blank">cka真题练习——etcd备份还原</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0ingress/" title="cka真题练习——ingress" target="_blank">cka真题练习——ingress</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0networkpolicy/" title="cka真题练习——NetworkPolicy" target="_blank">cka真题练习——NetworkPolicy</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0node%E8%B0%83%E5%BA%A6/" title="cka真题练习——node调度" target="_blank">cka真题练习——node调度</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0pod/" title="cka真题练习——pod" target="_blank">cka真题练习——pod</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0pv/" title="cka真题练习——pv" target="_blank">cka真题练习——pv</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>Categories</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://bytewong123.github.io/categories/golang/">golang (12)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/k8s/">k8s (24)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/mysql/">mysql (10)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/redis/">redis (10)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/rust/">rust (1)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/sql/">sql (1)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统 (3)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E6%9E%81%E5%AE%A2%E6%97%B6%E9%97%B4/">极客时间 (5)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/">消息队列 (1)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B3%BB%E7%BB%9F/">深入理解计算机系统 (1)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E7%AE%97%E6%B3%95/">算法 (138)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/">系统设计 (19)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>Tags</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://bytewong123.github.io/tags/golang/">golang</a>
+    
+    <a href="https://bytewong123.github.io/tags/k8s/">k8s</a>
+    
+    <a href="https://bytewong123.github.io/tags/kafka/">kafka</a>
+    
+    <a href="https://bytewong123.github.io/tags/mysql/">mysql</a>
+    
+    <a href="https://bytewong123.github.io/tags/redis/">redis</a>
+    
+    <a href="https://bytewong123.github.io/tags/rust/">rust</a>
+    
+    <a href="https://bytewong123.github.io/tags/sql/">sql</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E6%9E%81%E5%AE%A2%E6%97%B6%E9%97%B4/">极客时间</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/">消息队列</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E7%AE%97%E6%B3%95/">算法</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/">系统设计</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/">读书笔记</a>
+    
+</div>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title">Links</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a target="_blank" href="http://yuedu.baidu.com/ebook/14a722970740be1e640e9a3e" title="Android Gradle权威指南">Android Gradle权威指南</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="http://mirrors.flysnow.org/" title="常用开发工具CDN镜像">常用开发工具CDN镜像</a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title">Meta</h3>
+        <ul class="widget-list">
+            <li><a href="https://bytewong123.github.io/index.xml">RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

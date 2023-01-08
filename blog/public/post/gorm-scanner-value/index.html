@@ -1,0 +1,554 @@
+<!doctype html>
+<html lang="en">
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+
+    <title>gorm scanner value | sheeks</title>
+    <meta property="og:title" content="gorm scanner value - sheeks">
+    <meta property="og:type" content="article">
+        
+    <meta property="article:published_time" content='2023-01-08T18:06:57&#43;08:00'>
+        
+        
+    <meta property="article:modified_time" content='2023-01-08T18:06:57&#43;08:00'>
+        
+    <meta name="Keywords" content="golang,go语言,go语言笔记,sheeks,java,android,博客,项目管理,python,软件架构,公众号,小程序">
+    <meta name="description" content="gorm scanner value">
+        
+    <meta name="author" content="sheeks">
+    <meta property="og:url" content="https://bytewong123.github.io/post/gorm-scanner-value/">
+    <link rel="shortcut icon" href='/favicon.ico'  type="image/x-icon">
+
+    <link rel="stylesheet" href='/css/normalize.css'>
+    <link rel="stylesheet" href='/css/style.css'>
+    <script type="text/javascript" src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    
+    
+    
+    
+    
+    
+</head>
+
+<body>
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://bytewong123.github.io/">
+                        sheeks
+                    </a>
+                
+                <p class="description">dev</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://bytewong123.github.io/">Home</a>
+                    
+                    <a  href="https://bytewong123.github.io/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    
+    <article class="post">
+        <header>
+            <h1 class="post-title">gorm scanner value</h1>
+        </header>
+        
+  <time datetime="2023-01-08T10:06:57Z" class="post-meta meta-date dt-published">
+    2023-01-08
+  </time>
+
+
+<div class="post-meta meta-category">
+  <span>&nbsp;|</span>
+  
+    <a href='/categories/golang' target="_blank">golang</a>
+  
+</div>
+
+
+        
+        
+        <div class="post-content">
+            <h1 id="gorm-scanner-value">gorm scanner value</h1>
+<p>#技术/golang/代码风格</p>
+<h1 id="gorm自动加解密字段">gorm自动加解密字段</h1>
+<h1 id="背景">背景</h1>
+<p>ESOP系统的数据项包含了员工行权数量、授予数量、税率和税额等敏感信息，从这些数据出发，能够推演出期权数据和员工薪酬的规律。这些数据的安全等级非常高，在DB、日志中都绝对不能出现明文信息。针对数据的全流程加密，保证数据安全的同时，对于研发来讲也是一种保护。那么针对数据加密落库的方案，有什么优雅的解决方案吗？</p>
+<p>在我们定义Model时，model里的每个字段都是要映射到数据库的每一个column上的。在gorm中，我们通过go标签的方式来指定model和数据库表的绑定关系。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">Person</span> <span style="color:#66d9ef">struct</span> {
+    <span style="color:#a6e22e">IDNumber</span>  <span style="color:#66d9ef">string</span> <span style="color:#e6db74">`gorm:&#34;column:id_number&#34;`</span>
+}
+</code></pre></div><p>那么在明确了绑定关系之后，数据库字段值和Model结构体的值之间是怎么转换的呢？
+go源码中定义了两个关键的接口，Scanner和Valuer来实现不同类型之间的值转换。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#75715e">// Users/tuocheng/go/go1.16/src/database/sql/sql.go
+</span><span style="color:#75715e"></span>
+<span style="color:#75715e">// Scanner is an interface used by Scan.
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">Scanner</span> <span style="color:#66d9ef">interface</span> {
+   <span style="color:#75715e">// Scan assigns a value from a database driver.
+</span><span style="color:#75715e"></span>   <span style="color:#75715e">//
+</span><span style="color:#75715e"></span>   <span style="color:#75715e">// The src value will be of one of the following types:
+</span><span style="color:#75715e"></span>   <span style="color:#75715e">//
+</span><span style="color:#75715e"></span>   <span style="color:#75715e">//    int64
+</span><span style="color:#75715e"></span>   <span style="color:#75715e">//    float64
+</span><span style="color:#75715e"></span>   <span style="color:#75715e">//    bool
+</span><span style="color:#75715e"></span>   <span style="color:#75715e">//    []byte
+</span><span style="color:#75715e"></span>   <span style="color:#75715e">//    string
+</span><span style="color:#75715e"></span>   <span style="color:#75715e">//    time.Time
+</span><span style="color:#75715e"></span>   <span style="color:#75715e">//    nil - for NULL values
+</span><span style="color:#75715e"></span>   <span style="color:#75715e">//
+</span><span style="color:#75715e"></span>   <span style="color:#75715e">// An error should be returned if the value cannot be stored
+</span><span style="color:#75715e"></span>   <span style="color:#75715e">// without loss of information.
+</span><span style="color:#75715e"></span>   <span style="color:#75715e">//
+</span><span style="color:#75715e"></span>   <span style="color:#75715e">// Reference types such as []byte are only valid until the next call to Scan
+</span><span style="color:#75715e"></span>   <span style="color:#75715e">// and should not be retained. Their underlying memory is owned by the driver.
+</span><span style="color:#75715e"></span>   <span style="color:#75715e">// If retention is necessary, copy their values before the next call to Scan.
+</span><span style="color:#75715e"></span>   <span style="color:#a6e22e">Scan</span>(<span style="color:#a6e22e">src</span> <span style="color:#66d9ef">interface</span>{}) <span style="color:#66d9ef">error</span>
+}
+
+<span style="color:#75715e">// Users/tuocheng/go/go1.16/src/database/sql/driver/types.go
+</span><span style="color:#75715e"></span>
+<span style="color:#75715e">// Valuer is the interface providing the Value method.
+</span><span style="color:#75715e">//
+</span><span style="color:#75715e">// Types implementing Valuer interface are able to convert
+</span><span style="color:#75715e">// themselves to a driver Value.
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">Valuer</span> <span style="color:#66d9ef">interface</span> {
+   <span style="color:#75715e">// Value returns a driver Value.
+</span><span style="color:#75715e"></span>   <span style="color:#75715e">// Value must not panic.
+</span><span style="color:#75715e"></span>   <span style="color:#a6e22e">Value</span>() (<span style="color:#a6e22e">Value</span>, <span style="color:#66d9ef">error</span>)
+}
+</code></pre></div><p>在convertAssignRows进行转换时，会根据原类型和目标类型来区分是否需要调用scanner.Scan方法来转换。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#75715e">//Users/tuocheng/go/go1.16/src/database/sql/convert.go
+</span><span style="color:#75715e"></span>
+<span style="color:#75715e">// convertAssignRows copies to dest the value in src, converting it if possible.
+</span><span style="color:#75715e">// An error is returned if the copy would result in loss of information.
+</span><span style="color:#75715e">// dest should be a pointer type. If rows is passed in, the rows will
+</span><span style="color:#75715e">// be used as the parent for any cursor values converted from a
+</span><span style="color:#75715e">// driver.Rows to a *Rows.
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">convertAssignRows</span>(<span style="color:#a6e22e">dest</span>, <span style="color:#a6e22e">src</span> <span style="color:#66d9ef">interface</span>{}, <span style="color:#a6e22e">rows</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">Rows</span>) <span style="color:#66d9ef">error</span> {
+   <span style="color:#75715e">// Common cases, without reflect.
+</span><span style="color:#75715e"></span>   <span style="color:#75715e">// string、int、time.Time等类型，不用反射直接转
+</span><span style="color:#75715e"></span>   <span style="color:#66d9ef">switch</span> <span style="color:#a6e22e">s</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">src</span>.(<span style="color:#66d9ef">type</span>) {
+   <span style="color:#75715e">// 省略了 byte[]， decimalDecompose， nil类型对应的转换处理
+</span><span style="color:#75715e"></span>   <span style="color:#66d9ef">case</span> <span style="color:#66d9ef">string</span>:
+      <span style="color:#66d9ef">switch</span> <span style="color:#a6e22e">d</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">dest</span>.(<span style="color:#66d9ef">type</span>) {
+      <span style="color:#66d9ef">case</span> <span style="color:#f92672">*</span><span style="color:#66d9ef">string</span>:
+         <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">d</span> <span style="color:#f92672">==</span> <span style="color:#66d9ef">nil</span> {
+            <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">errNilPtr</span>
+         }
+         <span style="color:#f92672">*</span><span style="color:#a6e22e">d</span> = <span style="color:#a6e22e">s</span>
+         <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">nil</span>
+      <span style="color:#66d9ef">case</span> <span style="color:#f92672">*</span>[]<span style="color:#66d9ef">byte</span>:
+         <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">d</span> <span style="color:#f92672">==</span> <span style="color:#66d9ef">nil</span> {
+            <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">errNilPtr</span>
+         }
+         <span style="color:#f92672">*</span><span style="color:#a6e22e">d</span> = []byte(<span style="color:#a6e22e">s</span>)
+         <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">nil</span>
+      <span style="color:#66d9ef">case</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">RawBytes</span>:
+         <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">d</span> <span style="color:#f92672">==</span> <span style="color:#66d9ef">nil</span> {
+            <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">errNilPtr</span>
+         }
+         <span style="color:#f92672">*</span><span style="color:#a6e22e">d</span> = append((<span style="color:#f92672">*</span><span style="color:#a6e22e">d</span>)[:<span style="color:#ae81ff">0</span>], <span style="color:#a6e22e">s</span><span style="color:#960050;background-color:#1e0010">…</span>)
+         <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">nil</span>
+      }
+   <span style="color:#66d9ef">case</span> <span style="color:#a6e22e">time</span>.<span style="color:#a6e22e">Time</span>:
+      <span style="color:#66d9ef">switch</span> <span style="color:#a6e22e">d</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">dest</span>.(<span style="color:#66d9ef">type</span>) {
+      <span style="color:#66d9ef">case</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">time</span>.<span style="color:#a6e22e">Time</span>:
+         <span style="color:#f92672">*</span><span style="color:#a6e22e">d</span> = <span style="color:#a6e22e">s</span>
+         <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">nil</span>
+      <span style="color:#66d9ef">case</span> <span style="color:#f92672">*</span><span style="color:#66d9ef">string</span>:
+         <span style="color:#f92672">*</span><span style="color:#a6e22e">d</span> = <span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">Format</span>(<span style="color:#a6e22e">time</span>.<span style="color:#a6e22e">RFC3339Nano</span>)
+         <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">nil</span>
+      <span style="color:#66d9ef">case</span> <span style="color:#f92672">*</span>[]<span style="color:#66d9ef">byte</span>:
+         <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">d</span> <span style="color:#f92672">==</span> <span style="color:#66d9ef">nil</span> {
+            <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">errNilPtr</span>
+         }
+         <span style="color:#f92672">*</span><span style="color:#a6e22e">d</span> = []byte(<span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">Format</span>(<span style="color:#a6e22e">time</span>.<span style="color:#a6e22e">RFC3339Nano</span>))
+         <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">nil</span>
+      <span style="color:#66d9ef">case</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">RawBytes</span>:
+         <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">d</span> <span style="color:#f92672">==</span> <span style="color:#66d9ef">nil</span> {
+            <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">errNilPtr</span>
+         }
+         <span style="color:#f92672">*</span><span style="color:#a6e22e">d</span> = <span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">AppendFormat</span>((<span style="color:#f92672">*</span><span style="color:#a6e22e">d</span>)[:<span style="color:#ae81ff">0</span>], <span style="color:#a6e22e">time</span>.<span style="color:#a6e22e">RFC3339Nano</span>)
+         <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">nil</span>
+      }
+   }
+   
+   
+   <span style="color:#75715e">// 省略部分代码
+</span><span style="color:#75715e"></span>
+
+   <span style="color:#75715e">// 判断目标类型是否实现了scanner接口，若实现了该接口，便调用该接口进行转换
+</span><span style="color:#75715e"></span>   <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">scanner</span>, <span style="color:#a6e22e">ok</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">dest</span>.(<span style="color:#a6e22e">Scanner</span>); <span style="color:#a6e22e">ok</span> {
+      <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">scanner</span>.<span style="color:#a6e22e">Scan</span>(<span style="color:#a6e22e">src</span>)
+   }
+
+   <span style="color:#75715e">// 未实现scanner接口，继续尝试用反射进行转换
+</span><span style="color:#75715e"></span>   
+   <span style="color:#75715e">// 省略部分代码
+</span><span style="color:#75715e"></span>
+   <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Errorf</span>(<span style="color:#960050;background-color:#1e0010">“</span><span style="color:#a6e22e">unsupported</span> <span style="color:#a6e22e">Scan</span>, <span style="color:#a6e22e">storing</span> <span style="color:#a6e22e">driver</span>.<span style="color:#a6e22e">Value</span> <span style="color:#66d9ef">type</span> <span style="color:#f92672">%</span><span style="color:#a6e22e">T</span> <span style="color:#a6e22e">into</span> <span style="color:#66d9ef">type</span> <span style="color:#f92672">%</span><span style="color:#a6e22e">T</span><span style="color:#960050;background-color:#1e0010">”</span>, <span style="color:#a6e22e">src</span>, <span style="color:#a6e22e">dest</span>)
+}
+</code></pre></div><p><strong>那么当我们自定义的类型实现了Scanner接口和Valuer接口，orm框架就能够为我们实现自动的“拆装箱”。</strong></p>
+<h1 id="解决方案">解决方案</h1>
+<p>既然有了自动“拆装箱”的机制以及对应的scanner/valuer接口，我们便可以实现自己的“拆装箱”策略。我们在“拆箱”的时候进行加密入库，在“装箱”的时候进行解密反解析，便可以在model层就实现几乎无感的加解密。</p>
+<p>最终我们包装了一个KmsString类，通过kms托管密钥来对字段值进行加解密。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#75715e">// KmsString 实现 gorm string 类型加解密，保存字符串密文到数据库
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">KmsString</span> <span style="color:#66d9ef">string</span>
+
+<span style="color:#75715e">// KmsTypeFlag .
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">func</span> (<span style="color:#a6e22e">KmsString</span>) <span style="color:#a6e22e">KmsTypeFlag</span>() {}
+
+<span style="color:#66d9ef">func</span> (<span style="color:#a6e22e">s</span> <span style="color:#a6e22e">KmsString</span>) <span style="color:#a6e22e">Value</span>() (<span style="color:#a6e22e">driver</span>.<span style="color:#a6e22e">Value</span>, <span style="color:#66d9ef">error</span>) {
+   <span style="color:#75715e">// encryptString 自定制的加密策略
+</span><span style="color:#75715e"></span>   <span style="color:#a6e22e">value</span>, <span style="color:#a6e22e">err</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">encryptString</span>(string(<span style="color:#a6e22e">s</span>))
+   <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">err</span> <span style="color:#f92672">!=</span> <span style="color:#66d9ef">nil</span> {
+      <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">nil</span>, <span style="color:#a6e22e">err</span>
+   }
+   <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">value</span>, <span style="color:#66d9ef">nil</span>
+}
+
+<span style="color:#66d9ef">func</span> (<span style="color:#a6e22e">s</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">KmsString</span>) <span style="color:#a6e22e">Scan</span>(<span style="color:#a6e22e">src</span> <span style="color:#66d9ef">interface</span>{}) <span style="color:#66d9ef">error</span> {
+   <span style="color:#a6e22e">value</span>, <span style="color:#a6e22e">err</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">convertString</span>(<span style="color:#a6e22e">src</span>)
+   <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">err</span> <span style="color:#f92672">!=</span> <span style="color:#66d9ef">nil</span> {
+      <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">err</span>
+   }
+   <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">value</span> <span style="color:#f92672">!=</span> <span style="color:#960050;background-color:#1e0010">“”</span> {
+      <span style="color:#75715e">// decryptString 自定制的解密策略
+</span><span style="color:#75715e"></span>      <span style="color:#a6e22e">str</span>, <span style="color:#a6e22e">err</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">decryptString</span>(<span style="color:#a6e22e">value</span>)
+      <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">err</span> <span style="color:#f92672">!=</span> <span style="color:#66d9ef">nil</span> {
+         <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">err</span>
+      }
+      <span style="color:#f92672">*</span><span style="color:#a6e22e">s</span> = <span style="color:#a6e22e">KmsString</span>(<span style="color:#a6e22e">str</span>)
+   }
+   <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">nil</span>
+}
+</code></pre></div><p>利用该类，我们可以直接将model中的字段与数据库表绑定。在gorm进行scan和value的同时，完成数据的加解密。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">Person</span> <span style="color:#66d9ef">struct</span> {
+    <span style="color:#a6e22e">IDNumber</span>  <span style="color:#a6e22e">KmsString</span> <span style="color:#e6db74">`gorm:&#34;column:id_number&#34;`</span>
+}
+</code></pre></div><h1 id="效果及拓展">效果及拓展</h1>
+<p>通过实现scanner/valuer，我们实现了在model层“拆装箱”的过程中自动加解密。上层service, biz层均无感知，实现了加解密逻辑的终极收敛。
+除此之外，我们还可以利用scanner/valuer轻松的实现一些特别的功能。</p>
+<ol>
+<li>实现decimal类，在入库时乘以放大倍数存成bigint, 在读取时自动除以放大倍数转成decimal保证精度。</li>
+<li>定义ExtraMap类，在入库时json.Marshal存成varchar, 在读取时自动unmarshal成map。收敛marshal/unmarshal的逻辑在一处。</li>
+</ol>
+
+        </div>
+
+        
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/post/benchmark/">benchmark</a></li>
+        
+        <li><a href="/post/gc%E6%80%BB%E7%BB%93/">gc总结</a></li>
+        
+        <li><a href="/post/go-module%E7%89%88%E6%9C%AC%E9%80%89%E6%8B%A9/">go module版本选择</a></li>
+        
+        <li><a href="/post/golang-gc%E4%BC%98%E5%8C%96/">golang gc优化</a></li>
+        
+        <li><a href="/post/golang%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/">golang内存管理</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='/tags/golang' target="_blank">golang</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    
+
+    
+    
+    
+    
+
+</div>
+
+                    <footer id="footer">
+    <br />
+</footer>
+
+
+    
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+<style type="text/css">
+div.highlight {
+    position: relative;
+    margin: 1em 0px;
+}
+
+.copy-code {
+    display: none;
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    color: rgba(255, 255, 255, 0.8);
+    background: rgba(78, 78, 78, 0.8);
+    border-radius: var(--radius);
+    padding: 0 5px;
+    font: inherit;
+    user-select: none;
+    cursor: pointer;
+    border: 0;
+    --radius: 8px;
+}
+
+div.highlight:hover .copy-code,pre:hover .copy-code {
+    display: block;
+}
+
+</style>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+
+
+
+
+
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='//www.google.com/search' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://bytewong123.github.io/">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title">Latest articles</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/benchmark/" title="benchmark" target="_blank">benchmark</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/b%E6%A0%91/" title="b树" target="_blank">b树</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0daemonset/" title="cka真题练习——daemonset" target="_blank">cka真题练习——daemonset</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0deploy/" title="cka真题练习——deploy" target="_blank">cka真题练习——deploy</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0etcd%E5%A4%87%E4%BB%BD%E8%BF%98%E5%8E%9F/" title="cka真题练习——etcd备份还原" target="_blank">cka真题练习——etcd备份还原</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0ingress/" title="cka真题练习——ingress" target="_blank">cka真题练习——ingress</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0networkpolicy/" title="cka真题练习——NetworkPolicy" target="_blank">cka真题练习——NetworkPolicy</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0node%E8%B0%83%E5%BA%A6/" title="cka真题练习——node调度" target="_blank">cka真题练习——node调度</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0pod/" title="cka真题练习——pod" target="_blank">cka真题练习——pod</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0pv/" title="cka真题练习——pv" target="_blank">cka真题练习——pv</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>Categories</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://bytewong123.github.io/categories/golang/">golang (12)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/k8s/">k8s (24)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/mysql/">mysql (10)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/redis/">redis (10)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/rust/">rust (1)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/sql/">sql (1)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统 (3)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E6%9E%81%E5%AE%A2%E6%97%B6%E9%97%B4/">极客时间 (5)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/">消息队列 (1)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B3%BB%E7%BB%9F/">深入理解计算机系统 (1)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E7%AE%97%E6%B3%95/">算法 (138)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/">系统设计 (19)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>Tags</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://bytewong123.github.io/tags/golang/">golang</a>
+    
+    <a href="https://bytewong123.github.io/tags/k8s/">k8s</a>
+    
+    <a href="https://bytewong123.github.io/tags/kafka/">kafka</a>
+    
+    <a href="https://bytewong123.github.io/tags/mysql/">mysql</a>
+    
+    <a href="https://bytewong123.github.io/tags/redis/">redis</a>
+    
+    <a href="https://bytewong123.github.io/tags/rust/">rust</a>
+    
+    <a href="https://bytewong123.github.io/tags/sql/">sql</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E6%9E%81%E5%AE%A2%E6%97%B6%E9%97%B4/">极客时间</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/">消息队列</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E7%AE%97%E6%B3%95/">算法</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/">系统设计</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/">读书笔记</a>
+    
+</div>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title">Links</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a target="_blank" href="http://yuedu.baidu.com/ebook/14a722970740be1e640e9a3e" title="Android Gradle权威指南">Android Gradle权威指南</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="http://mirrors.flysnow.org/" title="常用开发工具CDN镜像">常用开发工具CDN镜像</a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title">Meta</h3>
+        <ul class="widget-list">
+            <li><a href="https://bytewong123.github.io/index.xml">RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

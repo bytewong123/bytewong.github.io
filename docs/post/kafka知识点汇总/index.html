@@ -1,0 +1,587 @@
+<!doctype html>
+<html lang="en">
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+
+    <title>kafka知识点汇总 | sheeks</title>
+    <meta property="og:title" content="kafka知识点汇总 - sheeks">
+    <meta property="og:type" content="article">
+        
+    <meta property="article:published_time" content='2023-01-08T18:06:57&#43;08:00'>
+        
+        
+    <meta property="article:modified_time" content='2023-01-08T18:06:57&#43;08:00'>
+        
+    <meta name="Keywords" content="golang,go语言,go语言笔记,sheeks,java,android,博客,项目管理,python,软件架构,公众号,小程序">
+    <meta name="description" content="kafka知识点汇总">
+        
+    <meta name="author" content="sheeks">
+    <meta property="og:url" content="https://bytewong123.github.io/post/kafka%E7%9F%A5%E8%AF%86%E7%82%B9%E6%B1%87%E6%80%BB/">
+    <link rel="shortcut icon" href='/favicon.ico'  type="image/x-icon">
+
+    <link rel="stylesheet" href='/css/normalize.css'>
+    <link rel="stylesheet" href='/css/style.css'>
+    <script type="text/javascript" src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    
+    
+    
+    
+    
+    
+</head>
+
+<body>
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://bytewong123.github.io/">
+                        sheeks
+                    </a>
+                
+                <p class="description">dev</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://bytewong123.github.io/">Home</a>
+                    
+                    <a  href="https://bytewong123.github.io/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    
+    <article class="post">
+        <header>
+            <h1 class="post-title">kafka知识点汇总</h1>
+        </header>
+        
+  <time datetime="2023-01-08T10:06:57Z" class="post-meta meta-date dt-published">
+    2023-01-08
+  </time>
+
+
+<div class="post-meta meta-category">
+  <span>&nbsp;|</span>
+  
+    <a href='/categories/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97' target="_blank">消息队列</a>
+  
+</div>
+
+
+        
+        
+        <div class="post-content">
+            <h1 id="kafka知识点汇总">kafka知识点汇总</h1>
+<p>#技术/消息队列</p>
+<h2 id="topic">topic</h2>
+<p>每条发布到kafka集群的消息都有一个类别，这个类别被称为topic</p>
+<ul>
+<li>如果某topic有N个partition，集群有N个broker，那么每个broker存储该topic的一个partition</li>
+<li>如果某topic有N个partition，集群有(N+M)个broker，那么其中有N个broker存储该topic的一个partition，剩下的M个broker不存储该topic的partition数据</li>
+<li>如果某topic有N个partition，集群中broker数目少于N个，那么一个broker存储该topic的一个或多个partition</li>
+</ul>
+<h2 id="partition">partition</h2>
+<h3 id="leader">leader</h3>
+<p>任何partition只有一个leader，只有leader是对外提供读写服务的</p>
+<h3 id="follower">follower</h3>
+<p>Leader副本接收到数据之后，Follower副本会不停的给他发送请求尝试去拉取最新的数据，拉取到自己本地后，写入磁盘中</p>
+<h3 id="isr">ISR</h3>
+<p>In-Sync Replicas，每个partition都有一个ISR
+保持同步的副本，是一个列表，记录了跟leader保持同步的follower</p>
+<ul>
+<li>假设replica.lag.max.messages设置为4，表明只要follower落后leader不超过3，就不会从isr中移除</li>
+<li>replica.lag.time.max设置为500 ms，表明只要follower向leader发送请求时间间隔不超过500 ms，就不会被标记为死亡,也不会从同步isr中移除</li>
+</ul>
+<h3 id="部署方式">部署方式</h3>
+<ul>
+<li>每个partition都有多个副本，相同partition的各个副本分布在不同的broker上</li>
+<li>partition的多副本分为leader和follower；</li>
+<li>有一个leader和多个follower</li>
+</ul>
+<h3 id="消费">消费</h3>
+<ul>
+<li>partition只能同一个group中的同一个consumer消费，如果想要重复消费，那么需要其他的组来消费</li>
+</ul>
+<h4 id="什么情况下会重复消费">什么情况下会重复消费？</h4>
+<p>消息处理后，offset未提交</p>
+<h2 id="consumer">consumer</h2>
+<h3 id="rebalance">rebalance</h3>
+<p>Rebalance 本质上是一种协议，规定了一个 Consumer Group 下的所有 consumer 如何达成一致，来分配订阅 Topic 的每个分区</p>
+<h4 id="触发条件">触发条件：</h4>
+<ol>
+<li>consumer加入或离开</li>
+<li>coordinator挂了，集群选举出新的coordinator</li>
+<li>topic的partition新加</li>
+<li>consumer调用unsubscrible()，取消topic的订阅</li>
+</ol>
+<h4 id="影响">影响：</h4>
+<p>Consumer被踢出消费组，可能还没有提交offset，Rebalance时会Partition重新分配其它Consumer,会造成重复消费</p>
+<h4 id="避免rebalance的方式">避免rebalance的方式：</h4>
+<ol>
+<li>未能及时发送心跳造成的rebalance</li>
+</ol>
+<ul>
+<li>session.timeout.ms 当broker多久没有收到consumer的心跳请求后就触发rebalance，默认值是10s（服务端逻辑）</li>
+<li>heartbeat.interval.ms  控制consumer发送心跳请求频率的参数，每次发送心跳的间隔（客户端逻辑）</li>
+</ul>
+<blockquote>
+<p>每个consumer 都会根据 heartbeat.interval.ms 参数指定的时间周期性地向group coordinator发送 hearbeat；
+由于心跳请求是在poll()拉取消息的方法中执行的，因此如果当前批次处理消息耗时太长，就会导致consumer没有机会按时发送心跳，broker认为消费者已死，触发rebalance。在0.10.1.0或更新的版本中解决了这个问题，心跳请求会在单独的线程中发送，因此就不会出现因为消息处理过长而发不出心跳的问题了</p>
+</blockquote>
+<ol start="2">
+<li>consumer消费超时而造成的rebalance</li>
+</ol>
+<ul>
+<li>max.poll.interval.ms  这个参数定义了两次poll()之间的最大间隔，默认值为5分钟。如果超过这个间隔同样会触发rebalance。能否在5min内处理完还取决于每次拉取了多少条消息</li>
+<li>max.poll.records 这个参数定义了poll()方法最多可以返回多少条消息，默认值为500。</li>
+</ul>
+<h3 id="group-coordinator">group coordinator</h3>
+<h4 id="consumer-group-partition分配过程rebalance过程">consumer group partition分配过程（rebalance过程）</h4>
+<ol>
+<li>每个consumer group有一个 group coordinator。对于每个consumer group，Kafka集群为其从broker集群中选择一个broker作为其coordinator</li>
+<li>consumer group里面的各个consumer都向 group coordinator发送JoinGroup请求，这样group coordinator就有了所有consumer的成员信息</li>
+<li>group coordinator从中选出一个consumer作为Leader consumer，并告诉Leader consumer说：你拿着这些成员信息和我给你的topic分区信息去安排一下哪些consumer负责消费哪些分区吧</li>
+<li>Leader consumer根据配置的分配策略(由参数partition.assignment.strategy指定)为各个consumer计算好了各自待消费的分区。partition的分配策略和分配结果其实是由client决定的，而不是由coordinator决定的</li>
+</ol>
+<blockquote>
+<p>让client分配不让server分配的原因：如果让server分配，一旦需要新的分配策略，server集群要重新部署，这对于已经在线上运行的集群来说，代价是很大的；而让client分配，server集群就不需要重新部署了</p>
+</blockquote>
+<ol start="5">
+<li>leader通过SyncGroup消息，把分配结果发给coordinator，其他consumer也发送SyncGroup消息，获得这个分配结果</li>
+</ol>
+<h4 id="rebalance-generation">rebalance generation</h4>
+<p>它表示了rebalance之后的一届成员，主要是用于保护consumer group，隔离无效offset提交的。比如上一届的consumer成员是无法提交位移到新一届的consumer group中。每次group进行rebalance之后，generation号都会加1，表示group进入到了一个新的版本</p>
+<h4 id="offset管理">offset管理</h4>
+<ol>
+<li>kafka把所有topic的所有partition提交的offset保存到了一个__consumer_offset的topic下，包含两个字段：</li>
+</ol>
+<blockquote>
+<p>key: Consumer Group, topic, partition
+Payload:Offset, metadata, timestamp</p>
+</blockquote>
+<ol start="2">
+<li>这个__consumer_offset 有50个分区，通过将group的id哈希值%50的值来确定要保存到那一个分区</li>
+<li>offset提交消息会根据消费组的key(消费组名称)进行分区. 对于一个给定的消费组,它的所有消息都会发送到唯一的broker(即Coordinator)</li>
+<li>该broker还会维护一张offset表，便于快速查询offset</li>
+</ol>
+<p>Coordinator上负责管理offset的组件是Offset manager。负责存储,抓取,和维护消费者的offsets. 每个broker都有一个offset manager实例. 有两种具体的实现:</p>
+<ol>
+<li>ZookeeperOffsetManager: 调用zookeeper来存储和接收offset（老版本的位移管理）。</li>
+<li>DefaultOffsetManager: 提供消费者offsets内置的offset管理。
+通过在config/server.properties中的offset.storage参数选择。</li>
+</ol>
+<p><strong>DefaultOffsetManager</strong>
+除了将offset作为logs保存到磁盘上,DefaultOffsetManager维护了一张能快速服务于offset抓取请求的consumer offsets表。</p>
+<p>消费开始时，拉取offset的过程</p>
+<ol>
+<li>发送请求至任意一个broker；</li>
+<li>broker确认自己是否为该group的offset存储的partition leader，如果不是就把请求转至对应的partition；</li>
+<li>leader partition处理后，返回给转发过来的broker，broker再把结果返回给consumer</li>
+</ol>
+<h2 id="kafka性能">kafka性能</h2>
+<ol>
+<li>顺序读写</li>
+</ol>
+<ul>
+<li>kafka将来自Producer的数据，顺序追加在partition，partition就是一个文件，以此实现顺序写入</li>
+<li>Consumer从broker读取数据时，因为自带了偏移量，接着上次读取的位置继续读，以此实现顺序读</li>
+</ul>
+<ol start="2">
+<li>零拷贝
+传统模式下，当需要对一个文件进行传输的时候，其具体流程细节如下：</li>
+</ol>
+<ul>
+<li>调用 read 函数，文件数据被 copy 到内核缓冲区</li>
+<li>read 函数返回，文件数据从内核缓冲区 copy 到用户缓冲区</li>
+<li>write 函数调用，将文件数据从用户缓冲区 copy 到内核与 socket 相关的缓冲区</li>
+<li>数据从 socket 缓冲区 copy 到相关协议引擎。</li>
+</ul>
+<p>sendfile 系统调用则提供了一种减少以上多次 copy：</p>
+<ul>
+<li>sendfile 系统调用，文件数据被 copy 至内核缓冲区</li>
+<li>再从内核缓冲区 copy 至内核中 socket 相关的缓冲区</li>
+</ul>
+<ol start="3">
+<li>mmap
+对磁盘文件发起IO操作，首先从磁盘上把数据读取到内核IO缓冲区里去，然后再从内核IO缓存区里读取到用户进程私有空间里去，然后我们才能拿到这个文件里的数据。为了读取磁盘文件里的数据，是不是发生了两次数据拷贝。写文件同理。
+mmap方法为我们提供了将文件的部分或全部映射到内存地址空间的能力，同当这块内存区域被写入数据之后[dirty]，操作系统会在一定时刻把这些数据写入到文件中。
+刚开始建立映射的时候，并没有任何的数据拷贝操作，其实磁盘文件还是停留在那里，只不过他把物理上的磁盘文件的一些地址和用户进程私有空间的一些虚拟内存地址进行了一个映射
+这个mmap技术在进行文件映射的时候，一般有大小限制，在1.5GB~2GB之间，所以在很多消息中间件，会限制文件的大小。
+<strong>PageCache，实际上在这里就是对应于虚拟内存</strong>
+接下来就可以对这个已经映射到内存里的磁盘文件进行读写操作了，比如要写入消息到文件，你先把一文件通过MappedByteBuffer的map()函数映射其地址到你的虚拟内存地址。
+接着就可以对这个MappedByteBuffer执行写入操作了，写入的时候他会直接进入PageCache中，然后过一段时间之后，由os的线程异步刷入磁盘中。
+使用了页缓存，只有一次数据拷贝的过程，就是从PageCache里拷贝到磁盘文件。</li>
+</ol>
+<h2 id="文件存储">文件存储</h2>
+<h3 id="存储方式">存储方式</h3>
+<p>按partition存储，同一个topic下有多个不同partition，每一个partition为一个文件夹，partiton目录命名规则为topic名称+partition序号。每一个partion(文件夹)相当于一个巨型文件被平均分配到多个大小相等segment(段)数据文件里</p>
+<p>segment文件，分为index file和data file</p>
+<ul>
+<li>index file
+索引文件存储offset与对应的message在data文件中的物理偏移</li>
+<li>data file
+partion全局的第一个segment data文件名从0开始，是00000.log，19位数字字符长度，没有数字用0填充
+每一个segment文件名称为上一个segment文件最后一条消息的offset值</li>
+</ul>
+<p>如何通过offset定位message</p>
+<ol>
+<li>定位segment index文件</li>
+<li>通过index文件中的offset查找data文件中的message</li>
+</ol>
+<h3 id="kafka高效文件存储的特点">kafka高效文件存储的特点</h3>
+<ol>
+<li>Kafka把topic中一个parition大文件分成多个小文件段，通过多个小文件段，就容易定期清除或删除已经消费完文件，减少磁盘占用。</li>
+<li>通过索引信息可以快速定位message和确定response的最大大小。</li>
+<li>通过index元数据全部映射到memory，可以避免segment file的IO磁盘操作。</li>
+<li>通过索引文件稀疏存储，可以大幅降低index文件元数据占用空间大小。</li>
+</ol>
+<h2 id="kafka为什么要使用主写主读的方式">kafka为什么要使用主写主读的方式</h2>
+<ol>
+<li>数据一致性问题：数据同步需要时间，应用读取从节点中的数据的值并不为最新的值，由此便产生了数据不一致的问题</li>
+<li>Kafka 中，主从同步会比 Redis 更加耗时，它需要经历网络→主节点内存→主节点磁盘→网络→从节 点内存→从节点磁盘这几个阶段，由于内存和磁盘这个环节，对延时敏感的应用而言，主写从读的功能并不太适用</li>
+</ol>
+<h1 id="常见问题">常见问题</h1>
+<h2 id="kafka如何保证不丢失消息">kafka如何保证不丢失消息</h2>
+<p>发送端：</p>
+<ol>
+<li>复制因子：创建topic的时候指定复制因子大于1时，一个分区被分配到一个broker上，同时会在其他broker上维护一个分区副本；</li>
+<li>isr列表：分区及其副本分别为leader和follower，leader对外提供读写服务，follower会向leader发送同步请求，拉取最新的数据，如果follower和leader的消息差距保持在一定范围之内，那么这个follower在isr列表内；当分区leader所在broker宕机，会从isr列表中选举一个follower作为新的leader提供服务</li>
+<li>通过kafka的acks参数可以控制消息的发送行为，acks可选的值有0、1、all；当设置为0时，生产者消息发送成功即为成功，不关心是否写入到磁盘及后续操作；当设置为1时，消息发送到分区leader后写入磁盘即为成功；当设置为all时，消息发送到分区leader并写入磁盘后，同步给isr列表中的所有分区副本后即为成功
+消费端：</li>
+<li>如果在消息处理完成前就提交了offset，那么就有可能造成数据的丢失。enable.auto.commit=false 关闭自动提交位移 在消息被完整处理之后再手动提交位移</li>
+</ol>
+<h2 id="zk的作用">zk的作用</h2>
+<p>zookeeper 是一个分布式的协调组件，早期版本的kafka用zk做meta信息存储，consumer的消费状态，group的管理以及 offset的值。考虑到zk本身的一些因素以及整个架构较大概率存在单点问题，新版本中逐渐弱化了zookeeper的作用。新的consumer使用了kafka内部的group coordination协议，也减少了对zookeeper的依赖，</p>
+<p>但是broker依然依赖于ZK，zookeeper 在kafka中还用来选举controller 和 检测broker是否存活等等。</p>
+<h2 id="kafka-消息数据积压消费能力不足怎么处理">Kafka 消息数据积压，消费能力不足怎么处理？</h2>
+<ol>
+<li>可以考虑增加Topic的分区数，并且同时提升消费组的消费者数量，消费者数=分区数。（两者缺一不可）</li>
+<li>如果是下游的数据处理不及时：提高每批次拉取的数量。批次拉取数据过少（拉取数据/处理时间&lt;生产速度），使处理的数据小于生产的数据，也会造成数据积压。</li>
+</ol>
+<h3 id="kafka重复消费如何处理">kafka重复消费如何处理？</h3>
+<p>正常情况下在consumer真正消费完消息后应该发送ack，通知broker该消息已正常消费，从queue中剔除
+当ack因为网络原因无法发送到broker，broker会认为词条消息没有被消费，此后会开启消息重投机制把消息再次投递到consumer。
+使用外部介质：</p>
+<ol>
+<li>数据库表：处理消息前，使用消息主键在表中带有约束的字段中insert</li>
+<li>Redis：使用分布式锁。</li>
+</ol>
+
+        </div>
+
+        
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/post/z%E5%AD%97%E5%9E%8B%E5%8F%98%E6%8D%A2/">Z字型变换</a></li>
+        
+        <li><a href="/post/benchmark/">benchmark</a></li>
+        
+        <li><a href="/post/b%E6%A0%91/">b树</a></li>
+        
+        <li><a href="/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0networkpolicy/">cka真题练习——NetworkPolicy</a></li>
+        
+        <li><a href="/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0daemonset/">cka真题练习——daemonset</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='/tags/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97' target="_blank">消息队列</a></li>
+                
+                <li><a href='/tags/kafka' target="_blank">kafka</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    
+
+    
+    
+    
+    
+
+</div>
+
+                    <footer id="footer">
+    <br />
+</footer>
+
+
+    
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+<style type="text/css">
+div.highlight {
+    position: relative;
+    margin: 1em 0px;
+}
+
+.copy-code {
+    display: none;
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    color: rgba(255, 255, 255, 0.8);
+    background: rgba(78, 78, 78, 0.8);
+    border-radius: var(--radius);
+    padding: 0 5px;
+    font: inherit;
+    user-select: none;
+    cursor: pointer;
+    border: 0;
+    --radius: 8px;
+}
+
+div.highlight:hover .copy-code,pre:hover .copy-code {
+    display: block;
+}
+
+</style>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+
+
+
+
+
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='//www.google.com/search' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://bytewong123.github.io/">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title">Latest articles</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/benchmark/" title="benchmark" target="_blank">benchmark</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/b%E6%A0%91/" title="b树" target="_blank">b树</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0daemonset/" title="cka真题练习——daemonset" target="_blank">cka真题练习——daemonset</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0deploy/" title="cka真题练习——deploy" target="_blank">cka真题练习——deploy</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0etcd%E5%A4%87%E4%BB%BD%E8%BF%98%E5%8E%9F/" title="cka真题练习——etcd备份还原" target="_blank">cka真题练习——etcd备份还原</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0ingress/" title="cka真题练习——ingress" target="_blank">cka真题练习——ingress</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0networkpolicy/" title="cka真题练习——NetworkPolicy" target="_blank">cka真题练习——NetworkPolicy</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0node%E8%B0%83%E5%BA%A6/" title="cka真题练习——node调度" target="_blank">cka真题练习——node调度</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0pod/" title="cka真题练习——pod" target="_blank">cka真题练习——pod</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0pv/" title="cka真题练习——pv" target="_blank">cka真题练习——pv</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>Categories</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://bytewong123.github.io/categories/golang/">golang (12)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/k8s/">k8s (24)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/mysql/">mysql (10)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/redis/">redis (10)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/rust/">rust (1)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/sql/">sql (1)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统 (3)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E6%9E%81%E5%AE%A2%E6%97%B6%E9%97%B4/">极客时间 (5)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/">消息队列 (1)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B3%BB%E7%BB%9F/">深入理解计算机系统 (1)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E7%AE%97%E6%B3%95/">算法 (138)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/">系统设计 (19)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>Tags</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://bytewong123.github.io/tags/golang/">golang</a>
+    
+    <a href="https://bytewong123.github.io/tags/k8s/">k8s</a>
+    
+    <a href="https://bytewong123.github.io/tags/kafka/">kafka</a>
+    
+    <a href="https://bytewong123.github.io/tags/mysql/">mysql</a>
+    
+    <a href="https://bytewong123.github.io/tags/redis/">redis</a>
+    
+    <a href="https://bytewong123.github.io/tags/rust/">rust</a>
+    
+    <a href="https://bytewong123.github.io/tags/sql/">sql</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E6%9E%81%E5%AE%A2%E6%97%B6%E9%97%B4/">极客时间</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/">消息队列</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E7%AE%97%E6%B3%95/">算法</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/">系统设计</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/">读书笔记</a>
+    
+</div>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title">Links</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a target="_blank" href="http://yuedu.baidu.com/ebook/14a722970740be1e640e9a3e" title="Android Gradle权威指南">Android Gradle权威指南</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="http://mirrors.flysnow.org/" title="常用开发工具CDN镜像">常用开发工具CDN镜像</a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title">Meta</h3>
+        <ul class="widget-list">
+            <li><a href="https://bytewong123.github.io/index.xml">RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

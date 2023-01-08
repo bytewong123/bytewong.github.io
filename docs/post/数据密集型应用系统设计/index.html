@@ -1,0 +1,473 @@
+<!doctype html>
+<html lang="en">
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+
+    <title>数据密集型应用系统设计 | sheeks</title>
+    <meta property="og:title" content="数据密集型应用系统设计 - sheeks">
+    <meta property="og:type" content="article">
+        
+    <meta property="article:published_time" content='2023-01-08T18:06:57&#43;08:00'>
+        
+        
+    <meta property="article:modified_time" content='2023-01-08T18:06:57&#43;08:00'>
+        
+    <meta name="Keywords" content="golang,go语言,go语言笔记,sheeks,java,android,博客,项目管理,python,软件架构,公众号,小程序">
+    <meta name="description" content="数据密集型应用系统设计">
+        
+    <meta name="author" content="sheeks">
+    <meta property="og:url" content="https://bytewong123.github.io/post/%E6%95%B0%E6%8D%AE%E5%AF%86%E9%9B%86%E5%9E%8B%E5%BA%94%E7%94%A8%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/">
+    <link rel="shortcut icon" href='/favicon.ico'  type="image/x-icon">
+
+    <link rel="stylesheet" href='/css/normalize.css'>
+    <link rel="stylesheet" href='/css/style.css'>
+    <script type="text/javascript" src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    
+    
+    
+    
+    
+    
+</head>
+
+<body>
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://bytewong123.github.io/">
+                        sheeks
+                    </a>
+                
+                <p class="description">dev</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://bytewong123.github.io/">Home</a>
+                    
+                    <a  href="https://bytewong123.github.io/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    
+    <article class="post">
+        <header>
+            <h1 class="post-title">数据密集型应用系统设计</h1>
+        </header>
+        
+  <time datetime="2023-01-08T10:06:57Z" class="post-meta meta-date dt-published">
+    2023-01-08
+  </time>
+
+
+<div class="post-meta meta-category">
+  <span>&nbsp;|</span>
+  
+    <a href='/categories/' target="_blank"></a>
+  
+</div>
+
+
+        
+        
+        <div class="post-content">
+            <h1 id="数据密集型应用系统设计">数据密集型应用系统设计</h1>
+<p>#技术/读书笔记</p>
+<h2 id="关系模型与文档模型">关系模型与文档模型</h2>
+<ol>
+<li>在关系模式中表示简历
+可以把简历需要的字段拆分为多个表：</li>
+</ol>
+<ul>
+<li>用户表</li>
+<li>地区表</li>
+<li>公司表</li>
+<li>职位表</li>
+<li>教育信息表</li>
+<li>联系方式表
+这几个表通过外键user_id和用户表关联在一起</li>
+</ul>
+<ol start="2">
+<li>文档模式中表示简历
+把简历作为一个json结构，每个用户的简历信息放在一个json文档中即可。职位、教育信息、地区等都是json的一个字段，层次清晰，扩展性好。</li>
+</ol>
+<h3 id="比较">比较</h3>
+<h4 id="一对多关系">一对多关系</h4>
+<p>如果在关系模式中读取一份简历，要么执行多个查询（通过user_id查询多个表），要么在users表及其从属表之间执行混乱的多路联结。而对于json表示方法，所有相关的信息都在一个地方，一次查询就足够了。
+用户简历到用户的职位、教育历史和联系信息存在一对多的关系，意味着数据存在树状结构。json表示将该树状结构显式化。</p>
+<h4 id="多对一关系">多对一关系</h4>
+<p>对于简历这一例子，用户表的地区、职位、公司的值都为其对应的id，而不是文本，这样做有什么好处？</p>
+<ol>
+<li>避免歧义（同名城市、公司）</li>
+<li>易于更新：名字只保存一次，如果需要改变（例如政治事件），可以很容易全面更新</li>
+<li>本地化支持：当网站被翻译成其他语言时，可以用查看者的母语来显示。
+使用id的好处是，它对人类没有任何直接意义，所以永远不需要直接改变：即使id代表的信息将来发生了变化，它也可以保持不变。任何对人类有意义的东西都可能在将来的某一时刻发生变更。
+数据库规范化的核心思想就是消除重复，消除冗余。这种规范化通常是表达多对一的关系（多，但不需要多份复制，而是作为一个id被引用就好）比较适合关系模型，但不适用于文档模型。由于关系模型支持结联操作，可以方便地通过ID引用其他表中的行。而在文档数据库中，一对多的树状结构不需要结联，支持结联通常也很弱。
+如果数据库本身不支持结联，则必须在应用程序代码中，通过对数据库多次查询来模拟结联。
+即使应用程序的初始版本非常适合采用无结联的文档结构，但随着应用支持越来越多的功能，数据也变得更加互联一体化。</li>
+</ol>
+<h3 id="关系模型与文档模型的取舍">关系模型与文档模型的取舍</h3>
+<ol>
+<li>如果应用数据具有类似文档的结构（一对多关系树，通常一次加载整个树），那么使用文档模型更合适；关系模型倾向于某种数据分解，它把文档结构分为多个表，有可能使得模式更为笨重，以及不必要的应用代码复杂化。</li>
+<li>在文档数据库中，对级联支持是否有问题取决于应用程序是否需要级联。如果确实使用了多对多关系，文档模型就变得不太吸引人。应用程序需要做额外的工作向数据库发出多个请求，模拟级联。这样会增加代码复杂度，并且速度比数据库的专用查询代码执行级联慢，在这些情况下，文档模型会导致应用程序代码更复杂，性能更差。</li>
+<li>文档模式更灵活，更适用于经常发生变化的数据结构；关系模式相对固定，修改字段比较困难。</li>
+<li>文档通常存储为编码的json、xml或其二进制变体（bson）的连续字符串。如果应用程序需要频繁访问整个文档，则存储局部性具有性能优势。如果数据被划分在多个表中，则需要进行多次索引来检索所有数据，中间可能需要更多的磁盘io并花费更多的时间。
+局部性优势仅适用于需要同时访问文档大部分内容的场景。由于数据库通常会加载整个文档，如果应用只访问其中的一小部分，则对于大型文档数据来讲就有些浪费。对文档进行更新时，通常会重写整个文档，而只有修改量不改变源文档大小时，原地覆盖更新才更有效。因此，通常建议文档应该尽量小，且避免写入时增加文档大小。这些性能方面的不利因素大大限制了文档数据库的适用场景</li>
+</ol>
+<h3 id="文档数据库和关系数据库的融合">文档数据库和关系数据库的融合</h3>
+<p>大多数关系数据库对xml，json提供了支持；一些文档数据库也开始提供级联，例如RethinkDB</p>
+<h3 id="命令式和声明式查询语言">命令式和声明式查询语言</h3>
+<p>命令式语言告诉计算机以特定顺序执行某些操作；
+声明式查询语言指定所需的数据模式，结果需要满足什么条件，以及如何转换数据，而不需要指明如何实现这一目标</p>
+<p>声明式查询语言比命令式查询语言更加简洁和易用。更重要的是它对外隐藏了数据库引擎的很多实现细节，这样<strong>数据库能够在不改变查询语句的情况下提高性能</strong></p>
+<p>声明式最大的好处：</p>
+<ol>
+<li>不用关系底层如何优化，在不改变查询语句的条件下，底层可以做更多优化的工作，只需要按照声明的内容将结果返回即可，命令式api是无法做到的，因为按什么样的顺序执行，完全是调用方决定，数据层能做的优化工作很少</li>
+<li>未来如果某些查询api改变了，命令式api可能会涉及到代码重写，而声明式api可以完全不用改变，由数据层进行兼容适配即可</li>
+</ol>
+<h3 id="mapreduce查询">mapreduce查询</h3>
+<p>mapreduce是一种编程模型，用于在很多机器上批量处理海量数据，兴起于google。一些NoSQL存储系统（MongoDB和CouchDB）支持有限的mapreduce方式在大量文档上执行只读查询</p>
+<p>mapreduce既不是声明式查询语言，也不是一个完全命令式的查询api，而是介于两者之间：查询的逻辑用代码片段表示，这些代码片段可以被处理框架重复地调用。</p>
+<p>在pg中，可以这样表示：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">SELECT</span> date_trunc(<span style="color:#e6db74">&#39;month&#39;</span>, ob_timestamp) <span style="color:#66d9ef">AS</span> ob_month, <span style="color:#66d9ef">SUM</span>(num_animals) <span style="color:#66d9ef">AS</span> total_animals <span style="color:#66d9ef">FROM</span> observations <span style="color:#66d9ef">WHERE</span> family <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;Sharks&#39;</span> <span style="color:#66d9ef">GROUP</span> <span style="color:#66d9ef">BY</span> ob_month;
+</code></pre></div><p>此查询首先对观察结果进行过滤，只需要Sharks家族，然后按照他们的发现月份进行分组，最后将该月的所有观察动物数量求和汇总</p>
+<p>MongoDB中的MapReduce功能也可以实现类似目的，如下所示：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-javascript" data-lang="javascript"><span style="color:#a6e22e">db</span>.<span style="color:#a6e22e">observations</span>.<span style="color:#a6e22e">mapReduce</span>(
+	<span style="color:#66d9ef">function</span> <span style="color:#a6e22e">map</span>() {
+		<span style="color:#66d9ef">var</span> <span style="color:#a6e22e">year</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">observationsTimestamp</span>.<span style="color:#a6e22e">getFullYear</span>();
+		<span style="color:#66d9ef">var</span> <span style="color:#a6e22e">month</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">observationsTimestamp</span>.<span style="color:#a6e22e">getMonth</span>()<span style="color:#f92672">+</span><span style="color:#ae81ff">1</span>;
+		<span style="color:#a6e22e">emit</span>(<span style="color:#a6e22e">year</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;-&#34;</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">month</span>, <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">numAnimals</span>);
+	},
+	<span style="color:#66d9ef">function</span> <span style="color:#a6e22e">reduce</span>(<span style="color:#a6e22e">key</span>, <span style="color:#a6e22e">values</span>) {
+		<span style="color:#66d9ef">return</span> Array.<span style="color:#a6e22e">sum</span>(<span style="color:#a6e22e">values</span>);
+	},
+	{
+		<span style="color:#a6e22e">query</span><span style="color:#f92672">:</span>{<span style="color:#a6e22e">family</span><span style="color:#f92672">:</span><span style="color:#e6db74">&#34;Sharks&#34;</span>},
+		<span style="color:#a6e22e">out</span><span style="color:#f92672">:</span><span style="color:#e6db74">&#34;monthlySharkReport&#34;</span>
+	}
+);
+</code></pre></div><ol>
+<li>过滤器声明式地指定鲨鱼种类：query</li>
+<li>对于每个匹配查询的文档，都会调用一次map函数，并将其设置为文档对象</li>
+<li>map函数发射的键-值对按键分组。对于相同键（即相同的月份和年份）的所有键值对，调用reduce函数，reduce函数将特定所有观察到的动物数量相加</li>
+</ol>
+<p>例如，map函数输出emit(“1995-12”, 3) 和 emit(“1995-12”, 4)，随后，reduce函数将被调用，reduce(“1995-12”, [3,4])，返回7</p>
+<p>mapreduce的问题在于，编写两个js函数是有一定难度的；并且不利于查询优化器提供更多查询优化的机会，所以mongoDB增加了聚合管道的声明式查询语言的支持，能够达到和mapreduce一样的效果。</p>
+<p>聚合管道在表达能力上相当于SQL的子集，但是它使用了基于JSON的语法，而不是SQL的英语句式语法。或许这种差异仅仅是个品味问题，然而这个故事的寓意是NoSQL系统可能会发现自己意外地重新发明了SQL，尽管是伪装的。</p>
+
+        </div>
+
+        
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/post/git-%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98/">git 常见问题</a></li>
+        
+        <li><a href="/post/goland/">goland</a></li>
+        
+        <li><a href="/post/golang-channel/">golang channel</a></li>
+        
+        <li><a href="/post/https/">https</a></li>
+        
+        <li><a href="/post/json/">json</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='/tags/' target="_blank"></a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    
+
+    
+    
+    
+    
+
+</div>
+
+                    <footer id="footer">
+    <br />
+</footer>
+
+
+    
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+<style type="text/css">
+div.highlight {
+    position: relative;
+    margin: 1em 0px;
+}
+
+.copy-code {
+    display: none;
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    color: rgba(255, 255, 255, 0.8);
+    background: rgba(78, 78, 78, 0.8);
+    border-radius: var(--radius);
+    padding: 0 5px;
+    font: inherit;
+    user-select: none;
+    cursor: pointer;
+    border: 0;
+    --radius: 8px;
+}
+
+div.highlight:hover .copy-code,pre:hover .copy-code {
+    display: block;
+}
+
+</style>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+
+
+
+
+
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='//www.google.com/search' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://bytewong123.github.io/">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title">Latest articles</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/benchmark/" title="benchmark" target="_blank">benchmark</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/b%E6%A0%91/" title="b树" target="_blank">b树</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0daemonset/" title="cka真题练习——daemonset" target="_blank">cka真题练习——daemonset</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0deploy/" title="cka真题练习——deploy" target="_blank">cka真题练习——deploy</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0etcd%E5%A4%87%E4%BB%BD%E8%BF%98%E5%8E%9F/" title="cka真题练习——etcd备份还原" target="_blank">cka真题练习——etcd备份还原</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0ingress/" title="cka真题练习——ingress" target="_blank">cka真题练习——ingress</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0networkpolicy/" title="cka真题练习——NetworkPolicy" target="_blank">cka真题练习——NetworkPolicy</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0node%E8%B0%83%E5%BA%A6/" title="cka真题练习——node调度" target="_blank">cka真题练习——node调度</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0pod/" title="cka真题练习——pod" target="_blank">cka真题练习——pod</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0pv/" title="cka真题练习——pv" target="_blank">cka真题练习——pv</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>Categories</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://bytewong123.github.io/categories/golang/">golang (12)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/k8s/">k8s (24)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/mysql/">mysql (10)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/redis/">redis (10)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/rust/">rust (1)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/sql/">sql (1)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统 (3)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E6%9E%81%E5%AE%A2%E6%97%B6%E9%97%B4/">极客时间 (5)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/">消息队列 (1)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B3%BB%E7%BB%9F/">深入理解计算机系统 (1)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E7%AE%97%E6%B3%95/">算法 (138)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/">系统设计 (19)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>Tags</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://bytewong123.github.io/tags/golang/">golang</a>
+    
+    <a href="https://bytewong123.github.io/tags/k8s/">k8s</a>
+    
+    <a href="https://bytewong123.github.io/tags/kafka/">kafka</a>
+    
+    <a href="https://bytewong123.github.io/tags/mysql/">mysql</a>
+    
+    <a href="https://bytewong123.github.io/tags/redis/">redis</a>
+    
+    <a href="https://bytewong123.github.io/tags/rust/">rust</a>
+    
+    <a href="https://bytewong123.github.io/tags/sql/">sql</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E6%9E%81%E5%AE%A2%E6%97%B6%E9%97%B4/">极客时间</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/">消息队列</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E7%AE%97%E6%B3%95/">算法</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/">系统设计</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/">读书笔记</a>
+    
+</div>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title">Links</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a target="_blank" href="http://yuedu.baidu.com/ebook/14a722970740be1e640e9a3e" title="Android Gradle权威指南">Android Gradle权威指南</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="http://mirrors.flysnow.org/" title="常用开发工具CDN镜像">常用开发工具CDN镜像</a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title">Meta</h3>
+        <ul class="widget-list">
+            <li><a href="https://bytewong123.github.io/index.xml">RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

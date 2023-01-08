@@ -1,0 +1,2153 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Posts on sheeks</title>
+    <link>https://bytewong123.github.io/post/</link>
+    <description>Recent content in Posts on sheeks</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <lastBuildDate>Sun, 08 Jan 2023 18:06:57 +0800</lastBuildDate><atom:link href="https://bytewong123.github.io/post/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>benchmark</title>
+      <link>https://bytewong123.github.io/post/benchmark/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/benchmark/</guid>
+      <description>benchmark #技术/golang</description>
+    </item>
+    
+    <item>
+      <title>b树</title>
+      <link>https://bytewong123.github.io/post/b%E6%A0%91/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/b%E6%A0%91/</guid>
+      <description>b树 #算法/b树</description>
+    </item>
+    
+    <item>
+      <title>cka真题练习——daemonset</title>
+      <link>https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0daemonset/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0daemonset/</guid>
+      <description>cka真题练习——daemonset 使用daemonset的方式，保证每个node都有一个nginx容器 Set configuration context $kubectl config use-context k8s.</description>
+    </item>
+    
+    <item>
+      <title>cka真题练习——deploy</title>
+      <link>https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0deploy/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0deploy/</guid>
+      <description>cka真题练习——deploy scale the deployment testpod to 4 pods 答案 kubectl scale deploy testpod --replicas=4 </description>
+    </item>
+    
+    <item>
+      <title>cka真题练习——etcd备份还原</title>
+      <link>https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0etcd%E5%A4%87%E4%BB%BD%E8%BF%98%E5%8E%9F/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0etcd%E5%A4%87%E4%BB%BD%E8%BF%98%E5%8E%9F/</guid>
+      <description>cka真题练习——etcd备份还原 First,create a snapshot of the existing etcd instance running at https://127.</description>
+    </item>
+    
+    <item>
+      <title>cka真题练习——ingress</title>
+      <link>https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0ingress/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0ingress/</guid>
+      <description>cka真题练习——ingress Create a new nginx Ingress resource as follows:Name: pingNamespace: ing-internal Exposing service hello on path /hello using service port 80 The availability of service hello can be checked using the following command,which should return hello: curl -kl &amp;lt;INTERNAL_IP&amp;gt;/hello 答案 创建ingress apiVersion: networking.</description>
+    </item>
+    
+    <item>
+      <title>cka真题练习——NetworkPolicy</title>
+      <link>https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0networkpolicy/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0networkpolicy/</guid>
+      <description>cka真题练习——NetworkPolicy 在某个ns内部，网络通信只允许访问pod的9200端口 Create a new NetworkPolicy named allow-port-from-namespace that allows Pods in the existing namespace my-app to connect to port 9200 of other pods in the same namespacenetworkpolicy的配置解读 apiVersion: networking.</description>
+    </item>
+    
+    <item>
+      <title>cka真题练习——node调度</title>
+      <link>https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0node%E8%B0%83%E5%BA%A6/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0node%E8%B0%83%E5%BA%A6/</guid>
+      <description>cka真题练习——node调度 1.</description>
+    </item>
+    
+    <item>
+      <title>cka真题练习——pod</title>
+      <link>https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0pod/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0pod/</guid>
+      <description>cka真题练习——pod 创建一个多容器的pod Create a pod named multi-container with a single app container for each of the following images running in side(there may be between 1 and 4 images specified):nginx + redis + memcached + consul 答案 apiVersion: v1 kind: Pod metadata: name: multi-container spec: containers: - name: nginx image: nginx - name: redis image: redis - name: memcached image: memcached - name: consul image: consul </description>
+    </item>
+    
+    <item>
+      <title>cka真题练习——pv</title>
+      <link>https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0pv/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0pv/</guid>
+      <description>cka真题练习——pv 创建一个hostPath类型的pv Create a persistent volume with name app-config,of capacity 4Gi and access mode ReadWriteMany.</description>
+    </item>
+    
+    <item>
+      <title>cka真题练习——pvc</title>
+      <link>https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0pvc/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0pvc/</guid>
+      <description>cka真题练习——pvc 1.</description>
+    </item>
+    
+    <item>
+      <title>cka真题练习——service</title>
+      <link>https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0service/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0service/</guid>
+      <description>cka真题练习——service Reconfigure the existing deployment front-end and add a port specification named http exposing port 80/tcp of the existing container nginx.</description>
+    </item>
+    
+    <item>
+      <title>cka真题练习——sidecar</title>
+      <link>https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0sidecar/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0sidecar/</guid>
+      <description>cka真题练习——sidecar 通过一个sidecar，收集主容器的日志 Without changing its existing containers,an existing pod needs to be integrated into kubernetes&#39;s built-in loggingarchitecture (e.</description>
+    </item>
+    
+    <item>
+      <title>cka真题练习——日志</title>
+      <link>https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0%E6%97%A5%E5%BF%97/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0%E6%97%A5%E5%BF%97/</guid>
+      <description>cka真题练习——日志 从名为bar的pod中监听到包含file-not-found的日志，并将其输出到/opt/test/bar目录下 Monitor the logs of pod bar and:Exract log lines corresponding to error file-not-foundWrite them to /opt/test/bar 答案 kubectl logs bar | grep &#39;file-not-found&#39; &amp;gt; /opt/test/bar </description>
+    </item>
+    
+    <item>
+      <title>cka真题练习——权限控制</title>
+      <link>https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0%E6%9D%83%E9%99%90%E6%8E%A7%E5%88%B6/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0%E6%9D%83%E9%99%90%E6%8E%A7%E5%88%B6/</guid>
+      <description>cka真题练习——权限控制 创建ClusterRole绑定到service account You have been asked to create a new ClusterRole for a deployment pipeline and bind it to a specific ServiceAccount scoped to a specific namespace.</description>
+    </item>
+    
+    <item>
+      <title>cka真题练习——集群升级</title>
+      <link>https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0%E9%9B%86%E7%BE%A4%E5%8D%87%E7%BA%A7/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0%E9%9B%86%E7%BE%A4%E5%8D%87%E7%BA%A7/</guid>
+      <description>cka真题练习——集群升级 Given an existing Kubernetes cluster running version 1.</description>
+    </item>
+    
+    <item>
+      <title>cka真题练习——集群监控</title>
+      <link>https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0%E9%9B%86%E7%BE%A4%E7%9B%91%E6%8E%A7/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0%E9%9B%86%E7%BE%A4%E7%9B%91%E6%8E%A7/</guid>
+      <description>cka真题练习——集群监控 查找cpu使用最多的pod From the pod label name=overloaded-cpu, find pods running high cpu workloads and write the name of the podconsuming most cpu to the file /opt/test1.</description>
+    </item>
+    
+    <item>
+      <title>cka真题练习——集群运维</title>
+      <link>https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0%E9%9B%86%E7%BE%A4%E8%BF%90%E7%BB%B4/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0%E9%9B%86%E7%BE%A4%E8%BF%90%E7%BB%B4/</guid>
+      <description>cka真题练习——集群运维 检查有问题的node并恢复 A kubernetes woker node,named wk8s-node-0 is in state Not Ready.</description>
+    </item>
+    
+    <item>
+      <title>daemonset原理</title>
+      <link>https://bytewong123.github.io/post/daemonset%E5%8E%9F%E7%90%86/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/daemonset%E5%8E%9F%E7%90%86/</guid>
+      <description>daemonset原理 #k8s DaemonSet 的主要作用，是让你在 Kubernetes 集群里，运行一个 Daemon Pod。 所以，这个 Pod 有如下三个特征</description>
+    </item>
+    
+    <item>
+      <title>deployment原理</title>
+      <link>https://bytewong123.github.io/post/deployment%E5%8E%9F%E7%90%86/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/deployment%E5%8E%9F%E7%90%86/</guid>
+      <description>deployment原理 #k8s</description>
+    </item>
+    
+    <item>
+      <title>gc总结</title>
+      <link>https://bytewong123.github.io/post/gc%E6%80%BB%E7%BB%93/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/gc%E6%80%BB%E7%BB%93/</guid>
+      <description>gc总结 #技术/golang/gc</description>
+    </item>
+    
+    <item>
+      <title>geohash</title>
+      <link>https://bytewong123.github.io/post/geohash/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/geohash/</guid>
+      <description>geohash #技术/数据库/redis</description>
+    </item>
+    
+    <item>
+      <title>git 常见问题</title>
+      <link>https://bytewong123.github.io/post/git-%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/git-%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98/</guid>
+      <description>git 常见问题 #git</description>
+    </item>
+    
+    <item>
+      <title>go module版本选择</title>
+      <link>https://bytewong123.github.io/post/go-module%E7%89%88%E6%9C%AC%E9%80%89%E6%8B%A9/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/go-module%E7%89%88%E6%9C%AC%E9%80%89%E6%8B%A9/</guid>
+      <description>go module版本选择 #技术/golang/版本控制</description>
+    </item>
+    
+    <item>
+      <title>goland</title>
+      <link>https://bytewong123.github.io/post/goland/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/goland/</guid>
+      <description>goland deployment rootpath+deployment path = 服务器存放的路径</description>
+    </item>
+    
+    <item>
+      <title>golang channel</title>
+      <link>https://bytewong123.github.io/post/golang-channel/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/golang-channel/</guid>
+      <description>golang channel #go</description>
+    </item>
+    
+    <item>
+      <title>golang gc优化</title>
+      <link>https://bytewong123.github.io/post/golang-gc%E4%BC%98%E5%8C%96/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/golang-gc%E4%BC%98%E5%8C%96/</guid>
+      <description>golang gc优化 #技术/golang/gc</description>
+    </item>
+    
+    <item>
+      <title>golang内存管理</title>
+      <link>https://bytewong123.github.io/post/golang%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/golang%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/</guid>
+      <description>golang内存管理 #技术/golang</description>
+    </item>
+    
+    <item>
+      <title>gorm scanner value</title>
+      <link>https://bytewong123.github.io/post/gorm-scanner-value/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/gorm-scanner-value/</guid>
+      <description>gorm scanner value #技术/golang/代码风格</description>
+    </item>
+    
+    <item>
+      <title>https</title>
+      <link>https://bytewong123.github.io/post/https/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/https/</guid>
+      <description>https 80 http 443 https专用；不能改，改了浏览器就不能用了 1.</description>
+    </item>
+    
+    <item>
+      <title>interface</title>
+      <link>https://bytewong123.github.io/post/interface/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/interface/</guid>
+      <description>interface #技术/golang/interface golang/4、interface.</description>
+    </item>
+    
+    <item>
+      <title>io模型</title>
+      <link>https://bytewong123.github.io/post/io%E6%A8%A1%E5%9E%8B/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/io%E6%A8%A1%E5%9E%8B/</guid>
+      <description>io模型 #技术/io模型</description>
+    </item>
+    
+    <item>
+      <title>job、cronjob原理</title>
+      <link>https://bytewong123.github.io/post/jobcronjob%E5%8E%9F%E7%90%86/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/jobcronjob%E5%8E%9F%E7%90%86/</guid>
+      <description>job、cronjob原理 #k8s</description>
+    </item>
+    
+    <item>
+      <title>json</title>
+      <link>https://bytewong123.github.io/post/json/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/json/</guid>
+      <description>json #go</description>
+    </item>
+    
+    <item>
+      <title>k8s controller manager</title>
+      <link>https://bytewong123.github.io/post/k8s-controller-manager/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/k8s-controller-manager/</guid>
+      <description>k8s controller manager #k8s controller manager其实是一系列controller的集合，在k8s项目的pkg/controller可以看到：</description>
+    </item>
+    
+    <item>
+      <title>k8s架构体系</title>
+      <link>https://bytewong123.github.io/post/k8s%E6%9E%B6%E6%9E%84%E4%BD%93%E7%B3%BB/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/k8s%E6%9E%B6%E6%9E%84%E4%BD%93%E7%B3%BB/</guid>
+      <description>k8s架构体系 #k8s</description>
+    </item>
+    
+    <item>
+      <title>kafka知识点汇总</title>
+      <link>https://bytewong123.github.io/post/kafka%E7%9F%A5%E8%AF%86%E7%82%B9%E6%B1%87%E6%80%BB/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/kafka%E7%9F%A5%E8%AF%86%E7%82%B9%E6%B1%87%E6%80%BB/</guid>
+      <description>kafka知识点汇总 #技术/消息队列</description>
+    </item>
+    
+    <item>
+      <title>kubebuilder初体验</title>
+      <link>https://bytewong123.github.io/post/kubebuilder%E5%88%9D%E4%BD%93%E9%AA%8C/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/kubebuilder%E5%88%9D%E4%BD%93%E9%AA%8C/</guid>
+      <description>kubebuilder初体验 #k8s</description>
+    </item>
+    
+    <item>
+      <title>lru</title>
+      <link>https://bytewong123.github.io/post/lru/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/lru/</guid>
+      <description>lru #算法</description>
+    </item>
+    
+    <item>
+      <title>mongodb副本集</title>
+      <link>https://bytewong123.github.io/post/mongodb%E5%89%AF%E6%9C%AC%E9%9B%86/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/mongodb%E5%89%AF%E6%9C%AC%E9%9B%86/</guid>
+      <description>mongodb副本集 #mongodb</description>
+    </item>
+    
+    <item>
+      <title>mpg</title>
+      <link>https://bytewong123.github.io/post/mpg/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/mpg/</guid>
+      <description>mpg #iv/golang</description>
+    </item>
+    
+    <item>
+      <title>mysql知识点</title>
+      <link>https://bytewong123.github.io/post/mysql%E7%9F%A5%E8%AF%86%E7%82%B9/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/mysql%E7%9F%A5%E8%AF%86%E7%82%B9/</guid>
+      <description>mysql知识点 #技术/数据库/mysql</description>
+    </item>
+    
+    <item>
+      <title>mysql知识点汇总——mvcc</title>
+      <link>https://bytewong123.github.io/post/mysql%E7%9F%A5%E8%AF%86%E7%82%B9%E6%B1%87%E6%80%BBmvcc/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/mysql%E7%9F%A5%E8%AF%86%E7%82%B9%E6%B1%87%E6%80%BBmvcc/</guid>
+      <description>mysql知识点汇总——mvcc #技术/数据库/mysql</description>
+    </item>
+    
+    <item>
+      <title>mysql知识点汇总——sql性能</title>
+      <link>https://bytewong123.github.io/post/mysql%E7%9F%A5%E8%AF%86%E7%82%B9%E6%B1%87%E6%80%BBsql%E6%80%A7%E8%83%BD/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/mysql%E7%9F%A5%E8%AF%86%E7%82%B9%E6%B1%87%E6%80%BBsql%E6%80%A7%E8%83%BD/</guid>
+      <description>mysql知识点汇总——sql性能 #技术/数据库/mysql</description>
+    </item>
+    
+    <item>
+      <title>mysql知识点汇总——事务隔离级别</title>
+      <link>https://bytewong123.github.io/post/mysql%E7%9F%A5%E8%AF%86%E7%82%B9%E6%B1%87%E6%80%BB%E4%BA%8B%E5%8A%A1%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/mysql%E7%9F%A5%E8%AF%86%E7%82%B9%E6%B1%87%E6%80%BB%E4%BA%8B%E5%8A%A1%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB/</guid>
+      <description>mysql知识点汇总——事务隔离级别 #技术/数据库/mysql</description>
+    </item>
+    
+    <item>
+      <title>mysql知识点汇总——分库分表</title>
+      <link>https://bytewong123.github.io/post/mysql%E7%9F%A5%E8%AF%86%E7%82%B9%E6%B1%87%E6%80%BB%E5%88%86%E5%BA%93%E5%88%86%E8%A1%A8/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/mysql%E7%9F%A5%E8%AF%86%E7%82%B9%E6%B1%87%E6%80%BB%E5%88%86%E5%BA%93%E5%88%86%E8%A1%A8/</guid>
+      <description>mysql知识点汇总——分库分表 #技术/数据库/mysql</description>
+    </item>
+    
+    <item>
+      <title>mysql知识点汇总——如何保证ACID</title>
+      <link>https://bytewong123.github.io/post/mysql%E7%9F%A5%E8%AF%86%E7%82%B9%E6%B1%87%E6%80%BB%E5%A6%82%E4%BD%95%E4%BF%9D%E8%AF%81acid/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/mysql%E7%9F%A5%E8%AF%86%E7%82%B9%E6%B1%87%E6%80%BB%E5%A6%82%E4%BD%95%E4%BF%9D%E8%AF%81acid/</guid>
+      <description>mysql知识点汇总——如何保证ACID #技术/数据库/mysql</description>
+    </item>
+    
+    <item>
+      <title>mysql知识点汇总——数据存储</title>
+      <link>https://bytewong123.github.io/post/mysql%E7%9F%A5%E8%AF%86%E7%82%B9%E6%B1%87%E6%80%BB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/mysql%E7%9F%A5%E8%AF%86%E7%82%B9%E6%B1%87%E6%80%BB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/</guid>
+      <description>mysql知识点汇总——数据存储 #技术/数据库/mysql</description>
+    </item>
+    
+    <item>
+      <title>mysql知识点汇总——索引</title>
+      <link>https://bytewong123.github.io/post/mysql%E7%9F%A5%E8%AF%86%E7%82%B9%E6%B1%87%E6%80%BB%E7%B4%A2%E5%BC%95/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/mysql%E7%9F%A5%E8%AF%86%E7%82%B9%E6%B1%87%E6%80%BB%E7%B4%A2%E5%BC%95/</guid>
+      <description>mysql知识点汇总——索引 #技术/数据库/mysql</description>
+    </item>
+    
+    <item>
+      <title>mysql知识点汇总——锁</title>
+      <link>https://bytewong123.github.io/post/mysql%E7%9F%A5%E8%AF%86%E7%82%B9%E6%B1%87%E6%80%BB%E9%94%81/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/mysql%E7%9F%A5%E8%AF%86%E7%82%B9%E6%B1%87%E6%80%BB%E9%94%81/</guid>
+      <description>mysql知识点汇总——锁 #技术/数据库/mysql</description>
+    </item>
+    
+    <item>
+      <title>mysql知识点汇总——高可用</title>
+      <link>https://bytewong123.github.io/post/mysql%E7%9F%A5%E8%AF%86%E7%82%B9%E6%B1%87%E6%80%BB%E9%AB%98%E5%8F%AF%E7%94%A8/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/mysql%E7%9F%A5%E8%AF%86%E7%82%B9%E6%B1%87%E6%80%BB%E9%AB%98%E5%8F%AF%E7%94%A8/</guid>
+      <description>mysql知识点汇总——高可用 #技术/数据库/mysql</description>
+    </item>
+    
+    <item>
+      <title>netpoll</title>
+      <link>https://bytewong123.github.io/post/netpoll/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/netpoll/</guid>
+      <description>netpoll #技术/golang/netpoll</description>
+    </item>
+    
+    <item>
+      <title>node调度</title>
+      <link>https://bytewong123.github.io/post/node%E8%B0%83%E5%BA%A6/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/node%E8%B0%83%E5%BA%A6/</guid>
+      <description>node调度 将节点设置为不可用并重新调度所有运行在上面的pod Set the node named ek8s-node-1 as unavailable and reschedule all the pods running on it Node节点禁止调度（平滑维护）方式- cordon，drain，delete cordon、drain和delete三个命令都会使node停止被调度，后期创建的pod不会继续被调度到该节点上，但操作的暴力程度却不一样。 但是若指定pod调度到该节点，仍然可以被调度到该节点上</description>
+    </item>
+    
+    <item>
+      <title>pod原理</title>
+      <link>https://bytewong123.github.io/post/pod%E5%8E%9F%E7%90%86/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/pod%E5%8E%9F%E7%90%86/</guid>
+      <description>pod原理 #k8s</description>
+    </item>
+    
+    <item>
+      <title>pv、pvc原理</title>
+      <link>https://bytewong123.github.io/post/pvpvc%E5%8E%9F%E7%90%86/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/pvpvc%E5%8E%9F%E7%90%86/</guid>
+      <description>pv、pvc原理 PV 描述的，是持久化存储数据卷 PVC 描述的，则是 Pod 所希望使用的持久化存储的属性。比如，Volume 存储的大小、可读写权限等等。</description>
+    </item>
+    
+    <item>
+      <title>redis cluster operator开发</title>
+      <link>https://bytewong123.github.io/post/redis-cluster-operator%E5%BC%80%E5%8F%91/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/redis-cluster-operator%E5%BC%80%E5%8F%91/</guid>
+      <description>redis cluster operator开发 </description>
+    </item>
+    
+    <item>
+      <title>redis实现关注模型</title>
+      <link>https://bytewong123.github.io/post/redis%E5%AE%9E%E7%8E%B0%E5%85%B3%E6%B3%A8%E6%A8%A1%E5%9E%8B/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/redis%E5%AE%9E%E7%8E%B0%E5%85%B3%E6%B3%A8%E6%A8%A1%E5%9E%8B/</guid>
+      <description>redis实现关注模型 #技术/系统设计</description>
+    </item>
+    
+    <item>
+      <title>redis知识点</title>
+      <link>https://bytewong123.github.io/post/redis%E7%9F%A5%E8%AF%86%E7%82%B9/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/redis%E7%9F%A5%E8%AF%86%E7%82%B9/</guid>
+      <description>redis知识点 #技术/数据库/redis</description>
+    </item>
+    
+    <item>
+      <title>redis知识点汇总——主从复制</title>
+      <link>https://bytewong123.github.io/post/redis%E7%9F%A5%E8%AF%86%E7%82%B9%E6%B1%87%E6%80%BB%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/redis%E7%9F%A5%E8%AF%86%E7%82%B9%E6%B1%87%E6%80%BB%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6/</guid>
+      <description>redis知识点汇总——主从复制 #技术/数据库/redis</description>
+    </item>
+    
+    <item>
+      <title>redis知识点汇总——哨兵</title>
+      <link>https://bytewong123.github.io/post/redis%E7%9F%A5%E8%AF%86%E7%82%B9%E6%B1%87%E6%80%BB%E5%93%A8%E5%85%B5/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/redis%E7%9F%A5%E8%AF%86%E7%82%B9%E6%B1%87%E6%80%BB%E5%93%A8%E5%85%B5/</guid>
+      <description>redis知识点汇总——哨兵 #技术/数据库/redis</description>
+    </item>
+    
+    <item>
+      <title>redis知识点汇总——常见问题</title>
+      <link>https://bytewong123.github.io/post/redis%E7%9F%A5%E8%AF%86%E7%82%B9%E6%B1%87%E6%80%BB%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/redis%E7%9F%A5%E8%AF%86%E7%82%B9%E6%B1%87%E6%80%BB%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98/</guid>
+      <description>redis知识点汇总——常见问题 #技术/数据库/redis</description>
+    </item>
+    
+    <item>
+      <title>redis知识点汇总——持久化</title>
+      <link>https://bytewong123.github.io/post/redis%E7%9F%A5%E8%AF%86%E7%82%B9%E6%B1%87%E6%80%BB%E6%8C%81%E4%B9%85%E5%8C%96/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/redis%E7%9F%A5%E8%AF%86%E7%82%B9%E6%B1%87%E6%80%BB%E6%8C%81%E4%B9%85%E5%8C%96/</guid>
+      <description>redis知识点汇总——持久化 #技术/数据库/redis</description>
+    </item>
+    
+    <item>
+      <title>redis知识点汇总——数据存储</title>
+      <link>https://bytewong123.github.io/post/redis%E7%9F%A5%E8%AF%86%E7%82%B9%E6%B1%87%E6%80%BB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/redis%E7%9F%A5%E8%AF%86%E7%82%B9%E6%B1%87%E6%80%BB%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/</guid>
+      <description>redis知识点汇总——数据存储 #技术/数据库/redis</description>
+    </item>
+    
+    <item>
+      <title>redis知识点汇总——数据结构</title>
+      <link>https://bytewong123.github.io/post/redis%E7%9F%A5%E8%AF%86%E7%82%B9%E6%B1%87%E6%80%BB%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/redis%E7%9F%A5%E8%AF%86%E7%82%B9%E6%B1%87%E6%80%BB%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/</guid>
+      <description>redis知识点汇总——数据结构 #技术/数据库/redis</description>
+    </item>
+    
+    <item>
+      <title>redis知识点汇总——线程模型</title>
+      <link>https://bytewong123.github.io/post/redis%E7%9F%A5%E8%AF%86%E7%82%B9%E6%B1%87%E6%80%BB%E7%BA%BF%E7%A8%8B%E6%A8%A1%E5%9E%8B/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/redis%E7%9F%A5%E8%AF%86%E7%82%B9%E6%B1%87%E6%80%BB%E7%BA%BF%E7%A8%8B%E6%A8%A1%E5%9E%8B/</guid>
+      <description>redis知识点汇总——线程模型 #技术/数据库/redis</description>
+    </item>
+    
+    <item>
+      <title>redis知识点汇总——集群</title>
+      <link>https://bytewong123.github.io/post/redis%E7%9F%A5%E8%AF%86%E7%82%B9%E6%B1%87%E6%80%BB%E9%9B%86%E7%BE%A4/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/redis%E7%9F%A5%E8%AF%86%E7%82%B9%E6%B1%87%E6%80%BB%E9%9B%86%E7%BE%A4/</guid>
+      <description>redis知识点汇总——集群 #技术/数据库/redis</description>
+    </item>
+    
+    <item>
+      <title>rust学习笔记</title>
+      <link>https://bytewong123.github.io/post/rust%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/rust%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</guid>
+      <description>rust学习笔记 #rust</description>
+    </item>
+    
+    <item>
+      <title>sort</title>
+      <link>https://bytewong123.github.io/post/sort/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/sort/</guid>
+      <description>sort #go</description>
+    </item>
+    
+    <item>
+      <title>statefulset原理</title>
+      <link>https://bytewong123.github.io/post/statefulset%E5%8E%9F%E7%90%86/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/statefulset%E5%8E%9F%E7%90%86/</guid>
+      <description>statefulset原理 #k8s</description>
+    </item>
+    
+    <item>
+      <title>zookeeper的zap协议</title>
+      <link>https://bytewong123.github.io/post/zookeeper%E7%9A%84zap%E5%8D%8F%E8%AE%AE/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/zookeeper%E7%9A%84zap%E5%8D%8F%E8%AE%AE/</guid>
+      <description>zookeeper的zap协议 #技术/系统设计 #技术/分布式理论</description>
+    </item>
+    
+    <item>
+      <title>Z字型变换</title>
+      <link>https://bytewong123.github.io/post/z%E5%AD%97%E5%9E%8B%E5%8F%98%E6%8D%A2/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/z%E5%AD%97%E5%9E%8B%E5%8F%98%E6%8D%A2/</guid>
+      <description>Z字型变换 #算法/数组 #算法/仍然不会</description>
+    </item>
+    
+    <item>
+      <title>三数相加（附快速排序）</title>
+      <link>https://bytewong123.github.io/post/%E4%B8%89%E6%95%B0%E7%9B%B8%E5%8A%A0%E9%99%84%E5%BF%AB%E9%80%9F%E6%8E%92%E5%BA%8F/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E4%B8%89%E6%95%B0%E7%9B%B8%E5%8A%A0%E9%99%84%E5%BF%AB%E9%80%9F%E6%8E%92%E5%BA%8F/</guid>
+      <description>三数相加（附快速排序） #算法/数组 #算法/双指针 #算法/仍然不会</description>
+    </item>
+    
+    <item>
+      <title>不同的二叉搜索树</title>
+      <link>https://bytewong123.github.io/post/%E4%B8%8D%E5%90%8C%E7%9A%84%E4%BA%8C%E5%8F%89%E6%90%9C%E7%B4%A2%E6%A0%91/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E4%B8%8D%E5%90%8C%E7%9A%84%E4%BA%8C%E5%8F%89%E6%90%9C%E7%B4%A2%E6%A0%91/</guid>
+      <description>不同的二叉搜索树 力扣</description>
+    </item>
+    
+    <item>
+      <title>不用加减法做加法</title>
+      <link>https://bytewong123.github.io/post/%E4%B8%8D%E7%94%A8%E5%8A%A0%E5%87%8F%E6%B3%95%E5%81%9A%E5%8A%A0%E6%B3%95/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E4%B8%8D%E7%94%A8%E5%8A%A0%E5%87%8F%E6%B3%95%E5%81%9A%E5%8A%A0%E6%B3%95/</guid>
+      <description>不用加减法做加法 #算法/位运算 #算法/仍然不会</description>
+    </item>
+    
+    <item>
+      <title>丑数</title>
+      <link>https://bytewong123.github.io/post/%E4%B8%91%E6%95%B0/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E4%B8%91%E6%95%B0/</guid>
+      <description>丑数 #算法/dp</description>
+    </item>
+    
+    <item>
+      <title>两个排序数组的中位数</title>
+      <link>https://bytewong123.github.io/post/%E4%B8%A4%E4%B8%AA%E6%8E%92%E5%BA%8F%E6%95%B0%E7%BB%84%E7%9A%84%E4%B8%AD%E4%BD%8D%E6%95%B0/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E4%B8%A4%E4%B8%AA%E6%8E%92%E5%BA%8F%E6%95%B0%E7%BB%84%E7%9A%84%E4%B8%AD%E4%BD%8D%E6%95%B0/</guid>
+      <description>两个排序数组的中位数 #算法/数组/二分查找 #算法/仍然不会</description>
+    </item>
+    
+    <item>
+      <title>两个栈实现队列</title>
+      <link>https://bytewong123.github.io/post/%E4%B8%A4%E4%B8%AA%E6%A0%88%E5%AE%9E%E7%8E%B0%E9%98%9F%E5%88%97/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E4%B8%A4%E4%B8%AA%E6%A0%88%E5%AE%9E%E7%8E%B0%E9%98%9F%E5%88%97/</guid>
+      <description>两个栈实现队列 #算法/设计 #算法/栈 #算法/剑指offer</description>
+    </item>
+    
+    <item>
+      <title>两个链表的第一个公共节点</title>
+      <link>https://bytewong123.github.io/post/%E4%B8%A4%E4%B8%AA%E9%93%BE%E8%A1%A8%E7%9A%84%E7%AC%AC%E4%B8%80%E4%B8%AA%E5%85%AC%E5%85%B1%E8%8A%82%E7%82%B9/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E4%B8%A4%E4%B8%AA%E9%93%BE%E8%A1%A8%E7%9A%84%E7%AC%AC%E4%B8%80%E4%B8%AA%E5%85%AC%E5%85%B1%E8%8A%82%E7%82%B9/</guid>
+      <description>两个链表的第一个公共节点 #算法/链表/快慢指针</description>
+    </item>
+    
+    <item>
+      <title>买卖股票一次的最大利润</title>
+      <link>https://bytewong123.github.io/post/%E4%B9%B0%E5%8D%96%E8%82%A1%E7%A5%A8%E4%B8%80%E6%AC%A1%E7%9A%84%E6%9C%80%E5%A4%A7%E5%88%A9%E6%B6%A6/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E4%B9%B0%E5%8D%96%E8%82%A1%E7%A5%A8%E4%B8%80%E6%AC%A1%E7%9A%84%E6%9C%80%E5%A4%A7%E5%88%A9%E6%B6%A6/</guid>
+      <description>买卖股票一次的最大利润 #算法/dp/股票问题 #算法/仍然不会</description>
+    </item>
+    
+    <item>
+      <title>买卖股票尽可能多次含冷冻期的最大利润</title>
+      <link>https://bytewong123.github.io/post/%E4%B9%B0%E5%8D%96%E8%82%A1%E7%A5%A8%E5%B0%BD%E5%8F%AF%E8%83%BD%E5%A4%9A%E6%AC%A1%E5%90%AB%E5%86%B7%E5%86%BB%E6%9C%9F%E7%9A%84%E6%9C%80%E5%A4%A7%E5%88%A9%E6%B6%A6/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E4%B9%B0%E5%8D%96%E8%82%A1%E7%A5%A8%E5%B0%BD%E5%8F%AF%E8%83%BD%E5%A4%9A%E6%AC%A1%E5%90%AB%E5%86%B7%E5%86%BB%E6%9C%9F%E7%9A%84%E6%9C%80%E5%A4%A7%E5%88%A9%E6%B6%A6/</guid>
+      <description>买卖股票尽可能多次含冷冻期的最大利润 #算法 #算法/dp/股票问题</description>
+    </item>
+    
+    <item>
+      <title>买卖股票尽可能多次的最大利润</title>
+      <link>https://bytewong123.github.io/post/%E4%B9%B0%E5%8D%96%E8%82%A1%E7%A5%A8%E5%B0%BD%E5%8F%AF%E8%83%BD%E5%A4%9A%E6%AC%A1%E7%9A%84%E6%9C%80%E5%A4%A7%E5%88%A9%E6%B6%A6/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E4%B9%B0%E5%8D%96%E8%82%A1%E7%A5%A8%E5%B0%BD%E5%8F%AF%E8%83%BD%E5%A4%9A%E6%AC%A1%E7%9A%84%E6%9C%80%E5%A4%A7%E5%88%A9%E6%B6%A6/</guid>
+      <description>买卖股票尽可能多次的最大利润 #算法/dp/股票问题 #算法/仍然不会</description>
+    </item>
+    
+    <item>
+      <title>买卖股票尽可能多次，含手续费的最大利润</title>
+      <link>https://bytewong123.github.io/post/%E4%B9%B0%E5%8D%96%E8%82%A1%E7%A5%A8%E5%B0%BD%E5%8F%AF%E8%83%BD%E5%A4%9A%E6%AC%A1%E5%90%AB%E6%89%8B%E7%BB%AD%E8%B4%B9%E7%9A%84%E6%9C%80%E5%A4%A7%E5%88%A9%E6%B6%A6/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E4%B9%B0%E5%8D%96%E8%82%A1%E7%A5%A8%E5%B0%BD%E5%8F%AF%E8%83%BD%E5%A4%9A%E6%AC%A1%E5%90%AB%E6%89%8B%E7%BB%AD%E8%B4%B9%E7%9A%84%E6%9C%80%E5%A4%A7%E5%88%A9%E6%B6%A6/</guid>
+      <description>买卖股票尽可能多次，含手续费的最大利润 #算法/dp/股票问题</description>
+    </item>
+    
+    <item>
+      <title>买卖股票最多只能买卖k次的最大利润</title>
+      <link>https://bytewong123.github.io/post/%E4%B9%B0%E5%8D%96%E8%82%A1%E7%A5%A8%E6%9C%80%E5%A4%9A%E5%8F%AA%E8%83%BD%E4%B9%B0%E5%8D%96k%E6%AC%A1%E7%9A%84%E6%9C%80%E5%A4%A7%E5%88%A9%E6%B6%A6/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E4%B9%B0%E5%8D%96%E8%82%A1%E7%A5%A8%E6%9C%80%E5%A4%9A%E5%8F%AA%E8%83%BD%E4%B9%B0%E5%8D%96k%E6%AC%A1%E7%9A%84%E6%9C%80%E5%A4%A7%E5%88%A9%E6%B6%A6/</guid>
+      <description>买卖股票最多只能买卖k次的最大利润 #算法/dp/股票问题</description>
+    </item>
+    
+    <item>
+      <title>买卖股票最多只能买卖两次的最大利润</title>
+      <link>https://bytewong123.github.io/post/%E4%B9%B0%E5%8D%96%E8%82%A1%E7%A5%A8%E6%9C%80%E5%A4%9A%E5%8F%AA%E8%83%BD%E4%B9%B0%E5%8D%96%E4%B8%A4%E6%AC%A1%E7%9A%84%E6%9C%80%E5%A4%A7%E5%88%A9%E6%B6%A6/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E4%B9%B0%E5%8D%96%E8%82%A1%E7%A5%A8%E6%9C%80%E5%A4%9A%E5%8F%AA%E8%83%BD%E4%B9%B0%E5%8D%96%E4%B8%A4%E6%AC%A1%E7%9A%84%E6%9C%80%E5%A4%A7%E5%88%A9%E6%B6%A6/</guid>
+      <description>买卖股票最多只能买卖两次的最大利润 #算法/dp/股票问题</description>
+    </item>
+    
+    <item>
+      <title>事务拆解</title>
+      <link>https://bytewong123.github.io/post/%E4%BA%8B%E5%8A%A1%E6%8B%86%E8%A7%A3/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E4%BA%8B%E5%8A%A1%E6%8B%86%E8%A7%A3/</guid>
+      <description>事务拆解 #技术/系统设计</description>
+    </item>
+    
+    <item>
+      <title>二叉搜索树与双向链表</title>
+      <link>https://bytewong123.github.io/post/%E4%BA%8C%E5%8F%89%E6%90%9C%E7%B4%A2%E6%A0%91%E4%B8%8E%E5%8F%8C%E5%90%91%E9%93%BE%E8%A1%A8/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E4%BA%8C%E5%8F%89%E6%90%9C%E7%B4%A2%E6%A0%91%E4%B8%8E%E5%8F%8C%E5%90%91%E9%93%BE%E8%A1%A8/</guid>
+      <description>二叉搜索树与双向链表 #算法/二叉树 #算法/剑指offer #算法/仍然不会</description>
+    </item>
+    
+    <item>
+      <title>二叉搜索树的中序后继</title>
+      <link>https://bytewong123.github.io/post/%E4%BA%8C%E5%8F%89%E6%90%9C%E7%B4%A2%E6%A0%91%E7%9A%84%E4%B8%AD%E5%BA%8F%E5%90%8E%E7%BB%A7/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E4%BA%8C%E5%8F%89%E6%90%9C%E7%B4%A2%E6%A0%91%E7%9A%84%E4%B8%AD%E5%BA%8F%E5%90%8E%E7%BB%A7/</guid>
+      <description>二叉搜索树的中序后继 #算法/二叉树</description>
+    </item>
+    
+    <item>
+      <title>二叉搜索树的后序遍历序列</title>
+      <link>https://bytewong123.github.io/post/%E4%BA%8C%E5%8F%89%E6%90%9C%E7%B4%A2%E6%A0%91%E7%9A%84%E5%90%8E%E5%BA%8F%E9%81%8D%E5%8E%86%E5%BA%8F%E5%88%97/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E4%BA%8C%E5%8F%89%E6%90%9C%E7%B4%A2%E6%A0%91%E7%9A%84%E5%90%8E%E5%BA%8F%E9%81%8D%E5%8E%86%E5%BA%8F%E5%88%97/</guid>
+      <description>二叉搜索树的后序遍历序列 #算法/二叉树/遍历序列 #算法/剑指offer</description>
+    </item>
+    
+    <item>
+      <title>二叉搜索树的后续遍历序列</title>
+      <link>https://bytewong123.github.io/post/%E4%BA%8C%E5%8F%89%E6%90%9C%E7%B4%A2%E6%A0%91%E7%9A%84%E5%90%8E%E7%BB%AD%E9%81%8D%E5%8E%86%E5%BA%8F%E5%88%97/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E4%BA%8C%E5%8F%89%E6%90%9C%E7%B4%A2%E6%A0%91%E7%9A%84%E5%90%8E%E7%BB%AD%E9%81%8D%E5%8E%86%E5%BA%8F%E5%88%97/</guid>
+      <description>二叉搜索树的后续遍历序列 #算法/二叉树</description>
+    </item>
+    
+    <item>
+      <title>二叉搜索树的第k大节点</title>
+      <link>https://bytewong123.github.io/post/%E4%BA%8C%E5%8F%89%E6%90%9C%E7%B4%A2%E6%A0%91%E7%9A%84%E7%AC%ACk%E5%A4%A7%E8%8A%82%E7%82%B9/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E4%BA%8C%E5%8F%89%E6%90%9C%E7%B4%A2%E6%A0%91%E7%9A%84%E7%AC%ACk%E5%A4%A7%E8%8A%82%E7%82%B9/</guid>
+      <description>二叉搜索树的第k大节点 #算法/二叉树</description>
+    </item>
+    
+    <item>
+      <title>二叉搜索树迭代器</title>
+      <link>https://bytewong123.github.io/post/%E4%BA%8C%E5%8F%89%E6%90%9C%E7%B4%A2%E6%A0%91%E8%BF%AD%E4%BB%A3%E5%99%A8/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E4%BA%8C%E5%8F%89%E6%90%9C%E7%B4%A2%E6%A0%91%E8%BF%AD%E4%BB%A3%E5%99%A8/</guid>
+      <description>二叉搜索树迭代器 #算法/二叉树/二叉搜索树</description>
+    </item>
+    
+    <item>
+      <title>二叉树中和为某一值的路径</title>
+      <link>https://bytewong123.github.io/post/%E4%BA%8C%E5%8F%89%E6%A0%91%E4%B8%AD%E5%92%8C%E4%B8%BA%E6%9F%90%E4%B8%80%E5%80%BC%E7%9A%84%E8%B7%AF%E5%BE%84/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E4%BA%8C%E5%8F%89%E6%A0%91%E4%B8%AD%E5%92%8C%E4%B8%BA%E6%9F%90%E4%B8%80%E5%80%BC%E7%9A%84%E8%B7%AF%E5%BE%84/</guid>
+      <description>二叉树中和为某一值的路径 #算法/二叉树/框架 #算法/剑指offer</description>
+    </item>
+    
+    <item>
+      <title>二叉树中序遍历（非递归）</title>
+      <link>https://bytewong123.github.io/post/%E4%BA%8C%E5%8F%89%E6%A0%91%E4%B8%AD%E5%BA%8F%E9%81%8D%E5%8E%86%E9%9D%9E%E9%80%92%E5%BD%92/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E4%BA%8C%E5%8F%89%E6%A0%91%E4%B8%AD%E5%BA%8F%E9%81%8D%E5%8E%86%E9%9D%9E%E9%80%92%E5%BD%92/</guid>
+      <description>二叉树中序遍历（非递归） #算法/二叉树</description>
+    </item>
+    
+    <item>
+      <title>二叉树剪枝</title>
+      <link>https://bytewong123.github.io/post/%E4%BA%8C%E5%8F%89%E6%A0%91%E5%89%AA%E6%9E%9D/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E4%BA%8C%E5%8F%89%E6%A0%91%E5%89%AA%E6%9E%9D/</guid>
+      <description>二叉树剪枝 #算法/二叉树/框架</description>
+    </item>
+    
+    <item>
+      <title>二叉树搜索树的最近公共祖先</title>
+      <link>https://bytewong123.github.io/post/%E4%BA%8C%E5%8F%89%E6%A0%91%E6%90%9C%E7%B4%A2%E6%A0%91%E7%9A%84%E6%9C%80%E8%BF%91%E5%85%AC%E5%85%B1%E7%A5%96%E5%85%88/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E4%BA%8C%E5%8F%89%E6%A0%91%E6%90%9C%E7%B4%A2%E6%A0%91%E7%9A%84%E6%9C%80%E8%BF%91%E5%85%AC%E5%85%B1%E7%A5%96%E5%85%88/</guid>
+      <description>二叉树搜索树的最近公共祖先 #算法/二叉树 #算法/仍然不会</description>
+    </item>
+    
+    <item>
+      <title>二叉树的层次遍历2</title>
+      <link>https://bytewong123.github.io/post/%E4%BA%8C%E5%8F%89%E6%A0%91%E7%9A%84%E5%B1%82%E6%AC%A1%E9%81%8D%E5%8E%862/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E4%BA%8C%E5%8F%89%E6%A0%91%E7%9A%84%E5%B1%82%E6%AC%A1%E9%81%8D%E5%8E%862/</guid>
+      <description>二叉树的层次遍历2 力扣 #算法/二叉树/层次遍历</description>
+    </item>
+    
+    <item>
+      <title>二叉树的序列化和反序列化</title>
+      <link>https://bytewong123.github.io/post/%E4%BA%8C%E5%8F%89%E6%A0%91%E7%9A%84%E5%BA%8F%E5%88%97%E5%8C%96%E5%92%8C%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E4%BA%8C%E5%8F%89%E6%A0%91%E7%9A%84%E5%BA%8F%E5%88%97%E5%8C%96%E5%92%8C%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/</guid>
+      <description>二叉树的序列化和反序列化 #算法/设计 #算法/剑指offer</description>
+    </item>
+    
+    <item>
+      <title>二叉树的最大深度</title>
+      <link>https://bytewong123.github.io/post/%E4%BA%8C%E5%8F%89%E6%A0%91%E7%9A%84%E6%9C%80%E5%A4%A7%E6%B7%B1%E5%BA%A6/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E4%BA%8C%E5%8F%89%E6%A0%91%E7%9A%84%E6%9C%80%E5%A4%A7%E6%B7%B1%E5%BA%A6/</guid>
+      <description>二叉树的最大深度 #算法/二叉树</description>
+    </item>
+    
+    <item>
+      <title>二叉树的最大直径</title>
+      <link>https://bytewong123.github.io/post/%E4%BA%8C%E5%8F%89%E6%A0%91%E7%9A%84%E6%9C%80%E5%A4%A7%E7%9B%B4%E5%BE%84/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E4%BA%8C%E5%8F%89%E6%A0%91%E7%9A%84%E6%9C%80%E5%A4%A7%E7%9B%B4%E5%BE%84/</guid>
+      <description>二叉树的最大直径 #算法/二叉树 #算法/仍然不会</description>
+    </item>
+    
+    <item>
+      <title>二叉树的最大路径和</title>
+      <link>https://bytewong123.github.io/post/%E4%BA%8C%E5%8F%89%E6%A0%91%E7%9A%84%E6%9C%80%E5%A4%A7%E8%B7%AF%E5%BE%84%E5%92%8C/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E4%BA%8C%E5%8F%89%E6%A0%91%E7%9A%84%E6%9C%80%E5%A4%A7%E8%B7%AF%E5%BE%84%E5%92%8C/</guid>
+      <description>二叉树的最大路径和 力扣</description>
+    </item>
+    
+    <item>
+      <title>二叉树的最小深度</title>
+      <link>https://bytewong123.github.io/post/%E4%BA%8C%E5%8F%89%E6%A0%91%E7%9A%84%E6%9C%80%E5%B0%8F%E6%B7%B1%E5%BA%A6/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E4%BA%8C%E5%8F%89%E6%A0%91%E7%9A%84%E6%9C%80%E5%B0%8F%E6%B7%B1%E5%BA%A6/</guid>
+      <description>二叉树的最小深度 力扣</description>
+    </item>
+    
+    <item>
+      <title>二维数组中的查找</title>
+      <link>https://bytewong123.github.io/post/%E4%BA%8C%E7%BB%B4%E6%95%B0%E7%BB%84%E4%B8%AD%E7%9A%84%E6%9F%A5%E6%89%BE/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E4%BA%8C%E7%BB%B4%E6%95%B0%E7%BB%84%E4%B8%AD%E7%9A%84%E6%9F%A5%E6%89%BE/</guid>
+      <description>二维数组中的查找 #算法 #算法/剑指offer</description>
+    </item>
+    
+    <item>
+      <title>二进制中1的个数</title>
+      <link>https://bytewong123.github.io/post/%E4%BA%8C%E8%BF%9B%E5%88%B6%E4%B8%AD1%E7%9A%84%E4%B8%AA%E6%95%B0/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E4%BA%8C%E8%BF%9B%E5%88%B6%E4%B8%AD1%E7%9A%84%E4%B8%AA%E6%95%B0/</guid>
+      <description>二进制中1的个数 #算法/位运算 #算法/仍然不会</description>
+    </item>
+    
+    <item>
+      <title>二进制加法</title>
+      <link>https://bytewong123.github.io/post/%E4%BA%8C%E8%BF%9B%E5%88%B6%E5%8A%A0%E6%B3%95/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E4%BA%8C%E8%BF%9B%E5%88%B6%E5%8A%A0%E6%B3%95/</guid>
+      <description>二进制加法 #算法/链表</description>
+    </item>
+    
+    <item>
+      <title>仅执行一次字符串交换能否使两个字符串相等</title>
+      <link>https://bytewong123.github.io/post/%E4%BB%85%E6%89%A7%E8%A1%8C%E4%B8%80%E6%AC%A1%E5%AD%97%E7%AC%A6%E4%B8%B2%E4%BA%A4%E6%8D%A2%E8%83%BD%E5%90%A6%E4%BD%BF%E4%B8%A4%E4%B8%AA%E5%AD%97%E7%AC%A6%E4%B8%B2%E7%9B%B8%E7%AD%89/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E4%BB%85%E6%89%A7%E8%A1%8C%E4%B8%80%E6%AC%A1%E5%AD%97%E7%AC%A6%E4%B8%B2%E4%BA%A4%E6%8D%A2%E8%83%BD%E5%90%A6%E4%BD%BF%E4%B8%A4%E4%B8%AA%E5%AD%97%E7%AC%A6%E4%B8%B2%E7%9B%B8%E7%AD%89/</guid>
+      <description>仅执行一次字符串交换能否使两个字符串相等 #算法/数组</description>
+    </item>
+    
+    <item>
+      <title>从前序与中序遍历序列构建二叉树</title>
+      <link>https://bytewong123.github.io/post/%E4%BB%8E%E5%89%8D%E5%BA%8F%E4%B8%8E%E4%B8%AD%E5%BA%8F%E9%81%8D%E5%8E%86%E5%BA%8F%E5%88%97%E6%9E%84%E5%BB%BA%E4%BA%8C%E5%8F%89%E6%A0%91/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E4%BB%8E%E5%89%8D%E5%BA%8F%E4%B8%8E%E4%B8%AD%E5%BA%8F%E9%81%8D%E5%8E%86%E5%BA%8F%E5%88%97%E6%9E%84%E5%BB%BA%E4%BA%8C%E5%8F%89%E6%A0%91/</guid>
+      <description>从前序与中序遍历序列构建二叉树 #算法/二叉树/框架 #算法/二叉树/遍历序列 #算法/剑指offer</description>
+    </item>
+    
+    <item>
+      <title>从后序与中序遍历序列构建二叉树</title>
+      <link>https://bytewong123.github.io/post/%E4%BB%8E%E5%90%8E%E5%BA%8F%E4%B8%8E%E4%B8%AD%E5%BA%8F%E9%81%8D%E5%8E%86%E5%BA%8F%E5%88%97%E6%9E%84%E5%BB%BA%E4%BA%8C%E5%8F%89%E6%A0%91/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E4%BB%8E%E5%90%8E%E5%BA%8F%E4%B8%8E%E4%B8%AD%E5%BA%8F%E9%81%8D%E5%8E%86%E5%BA%8F%E5%88%97%E6%9E%84%E5%BB%BA%E4%BA%8C%E5%8F%89%E6%A0%91/</guid>
+      <description>从后序与中序遍历序列构建二叉树 #算法/二叉树/框架 #算法/二叉树/遍历序列</description>
+    </item>
+    
+    <item>
+      <title>从尾到头打印链表</title>
+      <link>https://bytewong123.github.io/post/%E4%BB%8E%E5%B0%BE%E5%88%B0%E5%A4%B4%E6%89%93%E5%8D%B0%E9%93%BE%E8%A1%A8/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E4%BB%8E%E5%B0%BE%E5%88%B0%E5%A4%B4%E6%89%93%E5%8D%B0%E9%93%BE%E8%A1%A8/</guid>
+      <description>从尾到头打印链表 #算法 #算法/剑指offer #算法/链表</description>
+    </item>
+    
+    <item>
+      <title>从根节点到叶节点数字之和</title>
+      <link>https://bytewong123.github.io/post/%E4%BB%8E%E6%A0%B9%E8%8A%82%E7%82%B9%E5%88%B0%E5%8F%B6%E8%8A%82%E7%82%B9%E6%95%B0%E5%AD%97%E4%B9%8B%E5%92%8C/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E4%BB%8E%E6%A0%B9%E8%8A%82%E7%82%B9%E5%88%B0%E5%8F%B6%E8%8A%82%E7%82%B9%E6%95%B0%E5%AD%97%E4%B9%8B%E5%92%8C/</guid>
+      <description>从根节点到叶节点数字之和 #算法/二叉树/框架</description>
+    </item>
+    
+    <item>
+      <title>信息流系统设计</title>
+      <link>https://bytewong123.github.io/post/%E4%BF%A1%E6%81%AF%E6%B5%81%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E4%BF%A1%E6%81%AF%E6%B5%81%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/</guid>
+      <description>信息流系统设计 #技术/系统设计</description>
+    </item>
+    
+    <item>
+      <title>全排列</title>
+      <link>https://bytewong123.github.io/post/%E5%85%A8%E6%8E%92%E5%88%97/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E5%85%A8%E6%8E%92%E5%88%97/</guid>
+      <description>全排列 #算法/回溯 #算法/仍然不会</description>
+    </item>
+    
+    <item>
+      <title>全排列2</title>
+      <link>https://bytewong123.github.io/post/%E5%85%A8%E6%8E%92%E5%88%972/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E5%85%A8%E6%8E%92%E5%88%972/</guid>
+      <description>全排列2 #算法/回溯</description>
+    </item>
+    
+    <item>
+      <title>关系系统设计</title>
+      <link>https://bytewong123.github.io/post/%E5%85%B3%E7%B3%BB%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E5%85%B3%E7%B3%BB%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/</guid>
+      <description>关系系统设计 #技术/系统设计</description>
+    </item>
+    
+    <item>
+      <title>内存</title>
+      <link>https://bytewong123.github.io/post/%E5%86%85%E5%AD%98/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E5%86%85%E5%AD%98/</guid>
+      <description>内存 #技术/golang</description>
+    </item>
+    
+    <item>
+      <title>内存管理总结</title>
+      <link>https://bytewong123.github.io/post/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E6%80%BB%E7%BB%93/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E6%80%BB%E7%BB%93/</guid>
+      <description>内存管理总结 #iv/操作系统</description>
+    </item>
+    
+    <item>
+      <title>函数式编程</title>
+      <link>https://bytewong123.github.io/post/%E5%87%BD%E6%95%B0%E5%BC%8F%E7%BC%96%E7%A8%8B/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E5%87%BD%E6%95%B0%E5%BC%8F%E7%BC%96%E7%A8%8B/</guid>
+      <description>函数式编程 #技术/golang/代码风格</description>
+    </item>
+    
+    <item>
+      <title>删除排序数组中的重复项</title>
+      <link>https://bytewong123.github.io/post/%E5%88%A0%E9%99%A4%E6%8E%92%E5%BA%8F%E6%95%B0%E7%BB%84%E4%B8%AD%E7%9A%84%E9%87%8D%E5%A4%8D%E9%A1%B9/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E5%88%A0%E9%99%A4%E6%8E%92%E5%BA%8F%E6%95%B0%E7%BB%84%E4%B8%AD%E7%9A%84%E9%87%8D%E5%A4%8D%E9%A1%B9/</guid>
+      <description>删除排序数组中的重复项 #算法/数组/双指针</description>
+    </item>
+    
+    <item>
+      <title>删除链表中倒数第k个节点</title>
+      <link>https://bytewong123.github.io/post/%E5%88%A0%E9%99%A4%E9%93%BE%E8%A1%A8%E4%B8%AD%E5%80%92%E6%95%B0%E7%AC%ACk%E4%B8%AA%E8%8A%82%E7%82%B9/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E5%88%A0%E9%99%A4%E9%93%BE%E8%A1%A8%E4%B8%AD%E5%80%92%E6%95%B0%E7%AC%ACk%E4%B8%AA%E8%8A%82%E7%82%B9/</guid>
+      <description>删除链表中倒数第k个节点 #算法/链表/快慢指针 #算法/剑指offer</description>
+    </item>
+    
+    <item>
+      <title>判断环入口</title>
+      <link>https://bytewong123.github.io/post/%E5%88%A4%E6%96%AD%E7%8E%AF%E5%85%A5%E5%8F%A3/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E5%88%A4%E6%96%AD%E7%8E%AF%E5%85%A5%E5%8F%A3/</guid>
+      <description>判断环入口 #算法/链表/快慢指针</description>
+    </item>
+    
+    <item>
+      <title>剪绳子</title>
+      <link>https://bytewong123.github.io/post/%E5%89%AA%E7%BB%B3%E5%AD%90/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E5%89%AA%E7%BB%B3%E5%AD%90/</guid>
+      <description>剪绳子 #算法/dp #算法/剑指offer #算法/仍然不会</description>
+    </item>
+    
+    <item>
+      <title>剪绳子2</title>
+      <link>https://bytewong123.github.io/post/%E5%89%AA%E7%BB%B3%E5%AD%902/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E5%89%AA%E7%BB%B3%E5%AD%902/</guid>
+      <description>剪绳子2 #算法/dp #算法/剑指offer #算法/仍然不会</description>
+    </item>
+    
+    <item>
+      <title>包含min函数的栈</title>
+      <link>https://bytewong123.github.io/post/%E5%8C%85%E5%90%ABmin%E5%87%BD%E6%95%B0%E7%9A%84%E6%A0%88/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E5%8C%85%E5%90%ABmin%E5%87%BD%E6%95%B0%E7%9A%84%E6%A0%88/</guid>
+      <description>包含min函数的栈 #算法/设计 #算法/栈 力扣</description>
+    </item>
+    
+    <item>
+      <title>压测平台设计</title>
+      <link>https://bytewong123.github.io/post/%E5%8E%8B%E6%B5%8B%E5%B9%B3%E5%8F%B0%E8%AE%BE%E8%AE%A1/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E5%8E%8B%E6%B5%8B%E5%B9%B3%E5%8F%B0%E8%AE%BE%E8%AE%A1/</guid>
+      <description>压测平台设计 #技术/系统设计</description>
+    </item>
+    
+    <item>
+      <title>反转单词顺序</title>
+      <link>https://bytewong123.github.io/post/%E5%8F%8D%E8%BD%AC%E5%8D%95%E8%AF%8D%E9%A1%BA%E5%BA%8F/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E5%8F%8D%E8%BD%AC%E5%8D%95%E8%AF%8D%E9%A1%BA%E5%BA%8F/</guid>
+      <description>反转单词顺序 #算法/数组/双指针</description>
+    </item>
+    
+    <item>
+      <title>可能的二分法</title>
+      <link>https://bytewong123.github.io/post/%E5%8F%AF%E8%83%BD%E7%9A%84%E4%BA%8C%E5%88%86%E6%B3%95/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E5%8F%AF%E8%83%BD%E7%9A%84%E4%BA%8C%E5%88%86%E6%B3%95/</guid>
+      <description>可能的二分法 力扣</description>
+    </item>
+    
+    <item>
+      <title>合并k个链表</title>
+      <link>https://bytewong123.github.io/post/%E5%90%88%E5%B9%B6k%E4%B8%AA%E9%93%BE%E8%A1%A8/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E5%90%88%E5%B9%B6k%E4%B8%AA%E9%93%BE%E8%A1%A8/</guid>
+      <description>合并k个链表 #算法/链表 #算法/合并链表 #算法/堆</description>
+    </item>
+    
+    <item>
+      <title>合并两个升序链表</title>
+      <link>https://bytewong123.github.io/post/%E5%90%88%E5%B9%B6%E4%B8%A4%E4%B8%AA%E5%8D%87%E5%BA%8F%E9%93%BE%E8%A1%A8/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E5%90%88%E5%B9%B6%E4%B8%A4%E4%B8%AA%E5%8D%87%E5%BA%8F%E9%93%BE%E8%A1%A8/</guid>
+      <description>合并两个升序链表 #算法/链表 #算法/仍然不会</description>
+    </item>
+    
+    <item>
+      <title>合并两个有序数组</title>
+      <link>https://bytewong123.github.io/post/%E5%90%88%E5%B9%B6%E4%B8%A4%E4%B8%AA%E6%9C%89%E5%BA%8F%E6%95%B0%E7%BB%84/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E5%90%88%E5%B9%B6%E4%B8%A4%E4%B8%AA%E6%9C%89%E5%BA%8F%E6%95%B0%E7%BB%84/</guid>
+      <description>合并两个有序数组 #算法/数组/双指针</description>
+    </item>
+    
+    <item>
+      <title>合并两个有序链表</title>
+      <link>https://bytewong123.github.io/post/%E5%90%88%E5%B9%B6%E4%B8%A4%E4%B8%AA%E6%9C%89%E5%BA%8F%E9%93%BE%E8%A1%A8/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E5%90%88%E5%B9%B6%E4%B8%A4%E4%B8%AA%E6%9C%89%E5%BA%8F%E9%93%BE%E8%A1%A8/</guid>
+      <description>合并两个有序链表 #算法/链表/快慢指针 #算法/剑指offer</description>
+    </item>
+    
+    <item>
+      <title>合并区间</title>
+      <link>https://bytewong123.github.io/post/%E5%90%88%E5%B9%B6%E5%8C%BA%E9%97%B4/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E5%90%88%E5%B9%B6%E5%8C%BA%E9%97%B4/</guid>
+      <description>合并区间 #算法 #算法/区间问题</description>
+    </item>
+    
+    <item>
+      <title>合法的栈的压入弹出序列</title>
+      <link>https://bytewong123.github.io/post/%E5%90%88%E6%B3%95%E7%9A%84%E6%A0%88%E7%9A%84%E5%8E%8B%E5%85%A5%E5%BC%B9%E5%87%BA%E5%BA%8F%E5%88%97/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E5%90%88%E6%B3%95%E7%9A%84%E6%A0%88%E7%9A%84%E5%8E%8B%E5%85%A5%E5%BC%B9%E5%87%BA%E5%BA%8F%E5%88%97/</guid>
+      <description>合法的栈的压入/弹出序列 #算法/栈 #算法/剑指offer #算法/仍然不会</description>
+    </item>
+    
+    <item>
+      <title>和为s的连续正数序列</title>
+      <link>https://bytewong123.github.io/post/%E5%92%8C%E4%B8%BAs%E7%9A%84%E8%BF%9E%E7%BB%AD%E6%AD%A3%E6%95%B0%E5%BA%8F%E5%88%97/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E5%92%8C%E4%B8%BAs%E7%9A%84%E8%BF%9E%E7%BB%AD%E6%AD%A3%E6%95%B0%E5%BA%8F%E5%88%97/</guid>
+      <description>和为s的连续正数序列 #算法/剑指offer #算法/滑动窗口 #算法/仍然不会</description>
+    </item>
+    
+    <item>
+      <title>唯一id</title>
+      <link>https://bytewong123.github.io/post/%E5%94%AF%E4%B8%80id/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E5%94%AF%E4%B8%80id/</guid>
+      <description>唯一id #技术/系统设计</description>
+    </item>
+    
+    <item>
+      <title>回文数</title>
+      <link>https://bytewong123.github.io/post/%E5%9B%9E%E6%96%87%E6%95%B0/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E5%9B%9E%E6%96%87%E6%95%B0/</guid>
+      <description>回文数 #算法/回文问题</description>
+    </item>
+    
+    <item>
+      <title>回文链表</title>
+      <link>https://bytewong123.github.io/post/%E5%9B%9E%E6%96%87%E9%93%BE%E8%A1%A8/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E5%9B%9E%E6%96%87%E9%93%BE%E8%A1%A8/</guid>
+      <description>回文链表 #算法/回文问题</description>
+    </item>
+    
+    <item>
+      <title>在排序数组中查找数字出现的次数</title>
+      <link>https://bytewong123.github.io/post/%E5%9C%A8%E6%8E%92%E5%BA%8F%E6%95%B0%E7%BB%84%E4%B8%AD%E6%9F%A5%E6%89%BE%E6%95%B0%E5%AD%97%E5%87%BA%E7%8E%B0%E7%9A%84%E6%AC%A1%E6%95%B0/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E5%9C%A8%E6%8E%92%E5%BA%8F%E6%95%B0%E7%BB%84%E4%B8%AD%E6%9F%A5%E6%89%BE%E6%95%B0%E5%AD%97%E5%87%BA%E7%8E%B0%E7%9A%84%E6%AC%A1%E6%95%B0/</guid>
+      <description>在排序数组中查找数字出现的次数 #算法/数组/二分查找</description>
+    </item>
+    
+    <item>
+      <title>填充每个节点的下一个右侧指针</title>
+      <link>https://bytewong123.github.io/post/%E5%A1%AB%E5%85%85%E6%AF%8F%E4%B8%AA%E8%8A%82%E7%82%B9%E7%9A%84%E4%B8%8B%E4%B8%80%E4%B8%AA%E5%8F%B3%E4%BE%A7%E6%8C%87%E9%92%88/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E5%A1%AB%E5%85%85%E6%AF%8F%E4%B8%AA%E8%8A%82%E7%82%B9%E7%9A%84%E4%B8%8B%E4%B8%80%E4%B8%AA%E5%8F%B3%E4%BE%A7%E6%8C%87%E9%92%88/</guid>
+      <description>填充每个节点的下一个右侧指针 #算法/二叉树/框架 #算法/仍然不会</description>
+    </item>
+    
+    <item>
+      <title>填充每个节点的下一个右侧节点指针2</title>
+      <link>https://bytewong123.github.io/post/%E5%A1%AB%E5%85%85%E6%AF%8F%E4%B8%AA%E8%8A%82%E7%82%B9%E7%9A%84%E4%B8%8B%E4%B8%80%E4%B8%AA%E5%8F%B3%E4%BE%A7%E8%8A%82%E7%82%B9%E6%8C%87%E9%92%882/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E5%A1%AB%E5%85%85%E6%AF%8F%E4%B8%AA%E8%8A%82%E7%82%B9%E7%9A%84%E4%B8%8B%E4%B8%80%E4%B8%AA%E5%8F%B3%E4%BE%A7%E8%8A%82%E7%82%B9%E6%8C%87%E9%92%882/</guid>
+      <description>填充每个节点的下一个右侧节点指针2 力扣</description>
+    </item>
+    
+    <item>
+      <title>复杂链表的复制</title>
+      <link>https://bytewong123.github.io/post/%E5%A4%8D%E6%9D%82%E9%93%BE%E8%A1%A8%E7%9A%84%E5%A4%8D%E5%88%B6/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E5%A4%8D%E6%9D%82%E9%93%BE%E8%A1%A8%E7%9A%84%E5%A4%8D%E5%88%B6/</guid>
+      <description>复杂链表的复制 #算法/链表 #算法/剑指offer</description>
+    </item>
+    
+    <item>
+      <title>多数元素</title>
+      <link>https://bytewong123.github.io/post/%E5%A4%9A%E6%95%B0%E5%85%83%E7%B4%A0/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E5%A4%9A%E6%95%B0%E5%85%83%E7%B4%A0/</guid>
+      <description>多数元素 力扣</description>
+    </item>
+    
+    <item>
+      <title>子集</title>
+      <link>https://bytewong123.github.io/post/%E5%AD%90%E9%9B%86/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E5%AD%90%E9%9B%86/</guid>
+      <description>子集 #算法/回溯 #算法/仍然不会</description>
+    </item>
+    
+    <item>
+      <title>子集2</title>
+      <link>https://bytewong123.github.io/post/%E5%AD%90%E9%9B%862/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E5%AD%90%E9%9B%862/</guid>
+      <description>子集2 #算法/回溯 #算法/仍然不会</description>
+    </item>
+    
+    <item>
+      <title>字符串的排列</title>
+      <link>https://bytewong123.github.io/post/%E5%AD%97%E7%AC%A6%E4%B8%B2%E7%9A%84%E6%8E%92%E5%88%97/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E5%AD%97%E7%AC%A6%E4%B8%B2%E7%9A%84%E6%8E%92%E5%88%97/</guid>
+      <description>字符串的排列 #算法/回溯 #算法/剑指offer</description>
+    </item>
+    
+    <item>
+      <title>字符串相乘</title>
+      <link>https://bytewong123.github.io/post/%E5%AD%97%E7%AC%A6%E4%B8%B2%E7%9B%B8%E4%B9%98/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E5%AD%97%E7%AC%A6%E4%B8%B2%E7%9B%B8%E4%B9%98/</guid>
+      <description>字符串相乘 #算法/字符串 #算法/数学</description>
+    </item>
+    
+    <item>
+      <title>字符串相加</title>
+      <link>https://bytewong123.github.io/post/%E5%AD%97%E7%AC%A6%E4%B8%B2%E7%9B%B8%E5%8A%A0/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E5%AD%97%E7%AC%A6%E4%B8%B2%E7%9B%B8%E5%8A%A0/</guid>
+      <description>字符串相加 #算法</description>
+    </item>
+    
+    <item>
+      <title>字符串转换整数</title>
+      <link>https://bytewong123.github.io/post/%E5%AD%97%E7%AC%A6%E4%B8%B2%E8%BD%AC%E6%8D%A2%E6%95%B4%E6%95%B0/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E5%AD%97%E7%AC%A6%E4%B8%B2%E8%BD%AC%E6%8D%A2%E6%95%B4%E6%95%B0/</guid>
+      <description>字符串转换整数 #算法/设计 #算法/真题/字节</description>
+    </item>
+    
+    <item>
+      <title>容器实战高手课笔记——第一讲 kill 1号进程</title>
+      <link>https://bytewong123.github.io/post/%E5%AE%B9%E5%99%A8%E5%AE%9E%E6%88%98%E9%AB%98%E6%89%8B%E8%AF%BE%E7%AC%94%E8%AE%B0%E7%AC%AC%E4%B8%80%E8%AE%B2-kill-1%E5%8F%B7%E8%BF%9B%E7%A8%8B/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E5%AE%B9%E5%99%A8%E5%AE%9E%E6%88%98%E9%AB%98%E6%89%8B%E8%AF%BE%E7%AC%94%E8%AE%B0%E7%AC%AC%E4%B8%80%E8%AE%B2-kill-1%E5%8F%B7%E8%BF%9B%E7%A8%8B/</guid>
+      <description>容器实战高手课笔记——第一讲 kill 1号进程 #技术/极客时间/容器实战高手课</description>
+    </item>
+    
+    <item>
+      <title>对称二叉树</title>
+      <link>https://bytewong123.github.io/post/%E5%AF%B9%E7%A7%B0%E4%BA%8C%E5%8F%89%E6%A0%91/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E5%AF%B9%E7%A7%B0%E4%BA%8C%E5%8F%89%E6%A0%91/</guid>
+      <description>对称二叉树 #算法/二叉树/框架 #算法/仍然不会</description>
+    </item>
+    
+    <item>
+      <title>寻找两个节点的最近公共祖先</title>
+      <link>https://bytewong123.github.io/post/%E5%AF%BB%E6%89%BE%E4%B8%A4%E4%B8%AA%E8%8A%82%E7%82%B9%E7%9A%84%E6%9C%80%E8%BF%91%E5%85%AC%E5%85%B1%E7%A5%96%E5%85%88/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E5%AF%BB%E6%89%BE%E4%B8%A4%E4%B8%AA%E8%8A%82%E7%82%B9%E7%9A%84%E6%9C%80%E8%BF%91%E5%85%AC%E5%85%B1%E7%A5%96%E5%85%88/</guid>
+      <description>寻找两个节点的最近公共祖先 #算法/二叉树 #算法/仍然不会</description>
+    </item>
+    
+    <item>
+      <title>寻找峰值</title>
+      <link>https://bytewong123.github.io/post/%E5%AF%BB%E6%89%BE%E5%B3%B0%E5%80%BC/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E5%AF%BB%E6%89%BE%E5%B3%B0%E5%80%BC/</guid>
+      <description>寻找峰值 #算法/数组/二分查找 #算法/真题/字节</description>
+    </item>
+    
+    <item>
+      <title>寻找重复的子树</title>
+      <link>https://bytewong123.github.io/post/%E5%AF%BB%E6%89%BE%E9%87%8D%E5%A4%8D%E7%9A%84%E5%AD%90%E6%A0%91/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E5%AF%BB%E6%89%BE%E9%87%8D%E5%A4%8D%E7%9A%84%E5%AD%90%E6%A0%91/</guid>
+      <description>寻找重复的子树 给定一棵二叉树，返回所有重复的子树。对于同一类的重复子树，你只需要返回其中任意一棵的根结点即可。 两棵树重复是指它们具有相同的结构以及相同的结点值。 示例 1： 1 / \ 2 3 / / \ 4 2 4 / 4 下面是两个重复的子树： 2 / 4 和 4 因此，你需要以列表的形式返回上述重复子树的根结点。 链接：https://leetcode-cn.</description>
+    </item>
+    
+    <item>
+      <title>将二叉树展开为链表</title>
+      <link>https://bytewong123.github.io/post/%E5%B0%86%E4%BA%8C%E5%8F%89%E6%A0%91%E5%B1%95%E5%BC%80%E4%B8%BA%E9%93%BE%E8%A1%A8/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E5%B0%86%E4%BA%8C%E5%8F%89%E6%A0%91%E5%B1%95%E5%BC%80%E4%B8%BA%E9%93%BE%E8%A1%A8/</guid>
+      <description>将二叉树展开为链表 #算法/二叉树/框架 #算法/仍然不会</description>
+    </item>
+    
+    <item>
+      <title>左旋转字符串</title>
+      <link>https://bytewong123.github.io/post/%E5%B7%A6%E6%97%8B%E8%BD%AC%E5%AD%97%E7%AC%A6%E4%B8%B2/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E5%B7%A6%E6%97%8B%E8%BD%AC%E5%AD%97%E7%AC%A6%E4%B8%B2/</guid>
+      <description>左旋转字符串 #算法/数组/双指针 #算法/仍然不会</description>
+    </item>
+    
+    <item>
+      <title>平衡二叉树</title>
+      <link>https://bytewong123.github.io/post/%E5%B9%B3%E8%A1%A1%E4%BA%8C%E5%8F%89%E6%A0%91/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E5%B9%B3%E8%A1%A1%E4%BA%8C%E5%8F%89%E6%A0%91/</guid>
+      <description>平衡二叉树 #算法/二叉树/框架</description>
+    </item>
+    
+    <item>
+      <title>恢复二叉搜索树</title>
+      <link>https://bytewong123.github.io/post/%E6%81%A2%E5%A4%8D%E4%BA%8C%E5%8F%89%E6%90%9C%E7%B4%A2%E6%A0%91/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E6%81%A2%E5%A4%8D%E4%BA%8C%E5%8F%89%E6%90%9C%E7%B4%A2%E6%A0%91/</guid>
+      <description>恢复二叉搜索树 #算法/二叉树</description>
+    </item>
+    
+    <item>
+      <title>扑克牌中的顺子</title>
+      <link>https://bytewong123.github.io/post/%E6%89%91%E5%85%8B%E7%89%8C%E4%B8%AD%E7%9A%84%E9%A1%BA%E5%AD%90/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E6%89%91%E5%85%8B%E7%89%8C%E4%B8%AD%E7%9A%84%E9%A1%BA%E5%AD%90/</guid>
+      <description>扑克牌中的顺子 #算法/数组</description>
+    </item>
+    
+    <item>
+      <title>把二叉搜索树转化为累加树</title>
+      <link>https://bytewong123.github.io/post/%E6%8A%8A%E4%BA%8C%E5%8F%89%E6%90%9C%E7%B4%A2%E6%A0%91%E8%BD%AC%E5%8C%96%E4%B8%BA%E7%B4%AF%E5%8A%A0%E6%A0%91/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E6%8A%8A%E4%BA%8C%E5%8F%89%E6%90%9C%E7%B4%A2%E6%A0%91%E8%BD%AC%E5%8C%96%E4%B8%BA%E7%B4%AF%E5%8A%A0%E6%A0%91/</guid>
+      <description>把二叉搜索树转化为累加树 #算法/二叉树/框架 #算法/仍然不会</description>
+    </item>
+    
+    <item>
+      <title>把数字翻译成字符串</title>
+      <link>https://bytewong123.github.io/post/%E6%8A%8A%E6%95%B0%E5%AD%97%E7%BF%BB%E8%AF%91%E6%88%90%E5%AD%97%E7%AC%A6%E4%B8%B2/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E6%8A%8A%E6%95%B0%E5%AD%97%E7%BF%BB%E8%AF%91%E6%88%90%E5%AD%97%E7%AC%A6%E4%B8%B2/</guid>
+      <description>把数字翻译成字符串 #算法/dfs</description>
+    </item>
+    
+    <item>
+      <title>把数组排成最小的数</title>
+      <link>https://bytewong123.github.io/post/%E6%8A%8A%E6%95%B0%E7%BB%84%E6%8E%92%E6%88%90%E6%9C%80%E5%B0%8F%E7%9A%84%E6%95%B0/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E6%8A%8A%E6%95%B0%E7%BB%84%E6%8E%92%E6%88%90%E6%9C%80%E5%B0%8F%E7%9A%84%E6%95%B0/</guid>
+      <description>把数组排成最小的数 #算法/数组 #算法/仍然不会</description>
+    </item>
+    
+    <item>
+      <title>括号的分数</title>
+      <link>https://bytewong123.github.io/post/%E6%8B%AC%E5%8F%B7%E7%9A%84%E5%88%86%E6%95%B0/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E6%8B%AC%E5%8F%B7%E7%9A%84%E5%88%86%E6%95%B0/</guid>
+      <description>括号的分数 题目 给定一个平衡括号字符串 S，按下述规则计算该字符串的分数： () 得 1 分。 AB 得 A + B 分，其中 A 和 B 是平衡括号字符串。 (A) 得 2 * A 分，其中 A 是平衡括号字符串。 示例 1： 输入： &amp;quot;()&amp;quot; 输出： 1 示例 2： 输入： &amp;quot;(())&amp;quot; 输出： 2 示例 3： 输入： &amp;quot;()()&amp;quot; 输出： 2 示例 4： 输入： &amp;quot;(()(()))&amp;quot; 输出： 6 思路  遇到左括号，入栈0 遇到右括号，弹出栈顶元素，此时有两种情况，栈顶元素*2（之前里面有n对括号）和1（之前里面没括号），只可能是其中一种情况，因此取较大值与当前栈顶加和，更新到栈顶即可  #算法/栈</description>
+    </item>
+    
+    <item>
+      <title>搜索插入位置</title>
+      <link>https://bytewong123.github.io/post/%E6%90%9C%E7%B4%A2%E6%8F%92%E5%85%A5%E4%BD%8D%E7%BD%AE/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E6%90%9C%E7%B4%A2%E6%8F%92%E5%85%A5%E4%BD%8D%E7%BD%AE/</guid>
+      <description>搜索插入位置 #算法/二分查找</description>
+    </item>
+    
+    <item>
+      <title>搜索旋转排序数组</title>
+      <link>https://bytewong123.github.io/post/%E6%90%9C%E7%B4%A2%E6%97%8B%E8%BD%AC%E6%8E%92%E5%BA%8F%E6%95%B0%E7%BB%84/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E6%90%9C%E7%B4%A2%E6%97%8B%E8%BD%AC%E6%8E%92%E5%BA%8F%E6%95%B0%E7%BB%84/</guid>
+      <description>搜索旋转排序数组 #算法/数组/二分查找</description>
+    </item>
+    
+    <item>
+      <title>数值的整数次方</title>
+      <link>https://bytewong123.github.io/post/%E6%95%B0%E5%80%BC%E7%9A%84%E6%95%B4%E6%95%B0%E6%AC%A1%E6%96%B9/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E6%95%B0%E5%80%BC%E7%9A%84%E6%95%B4%E6%95%B0%E6%AC%A1%E6%96%B9/</guid>
+      <description>数值的整数次方 #算法/二叉树 #算法/剑指offer #算法/仍然不会</description>
+    </item>
+    
+    <item>
+      <title>数据密集型应用系统设计</title>
+      <link>https://bytewong123.github.io/post/%E6%95%B0%E6%8D%AE%E5%AF%86%E9%9B%86%E5%9E%8B%E5%BA%94%E7%94%A8%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E6%95%B0%E6%8D%AE%E5%AF%86%E9%9B%86%E5%9E%8B%E5%BA%94%E7%94%A8%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/</guid>
+      <description>数据密集型应用系统设计 #技术/读书笔记</description>
+    </item>
+    
+    <item>
+      <title>数据流中的第k大元素</title>
+      <link>https://bytewong123.github.io/post/%E6%95%B0%E6%8D%AE%E6%B5%81%E4%B8%AD%E7%9A%84%E7%AC%ACk%E5%A4%A7%E5%85%83%E7%B4%A0/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E6%95%B0%E6%8D%AE%E6%B5%81%E4%B8%AD%E7%9A%84%E7%AC%ACk%E5%A4%A7%E5%85%83%E7%B4%A0/</guid>
+      <description>数据流中的第k大元素 #算法/堆</description>
+    </item>
+    
+    <item>
+      <title>数组中两个只出现一次的数字</title>
+      <link>https://bytewong123.github.io/post/%E6%95%B0%E7%BB%84%E4%B8%AD%E4%B8%A4%E4%B8%AA%E5%8F%AA%E5%87%BA%E7%8E%B0%E4%B8%80%E6%AC%A1%E7%9A%84%E6%95%B0%E5%AD%97/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E6%95%B0%E7%BB%84%E4%B8%AD%E4%B8%A4%E4%B8%AA%E5%8F%AA%E5%87%BA%E7%8E%B0%E4%B8%80%E6%AC%A1%E7%9A%84%E6%95%B0%E5%AD%97/</guid>
+      <description>数组中两个只出现一次的数字 #算法/位运算 #算法/仍然不会</description>
+    </item>
+    
+    <item>
+      <title>数组中出现次数超过一半的数字</title>
+      <link>https://bytewong123.github.io/post/%E6%95%B0%E7%BB%84%E4%B8%AD%E5%87%BA%E7%8E%B0%E6%AC%A1%E6%95%B0%E8%B6%85%E8%BF%87%E4%B8%80%E5%8D%8A%E7%9A%84%E6%95%B0%E5%AD%97/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E6%95%B0%E7%BB%84%E4%B8%AD%E5%87%BA%E7%8E%B0%E6%AC%A1%E6%95%B0%E8%B6%85%E8%BF%87%E4%B8%80%E5%8D%8A%E7%9A%84%E6%95%B0%E5%AD%97/</guid>
+      <description>数组中出现次数超过一半的数字 #算法/数组/hash法 #算法/数组/投票法 #算法/剑指offer #算法/仍然不会</description>
+    </item>
+    
+    <item>
+      <title>数组中只出现一次的数字，其余数字出现3次</title>
+      <link>https://bytewong123.github.io/post/%E6%95%B0%E7%BB%84%E4%B8%AD%E5%8F%AA%E5%87%BA%E7%8E%B0%E4%B8%80%E6%AC%A1%E7%9A%84%E6%95%B0%E5%AD%97%E5%85%B6%E4%BD%99%E6%95%B0%E5%AD%97%E5%87%BA%E7%8E%B03%E6%AC%A1/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E6%95%B0%E7%BB%84%E4%B8%AD%E5%8F%AA%E5%87%BA%E7%8E%B0%E4%B8%80%E6%AC%A1%E7%9A%84%E6%95%B0%E5%AD%97%E5%85%B6%E4%BD%99%E6%95%B0%E5%AD%97%E5%87%BA%E7%8E%B03%E6%AC%A1/</guid>
+      <description>数组中只出现一次的数字，其余数字出现3次 #算法/位运算 #算法/仍然不会</description>
+    </item>
+    
+    <item>
+      <title>数组中重复的数字</title>
+      <link>https://bytewong123.github.io/post/%E6%95%B0%E7%BB%84%E4%B8%AD%E9%87%8D%E5%A4%8D%E7%9A%84%E6%95%B0%E5%AD%97/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E6%95%B0%E7%BB%84%E4%B8%AD%E9%87%8D%E5%A4%8D%E7%9A%84%E6%95%B0%E5%AD%97/</guid>
+      <description>数组中重复的数字 #算法 #算法/剑指offer</description>
+    </item>
+    
+    <item>
+      <title>整数除法</title>
+      <link>https://bytewong123.github.io/post/%E6%95%B4%E6%95%B0%E9%99%A4%E6%B3%95/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E6%95%B4%E6%95%B0%E9%99%A4%E6%B3%95/</guid>
+      <description>整数除法 #算法/位运算</description>
+    </item>
+    
+    <item>
+      <title>旋转数组的最小值</title>
+      <link>https://bytewong123.github.io/post/%E6%97%8B%E8%BD%AC%E6%95%B0%E7%BB%84%E7%9A%84%E6%9C%80%E5%B0%8F%E5%80%BC/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E6%97%8B%E8%BD%AC%E6%95%B0%E7%BB%84%E7%9A%84%E6%9C%80%E5%B0%8F%E5%80%BC/</guid>
+      <description>旋转数组的最小值 #算法/剑指offer #算法/数组/二分查找 #算法/仍然不会</description>
+    </item>
+    
+    <item>
+      <title>旋转数组的最小数字</title>
+      <link>https://bytewong123.github.io/post/%E6%97%8B%E8%BD%AC%E6%95%B0%E7%BB%84%E7%9A%84%E6%9C%80%E5%B0%8F%E6%95%B0%E5%AD%97/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E6%97%8B%E8%BD%AC%E6%95%B0%E7%BB%84%E7%9A%84%E6%9C%80%E5%B0%8F%E6%95%B0%E5%AD%97/</guid>
+      <description>旋转数组的最小数字 #算法/数组</description>
+    </item>
+    
+    <item>
+      <title>无重复字符的最长子串</title>
+      <link>https://bytewong123.github.io/post/%E6%97%A0%E9%87%8D%E5%A4%8D%E5%AD%97%E7%AC%A6%E7%9A%84%E6%9C%80%E9%95%BF%E5%AD%90%E4%B8%B2/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E6%97%A0%E9%87%8D%E5%A4%8D%E5%AD%97%E7%AC%A6%E7%9A%84%E6%9C%80%E9%95%BF%E5%AD%90%E4%B8%B2/</guid>
+      <description>无重复字符的最长子串 #算法/滑动窗口 #算法/子串问题</description>
+    </item>
+    
+    <item>
+      <title>替换空格</title>
+      <link>https://bytewong123.github.io/post/%E6%9B%BF%E6%8D%A2%E7%A9%BA%E6%A0%BC/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E6%9B%BF%E6%8D%A2%E7%A9%BA%E6%A0%BC/</guid>
+      <description>替换空格 #算法 #算法/剑指offer</description>
+    </item>
+    
+    <item>
+      <title>最大二叉树</title>
+      <link>https://bytewong123.github.io/post/%E6%9C%80%E5%A4%A7%E4%BA%8C%E5%8F%89%E6%A0%91/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E6%9C%80%E5%A4%A7%E4%BA%8C%E5%8F%89%E6%A0%91/</guid>
+      <description>最大二叉树 #算法/二叉树/框架 #算法/仍然不会</description>
+    </item>
+    
+    <item>
+      <title>最小的k个数</title>
+      <link>https://bytewong123.github.io/post/%E6%9C%80%E5%B0%8F%E7%9A%84k%E4%B8%AA%E6%95%B0/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E6%9C%80%E5%B0%8F%E7%9A%84k%E4%B8%AA%E6%95%B0/</guid>
+      <description>最小的k个数 #算法/堆 #算法/剑指offer</description>
+    </item>
+    
+    <item>
+      <title>最小覆盖子串</title>
+      <link>https://bytewong123.github.io/post/%E6%9C%80%E5%B0%8F%E8%A6%86%E7%9B%96%E5%AD%90%E4%B8%B2/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E6%9C%80%E5%B0%8F%E8%A6%86%E7%9B%96%E5%AD%90%E4%B8%B2/</guid>
+      <description>最小覆盖子串 #算法/滑动窗口 #算法/子串问题</description>
+    </item>
+    
+    <item>
+      <title>最长公共前缀</title>
+      <link>https://bytewong123.github.io/post/%E6%9C%80%E9%95%BF%E5%85%AC%E5%85%B1%E5%89%8D%E7%BC%80/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E6%9C%80%E9%95%BF%E5%85%AC%E5%85%B1%E5%89%8D%E7%BC%80/</guid>
+      <description>最长公共前缀 #算法/子串问题</description>
+    </item>
+    
+    <item>
+      <title>最长公共子串</title>
+      <link>https://bytewong123.github.io/post/%E6%9C%80%E9%95%BF%E5%85%AC%E5%85%B1%E5%AD%90%E4%B8%B2/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E6%9C%80%E9%95%BF%E5%85%AC%E5%85%B1%E5%AD%90%E4%B8%B2/</guid>
+      <description>最长公共子串 #算法/dp #算法/子串问题</description>
+    </item>
+    
+    <item>
+      <title>最长公共子序列</title>
+      <link>https://bytewong123.github.io/post/%E6%9C%80%E9%95%BF%E5%85%AC%E5%85%B1%E5%AD%90%E5%BA%8F%E5%88%97/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E6%9C%80%E9%95%BF%E5%85%AC%E5%85%B1%E5%AD%90%E5%BA%8F%E5%88%97/</guid>
+      <description>最长公共子序列 #算法/dp #算法/子串问题 #算法/仍然不会</description>
+    </item>
+    
+    <item>
+      <title>最长回文子串</title>
+      <link>https://bytewong123.github.io/post/%E6%9C%80%E9%95%BF%E5%9B%9E%E6%96%87%E5%AD%90%E4%B8%B2/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E6%9C%80%E9%95%BF%E5%9B%9E%E6%96%87%E5%AD%90%E4%B8%B2/</guid>
+      <description>最长回文子串 #算法/dp #算法/仍然不会 #算法/子串问题 #算法/回文问题</description>
+    </item>
+    
+    <item>
+      <title>有序链表转换为二叉搜索树</title>
+      <link>https://bytewong123.github.io/post/%E6%9C%89%E5%BA%8F%E9%93%BE%E8%A1%A8%E8%BD%AC%E6%8D%A2%E4%B8%BA%E4%BA%8C%E5%8F%89%E6%90%9C%E7%B4%A2%E6%A0%91/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E6%9C%89%E5%BA%8F%E9%93%BE%E8%A1%A8%E8%BD%AC%E6%8D%A2%E4%B8%BA%E4%BA%8C%E5%8F%89%E6%90%9C%E7%B4%A2%E6%A0%91/</guid>
+      <description>有序链表转换为二叉搜索树 #算法/二叉树</description>
+    </item>
+    
+    <item>
+      <title>有效的数独</title>
+      <link>https://bytewong123.github.io/post/%E6%9C%89%E6%95%88%E7%9A%84%E6%95%B0%E7%8B%AC/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E6%9C%89%E6%95%88%E7%9A%84%E6%95%B0%E7%8B%AC/</guid>
+      <description>有效的数独 #算法/矩阵</description>
+    </item>
+    
+    <item>
+      <title>未读数系统设计</title>
+      <link>https://bytewong123.github.io/post/%E6%9C%AA%E8%AF%BB%E6%95%B0%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E6%9C%AA%E8%AF%BB%E6%95%B0%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/</guid>
+      <description>未读数系统设计 #技术/系统设计</description>
+    </item>
+    
+    <item>
+      <title>机器人的运动范围</title>
+      <link>https://bytewong123.github.io/post/%E6%9C%BA%E5%99%A8%E4%BA%BA%E7%9A%84%E8%BF%90%E5%8A%A8%E8%8C%83%E5%9B%B4/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E6%9C%BA%E5%99%A8%E4%BA%BA%E7%9A%84%E8%BF%90%E5%8A%A8%E8%8C%83%E5%9B%B4/</guid>
+      <description>机器人的运动范围 #算法/dfs #算法/剑指offer</description>
+    </item>
+    
+    <item>
+      <title>杨辉三角</title>
+      <link>https://bytewong123.github.io/post/%E6%9D%A8%E8%BE%89%E4%B8%89%E8%A7%92/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E6%9D%A8%E8%BE%89%E4%B8%89%E8%A7%92/</guid>
+      <description>杨辉三角 #算法/数组</description>
+    </item>
+    
+    <item>
+      <title>构建乘积数组</title>
+      <link>https://bytewong123.github.io/post/%E6%9E%84%E5%BB%BA%E4%B9%98%E7%A7%AF%E6%95%B0%E7%BB%84/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E6%9E%84%E5%BB%BA%E4%B9%98%E7%A7%AF%E6%95%B0%E7%BB%84/</guid>
+      <description>构建乘积数组 #算法/剑指offer #算法/数组 #算法/仍然不会</description>
+    </item>
+    
+    <item>
+      <title>树的子结构</title>
+      <link>https://bytewong123.github.io/post/%E6%A0%91%E7%9A%84%E5%AD%90%E7%BB%93%E6%9E%84/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E6%A0%91%E7%9A%84%E5%AD%90%E7%BB%93%E6%9E%84/</guid>
+      <description>树的子结构 #算法/二叉树/框架 #算法/仍然不会</description>
+    </item>
+    
+    <item>
+      <title>求1&#43;2&#43;…&#43;n</title>
+      <link>https://bytewong123.github.io/post/%E6%B1%821&#43;2&#43;&#43;n/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E6%B1%821&#43;2&#43;&#43;n/</guid>
+      <description>求1+2+…+n #算法/设计</description>
+    </item>
+    
+    <item>
+      <title>求平方根</title>
+      <link>https://bytewong123.github.io/post/%E6%B1%82%E5%B9%B3%E6%96%B9%E6%A0%B9/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E6%B1%82%E5%B9%B3%E6%96%B9%E6%A0%B9/</guid>
+      <description>求平方根 #算法/数组/二分查找</description>
+    </item>
+    
+    <item>
+      <title>深入理解计算机系统</title>
+      <link>https://bytewong123.github.io/post/%E7%AC%AC%E4%B8%80%E7%AB%A0/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E7%AC%AC%E4%B8%80%E7%AB%A0/</guid>
+      <description>第一章 #阅读/深入理解计算机系统</description>
+    </item>
+    
+    <item>
+      <title>滑动窗口的最大值</title>
+      <link>https://bytewong123.github.io/post/%E6%BB%91%E5%8A%A8%E7%AA%97%E5%8F%A3%E7%9A%84%E6%9C%80%E5%A4%A7%E5%80%BC/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E6%BB%91%E5%8A%A8%E7%AA%97%E5%8F%A3%E7%9A%84%E6%9C%80%E5%A4%A7%E5%80%BC/</guid>
+      <description>滑动窗口的最大值 #算法/滑动窗口 #算法/剑指offer</description>
+    </item>
+    
+    <item>
+      <title>牛客网sql练习</title>
+      <link>https://bytewong123.github.io/post/%E7%89%9B%E5%AE%A2%E7%BD%91sql%E7%BB%83%E4%B9%A0/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E7%89%9B%E5%AE%A2%E7%BD%91sql%E7%BB%83%E4%B9%A0/</guid>
+      <description>牛客网sql练习 #sql</description>
+    </item>
+    
+    <item>
+      <title>物理内存管理</title>
+      <link>https://bytewong123.github.io/post/%E7%89%A9%E7%90%86%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E7%89%A9%E7%90%86%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/</guid>
+      <description>物理内存管理 #iv/操作系统</description>
+    </item>
+    
+    <item>
+      <title>环形链表</title>
+      <link>https://bytewong123.github.io/post/%E7%8E%AF%E5%BD%A2%E9%93%BE%E8%A1%A8/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E7%8E%AF%E5%BD%A2%E9%93%BE%E8%A1%A8/</guid>
+      <description>环形链表 #算法/链表/环问题 #算法/链表/快慢指针</description>
+    </item>
+    
+    <item>
+      <title>用户态、内核态</title>
+      <link>https://bytewong123.github.io/post/%E7%94%A8%E6%88%B7%E6%80%81%E5%86%85%E6%A0%B8%E6%80%81/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E7%94%A8%E6%88%B7%E6%80%81%E5%86%85%E6%A0%B8%E6%80%81/</guid>
+      <description>用户态、内核态 #iv/操作系统</description>
+    </item>
+    
+    <item>
+      <title>用栈操作构建数组</title>
+      <link>https://bytewong123.github.io/post/%E7%94%A8%E6%A0%88%E6%93%8D%E4%BD%9C%E6%9E%84%E5%BB%BA%E6%95%B0%E7%BB%84/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E7%94%A8%E6%A0%88%E6%93%8D%E4%BD%9C%E6%9E%84%E5%BB%BA%E6%95%B0%E7%BB%84/</guid>
+      <description>用栈操作构建数组 #算法/栈</description>
+    </item>
+    
+    <item>
+      <title>盛水最多的容器</title>
+      <link>https://bytewong123.github.io/post/%E7%9B%9B%E6%B0%B4%E6%9C%80%E5%A4%9A%E7%9A%84%E5%AE%B9%E5%99%A8/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E7%9B%9B%E6%B0%B4%E6%9C%80%E5%A4%9A%E7%9A%84%E5%AE%B9%E5%99%A8/</guid>
+      <description>盛水最多的容器 #算法/数组/双指针</description>
+    </item>
+    
+    <item>
+      <title>相交链表</title>
+      <link>https://bytewong123.github.io/post/%E7%9B%B8%E4%BA%A4%E9%93%BE%E8%A1%A8/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E7%9B%B8%E4%BA%A4%E9%93%BE%E8%A1%A8/</guid>
+      <description>相交链表 #算法/链表</description>
+    </item>
+    
+    <item>
+      <title>矩阵中的路径</title>
+      <link>https://bytewong123.github.io/post/%E7%9F%A9%E9%98%B5%E4%B8%AD%E7%9A%84%E8%B7%AF%E5%BE%84/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E7%9F%A9%E9%98%B5%E4%B8%AD%E7%9A%84%E8%B7%AF%E5%BE%84/</guid>
+      <description>矩阵中的路径 #算法/dfs</description>
+    </item>
+    
+    <item>
+      <title>短视频系统设计</title>
+      <link>https://bytewong123.github.io/post/%E7%9F%AD%E8%A7%86%E9%A2%91%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E7%9F%AD%E8%A7%86%E9%A2%91%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/</guid>
+      <description>短视频系统设计 #技术/系统设计 用户上传视频、搜索视频、观看视频</description>
+    </item>
+    
+    <item>
+      <title>礼物的最大价值</title>
+      <link>https://bytewong123.github.io/post/%E7%A4%BC%E7%89%A9%E7%9A%84%E6%9C%80%E5%A4%A7%E4%BB%B7%E5%80%BC/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E7%A4%BC%E7%89%A9%E7%9A%84%E6%9C%80%E5%A4%A7%E4%BB%B7%E5%80%BC/</guid>
+      <description>礼物的最大价值 #算法/dfs #算法/剑指offer #算法/仍然不会</description>
+    </item>
+    
+    <item>
+      <title>秒杀系统设计</title>
+      <link>https://bytewong123.github.io/post/%E7%A7%92%E6%9D%80%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E7%A7%92%E6%9D%80%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/</guid>
+      <description>秒杀系统设计 #技术/系统设计</description>
+    </item>
+    
+    <item>
+      <title>移除元素</title>
+      <link>https://bytewong123.github.io/post/%E7%A7%BB%E9%99%A4%E5%85%83%E7%B4%A0/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E7%A7%BB%E9%99%A4%E5%85%83%E7%B4%A0/</guid>
+      <description>移除元素 #算法/数组/双指针</description>
+    </item>
+    
+    <item>
+      <title>第一个只出现一次的字符</title>
+      <link>https://bytewong123.github.io/post/%E7%AC%AC%E4%B8%80%E4%B8%AA%E5%8F%AA%E5%87%BA%E7%8E%B0%E4%B8%80%E6%AC%A1%E7%9A%84%E5%AD%97%E7%AC%A6/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E7%AC%AC%E4%B8%80%E4%B8%AA%E5%8F%AA%E5%87%BA%E7%8E%B0%E4%B8%80%E6%AC%A1%E7%9A%84%E5%AD%97%E7%AC%A6/</guid>
+      <description>第一个只出现一次的字符 #算法/数组/hash法</description>
+    </item>
+    
+    <item>
+      <title>约瑟夫环</title>
+      <link>https://bytewong123.github.io/post/%E7%BA%A6%E7%91%9F%E5%A4%AB%E7%8E%AF/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E7%BA%A6%E7%91%9F%E5%A4%AB%E7%8E%AF/</guid>
+      <description>约瑟夫环 #算法/数组</description>
+    </item>
+    
+    <item>
+      <title>组合总数</title>
+      <link>https://bytewong123.github.io/post/%E7%BB%84%E5%90%88%E6%80%BB%E6%95%B0/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E7%BB%84%E5%90%88%E6%80%BB%E6%95%B0/</guid>
+      <description>组合总数 #算法/回溯 #算法/仍然不会</description>
+    </item>
+    
+    <item>
+      <title>组合总数2</title>
+      <link>https://bytewong123.github.io/post/%E7%BB%84%E5%90%88%E6%80%BB%E6%95%B02/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E7%BB%84%E5%90%88%E6%80%BB%E6%95%B02/</guid>
+      <description>组合总数2 #算法/回溯</description>
+    </item>
+    
+    <item>
+      <title>组合总数3</title>
+      <link>https://bytewong123.github.io/post/%E7%BB%84%E5%90%88%E6%80%BB%E6%95%B03/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E7%BB%84%E5%90%88%E6%80%BB%E6%95%B03/</guid>
+      <description>组合总数3 #算法/回溯</description>
+    </item>
+    
+    <item>
+      <title>缓存和DB数据的一致性</title>
+      <link>https://bytewong123.github.io/post/%E7%BC%93%E5%AD%98%E5%92%8Cdb%E6%95%B0%E6%8D%AE%E7%9A%84%E4%B8%80%E8%87%B4%E6%80%A7/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E7%BC%93%E5%AD%98%E5%92%8Cdb%E6%95%B0%E6%8D%AE%E7%9A%84%E4%B8%80%E8%87%B4%E6%80%A7/</guid>
+      <description>缓存和DB数据的一致性 #技术/系统设计</description>
+    </item>
+    
+    <item>
+      <title>编辑距离</title>
+      <link>https://bytewong123.github.io/post/%E7%BC%96%E8%BE%91%E8%B7%9D%E7%A6%BB/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E7%BC%96%E8%BE%91%E8%B7%9D%E7%A6%BB/</guid>
+      <description>编辑距离 #算法/dp #算法/仍然不会 #算法/真题/字节</description>
+    </item>
+    
+    <item>
+      <title>缺失的第一个正数</title>
+      <link>https://bytewong123.github.io/post/%E7%BC%BA%E5%A4%B1%E7%9A%84%E7%AC%AC%E4%B8%80%E4%B8%AA%E6%AD%A3%E6%95%B0/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E7%BC%BA%E5%A4%B1%E7%9A%84%E7%AC%AC%E4%B8%80%E4%B8%AA%E6%AD%A3%E6%95%B0/</guid>
+      <description>缺失的第一个正数 #算法/数组</description>
+    </item>
+    
+    <item>
+      <title>网盘系统设计</title>
+      <link>https://bytewong123.github.io/post/%E7%BD%91%E7%9B%98%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E7%BD%91%E7%9B%98%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/</guid>
+      <description>网盘系统设计 #技术/系统设计</description>
+    </item>
+    
+    <item>
+      <title>网约车系统设计</title>
+      <link>https://bytewong123.github.io/post/%E7%BD%91%E7%BA%A6%E8%BD%A6%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E7%BD%91%E7%BA%A6%E8%BD%A6%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/</guid>
+      <description>网约车系统设计 #技术/系统设计</description>
+    </item>
+    
+    <item>
+      <title>翻转二叉树</title>
+      <link>https://bytewong123.github.io/post/%E7%BF%BB%E8%BD%AC%E4%BA%8C%E5%8F%89%E6%A0%91/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E7%BF%BB%E8%BD%AC%E4%BA%8C%E5%8F%89%E6%A0%91/</guid>
+      <description>翻转二叉树 #算法/二叉树/框架</description>
+    </item>
+    
+    <item>
+      <title>翻转整数</title>
+      <link>https://bytewong123.github.io/post/%E7%BF%BB%E8%BD%AC%E6%95%B4%E6%95%B0/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E7%BF%BB%E8%BD%AC%E6%95%B4%E6%95%B0/</guid>
+      <description>翻转整数 #算法/数学</description>
+    </item>
+    
+    <item>
+      <title>翻转链表</title>
+      <link>https://bytewong123.github.io/post/%E7%BF%BB%E8%BD%AC%E9%93%BE%E8%A1%A8/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E7%BF%BB%E8%BD%AC%E9%93%BE%E8%A1%A8/</guid>
+      <description>翻转链表 #算法/链表/翻转链表</description>
+    </item>
+    
+    <item>
+      <title>翻转链表2（翻转第m到第n个链表节点之间的元素）</title>
+      <link>https://bytewong123.github.io/post/%E7%BF%BB%E8%BD%AC%E9%93%BE%E8%A1%A82%E7%BF%BB%E8%BD%AC%E7%AC%ACm%E5%88%B0%E7%AC%ACn%E4%B8%AA%E9%93%BE%E8%A1%A8%E8%8A%82%E7%82%B9%E4%B9%8B%E9%97%B4%E7%9A%84%E5%85%83%E7%B4%A0/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E7%BF%BB%E8%BD%AC%E9%93%BE%E8%A1%A82%E7%BF%BB%E8%BD%AC%E7%AC%ACm%E5%88%B0%E7%AC%ACn%E4%B8%AA%E9%93%BE%E8%A1%A8%E8%8A%82%E7%82%B9%E4%B9%8B%E9%97%B4%E7%9A%84%E5%85%83%E7%B4%A0/</guid>
+      <description>翻转链表2（翻转第m到第n个链表节点之间的元素） #算法/链表/翻转链表</description>
+    </item>
+    
+    <item>
+      <title>聚合列表</title>
+      <link>https://bytewong123.github.io/post/%E8%81%9A%E5%90%88%E5%88%97%E8%A1%A8/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E8%81%9A%E5%90%88%E5%88%97%E8%A1%A8/</guid>
+      <description>聚合列表 #技术/系统设计</description>
+    </item>
+    
+    <item>
+      <title>表示数值的字符串</title>
+      <link>https://bytewong123.github.io/post/%E8%A1%A8%E7%A4%BA%E6%95%B0%E5%80%BC%E7%9A%84%E5%AD%97%E7%AC%A6%E4%B8%B2/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E8%A1%A8%E7%A4%BA%E6%95%B0%E5%80%BC%E7%9A%84%E5%AD%97%E7%AC%A6%E4%B8%B2/</guid>
+      <description>表示数值的字符串 #算法/设计</description>
+    </item>
+    
+    <item>
+      <title>解数独</title>
+      <link>https://bytewong123.github.io/post/%E8%A7%A3%E6%95%B0%E7%8B%AC/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E8%A7%A3%E6%95%B0%E7%8B%AC/</guid>
+      <description>解数独 #算法/矩阵 #算法/回朔</description>
+    </item>
+    
+    <item>
+      <title>计数系统设计</title>
+      <link>https://bytewong123.github.io/post/%E8%AE%A1%E6%95%B0%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E8%AE%A1%E6%95%B0%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/</guid>
+      <description>计数系统设计 #技术/系统设计</description>
+    </item>
+    
+    <item>
+      <title>调整数组顺序使奇数位于偶数前面</title>
+      <link>https://bytewong123.github.io/post/%E8%B0%83%E6%95%B4%E6%95%B0%E7%BB%84%E9%A1%BA%E5%BA%8F%E4%BD%BF%E5%A5%87%E6%95%B0%E4%BD%8D%E4%BA%8E%E5%81%B6%E6%95%B0%E5%89%8D%E9%9D%A2/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E8%B0%83%E6%95%B4%E6%95%B0%E7%BB%84%E9%A1%BA%E5%BA%8F%E4%BD%BF%E5%A5%87%E6%95%B0%E4%BD%8D%E4%BA%8E%E5%81%B6%E6%95%B0%E5%89%8D%E9%9D%A2/</guid>
+      <description>调整数组顺序使奇数位于偶数前面 #算法/数组/双指针 #算法/剑指offer #算法/仍然不会</description>
+    </item>
+    
+    <item>
+      <title>趣谈网络协议</title>
+      <link>https://bytewong123.github.io/post/%E8%B6%A3%E8%B0%88%E7%BD%91%E7%BB%9C%E5%8D%8F%E8%AE%AE/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E8%B6%A3%E8%B0%88%E7%BD%91%E7%BB%9C%E5%8D%8F%E8%AE%AE/</guid>
+      <description>趣谈网络协议 #技术/极客时间 #技术/网络</description>
+    </item>
+    
+    <item>
+      <title>进程和线程</title>
+      <link>https://bytewong123.github.io/post/%E8%BF%9B%E7%A8%8B%E5%92%8C%E7%BA%BF%E7%A8%8B/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E8%BF%9B%E7%A8%8B%E5%92%8C%E7%BA%BF%E7%A8%8B/</guid>
+      <description>进程和线程 #技术/操作系统</description>
+    </item>
+    
+    <item>
+      <title>连续子数组的最大和</title>
+      <link>https://bytewong123.github.io/post/%E8%BF%9E%E7%BB%AD%E5%AD%90%E6%95%B0%E7%BB%84%E7%9A%84%E6%9C%80%E5%A4%A7%E5%92%8C/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E8%BF%9E%E7%BB%AD%E5%AD%90%E6%95%B0%E7%BB%84%E7%9A%84%E6%9C%80%E5%A4%A7%E5%92%8C/</guid>
+      <description>连续子数组的最大和 #算法/dp</description>
+    </item>
+    
+    <item>
+      <title>配置中心设计</title>
+      <link>https://bytewong123.github.io/post/%E9%85%8D%E7%BD%AE%E4%B8%AD%E5%BF%83%E8%AE%BE%E8%AE%A1/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E9%85%8D%E7%BD%AE%E4%B8%AD%E5%BF%83%E8%AE%BE%E8%AE%A1/</guid>
+      <description>配置中心设计 #技术/系统设计</description>
+    </item>
+    
+    <item>
+      <title>重点关注</title>
+      <link>https://bytewong123.github.io/post/%E9%87%8D%E7%82%B9%E5%85%B3%E6%B3%A8/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E9%87%8D%E7%82%B9%E5%85%B3%E6%B3%A8/</guid>
+      <description>重点关注 #算法/重点关注</description>
+    </item>
+    
+    <item>
+      <title>闭包</title>
+      <link>https://bytewong123.github.io/post/%E9%97%AD%E5%8C%85/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E9%97%AD%E5%8C%85/</guid>
+      <description>闭包 #技术/golang</description>
+    </item>
+    
+    <item>
+      <title>队列的最大值</title>
+      <link>https://bytewong123.github.io/post/%E9%98%9F%E5%88%97%E7%9A%84%E6%9C%80%E5%A4%A7%E5%80%BC/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E9%98%9F%E5%88%97%E7%9A%84%E6%9C%80%E5%A4%A7%E5%80%BC/</guid>
+      <description>队列的最大值 #算法/设计 #算法/仍然不会</description>
+    </item>
+    
+    <item>
+      <title>限流</title>
+      <link>https://bytewong123.github.io/post/%E9%99%90%E6%B5%81/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E9%99%90%E6%B5%81/</guid>
+      <description>限流 #技术/系统设计</description>
+    </item>
+    
+    <item>
+      <title>青蛙跳台阶</title>
+      <link>https://bytewong123.github.io/post/%E9%9D%92%E8%9B%99%E8%B7%B3%E5%8F%B0%E9%98%B6/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E9%9D%92%E8%9B%99%E8%B7%B3%E5%8F%B0%E9%98%B6/</guid>
+      <description>青蛙跳台阶 #算法/dp</description>
+    </item>
+    
+    <item>
+      <title>顺时针打印矩阵</title>
+      <link>https://bytewong123.github.io/post/%E9%A1%BA%E6%97%B6%E9%92%88%E6%89%93%E5%8D%B0%E7%9F%A9%E9%98%B5/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E9%A1%BA%E6%97%B6%E9%92%88%E6%89%93%E5%8D%B0%E7%9F%A9%E9%98%B5/</guid>
+      <description>顺时针打印矩阵 #算法/矩阵 #算法/仍然不会</description>
+    </item>
+    
+    <item>
+      <title>高可用架构的十种武器</title>
+      <link>https://bytewong123.github.io/post/%E9%AB%98%E5%8F%AF%E7%94%A8%E6%9E%B6%E6%9E%84%E7%9A%84%E5%8D%81%E7%A7%8D%E6%AD%A6%E5%99%A8/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E9%AB%98%E5%8F%AF%E7%94%A8%E6%9E%B6%E6%9E%84%E7%9A%84%E5%8D%81%E7%A7%8D%E6%AD%A6%E5%99%A8/</guid>
+      <description>高可用架构的十种武器 #技术/系统设计</description>
+    </item>
+    
+    <item>
+      <title>高并发系统</title>
+      <link>https://bytewong123.github.io/post/%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F/</guid>
+      <description>高并发系统 #技术/极客时间/高并发系统设计40问</description>
+    </item>
+    
+    <item>
+      <title>高并发系统设计40问</title>
+      <link>https://bytewong123.github.io/post/%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A140%E9%97%AE/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A140%E9%97%AE/</guid>
+      <description>高并发系统设计40问 #技术/极客时间/高并发系统设计40问</description>
+    </item>
+    
+    <item>
+      <title>高并发系统设计40问——分布式服务篇</title>
+      <link>https://bytewong123.github.io/post/%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A140%E9%97%AE%E5%88%86%E5%B8%83%E5%BC%8F%E6%9C%8D%E5%8A%A1%E7%AF%87/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E9%AB%98%E5%B9%B6%E5%8F%91%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A140%E9%97%AE%E5%88%86%E5%B8%83%E5%BC%8F%E6%9C%8D%E5%8A%A1%E7%AF%87/</guid>
+      <description>高并发系统设计40问——分布式服务篇 #技术/极客时间/高并发系统设计40问</description>
+    </item>
+    
+    <item>
+      <title>高性能三板斧</title>
+      <link>https://bytewong123.github.io/post/%E9%AB%98%E6%80%A7%E8%83%BD%E4%B8%89%E6%9D%BF%E6%96%A7/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E9%AB%98%E6%80%A7%E8%83%BD%E4%B8%89%E6%9D%BF%E6%96%A7/</guid>
+      <description>高性能三板斧 #技术/系统设计</description>
+    </item>
+    
+  </channel>
+</rss>

@@ -1,0 +1,503 @@
+<!doctype html>
+<html lang="en">
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+
+    <title>redis实现关注模型 | sheeks</title>
+    <meta property="og:title" content="redis实现关注模型 - sheeks">
+    <meta property="og:type" content="article">
+        
+    <meta property="article:published_time" content='2023-01-08T18:06:57&#43;08:00'>
+        
+        
+    <meta property="article:modified_time" content='2023-01-08T18:06:57&#43;08:00'>
+        
+    <meta name="Keywords" content="golang,go语言,go语言笔记,sheeks,java,android,博客,项目管理,python,软件架构,公众号,小程序">
+    <meta name="description" content="redis实现关注模型">
+        
+    <meta name="author" content="sheeks">
+    <meta property="og:url" content="https://bytewong123.github.io/post/redis%E5%AE%9E%E7%8E%B0%E5%85%B3%E6%B3%A8%E6%A8%A1%E5%9E%8B/">
+    <link rel="shortcut icon" href='/favicon.ico'  type="image/x-icon">
+
+    <link rel="stylesheet" href='/css/normalize.css'>
+    <link rel="stylesheet" href='/css/style.css'>
+    <script type="text/javascript" src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    
+    
+    
+    
+    
+    
+</head>
+
+<body>
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://bytewong123.github.io/">
+                        sheeks
+                    </a>
+                
+                <p class="description">dev</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://bytewong123.github.io/">Home</a>
+                    
+                    <a  href="https://bytewong123.github.io/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    
+    <article class="post">
+        <header>
+            <h1 class="post-title">redis实现关注模型</h1>
+        </header>
+        
+  <time datetime="2023-01-08T10:06:57Z" class="post-meta meta-date dt-published">
+    2023-01-08
+  </time>
+
+
+<div class="post-meta meta-category">
+  <span>&nbsp;|</span>
+  
+    <a href='/categories/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1' target="_blank">系统设计</a>
+  
+</div>
+
+
+        
+        
+        <div class="post-content">
+            <h1 id="redis实现关注模型">redis实现关注模型</h1>
+<p>#技术/系统设计</p>
+<h2 id="共同关注">共同关注</h2>
+<p>a 关注了 b, c, d用户
+b 关注了 c, d, e, f用户
+a和b共同关注的用户是：c, d</p>
+<p>将a和b关注的用户都存入 set，使用SINTER算出交集即可</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">SINTER set_a set_b -&gt; <span style="color:#f92672">{</span>c, d<span style="color:#f92672">}</span>
+</code></pre></div><h2 id="我关注的人也关注了他">我关注的人也关注了他</h2>
+<p>a 关注了 b, c, d用户
+b 关注了 c, d, e, f用户
+c 关注了 e, f, g, h用户
+d 关注了 c, f, g</p>
+<p>a访问c的首页，显示a关注的人也关注了c
+即b, d也关注了c</p>
+<p>遍历a关注的所有人（除c以外）的set</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">SISMEMBER b_set, c
+SISMEMBER d_set, c
+...
+</code></pre></div><p>依次判断即可。若关注了几十万人，也无所谓，因为首页只需展示部分，通常是个位数，若查看全部通常是翻页接口，一批一批返回即可</p>
+<h2 id="我可能认识的人">我可能认识的人</h2>
+<p>a可能认识的人e, f
+通常使用a和b用户的差集即可</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">SDIFF a_set, b_set -&gt; <span style="color:#f92672">{</span>b,e,f<span style="color:#f92672">}</span>，刨掉b和a自身，即为可能认识的人e,f
+</code></pre></div><h1 id="redis实现排行榜模型">redis实现排行榜模型</h1>
+<p>每天有一个当日所有新闻的有序集合，每点击一次，给有序集合内部的key的分值+1</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">ZINCRBY hot_news_2021_01_02 <span style="color:#ae81ff">1</span> news_name
+</code></pre></div><p>当日的热搜榜前10即</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">ZREVRANGE hot_news_2021_01_02 <span style="color:#ae81ff">0</span> <span style="color:#ae81ff">9</span> WITHSCORES
+</code></pre></div><p>七日排行榜</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">ZUNIONSTORE hot_news_2021_week_1 <span style="color:#ae81ff">7</span> hot_news_2021_01_01, hot_news_2021_01_02, ... , hot_news_2021_01_07
+</code></pre></div><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">ZREVRANGE hot_news_2021_week_1 <span style="color:#ae81ff">0</span> <span style="color:#ae81ff">9</span> WITHSCORES
+</code></pre></div><h1 id="redis分布式锁">redis分布式锁</h1>
+<h2 id="setnx">setnx</h2>
+<p>setnx 返回1，加锁成功
+setnx 返回0，锁已存在，加锁失败
+问题：当加锁线程挂掉，锁永远无法释放</p>
+<h2 id="setnx--expire">setnx + expire</h2>
+<p>setnx的同时，加上过期时间，防止死锁问题
+问题：若加锁线程的业务处理过程阻塞，导致过了超时时间还未完成业务处理，另一线程又可以获取到锁并加锁，加锁线程释放锁时释放了另一线程加上的锁，这样锁其实就永久失效了</p>
+<h2 id="setnx--expire--uuid">setnx + expire + uuid</h2>
+<p>setnx，value为一个uuid，只能由加锁线程释放
+问题：对于expire时间仍然难以把控，若加锁线程业务处理过程卡住，那么也会导致后续线程可以加锁成功，锁永久失效</p>
+<h2 id="setnx--expire后台线程刷新锁">setnx + expire，后台线程刷新锁</h2>
+<p>setnx，过期时间设置得稍微小一点，后台启动一个线程每隔expire/n的时间监控锁key，若发现该锁存在，则为其延长锁的过期时间
+问题：若redis是主从/集群架构，加锁后主节点挂了，从节点还未同步该key，会导致别的线程可以重新加锁，锁失效</p>
+<h2 id="zookeepercp">zookeeper，cp</h2>
+<p>redis保证了ap（可用性+分区一致性），zookeeper保证cp（一致性+分区一致性）
+zk可以保证写入了半数以上节点成功后才返回，即使master挂掉，可以让leader顶上重新工作</p>
+<h1 id="redis存储对象数据场景">redis存储对象数据场景</h1>
+<h2 id="set">SET</h2>
+<p><code>SET user:1 value(json)</code></p>
+<h2 id="mgetmset">MGET,MSET</h2>
+<p><code>MSET user:1:name name1 user:1:school school1</code>
+<code>MGET user:1:name user:1:school</code>
+使用场景：若某一对象字段非常多时，json编码解码比较耗费时间，网络传输的压力也较大，可以通过这种方式只操作部分字段</p>
+<h2 id="hmset-hmget">HMSET, HMGET</h2>
+<p><code>HMSET user 1:name name1 1:age age1</code>
+<code>HMGET user 1:name 1:age</code>
+问题：大key
+解决方式：对hash key进行拆分</p>
+<h1 id="分布式全局序列号">分布式全局序列号</h1>
+<p><code>INCRBY order_id</code>
+每次自增，保证序列号全局唯一；问题：对redis压力较大</p>
+<p>优化方式：
+<code>INCRBY order_id 1000</code>
+每次取1000个，一个实例内部缓存住这1000个，然后在内部进行分配</p>
+<h1 id="电商购物车">电商购物车</h1>
+<p>hash结构
+以用户id为key，商品id为field，商品数量为value</p>
+<p>购物车操作：</p>
+<pre><code>添加商品：hset cart:1001 10088 1
+增加商品数量：hincrby cart:1001 10088 1
+商品种类总数：hlen cart:1001
+删除商品：hdel cart:1001 10088
+获取购物车所有商品：hgetall cart:1001
+</code></pre><p>问题：在redis cluster架构下不宜大规模使用，大key问题：
+数据倾斜，某个节点存储了大key，压力较大</p>
+<h1 id="阻塞队列">阻塞队列</h1>
+<p><code>lpush + brpop</code>
+brpop，若队列里没有元素则一直阻塞，知道有元素被放入</p>
+<h1 id="微信消息推送">微信消息推送</h1>
+<p>a关注了b和c等大v
+b发了微博，消息id为10018
+<code>LPUSH msg:a 10018</code>
+c发了微博，消息id为10086
+<code>LPUSH msg:a 10086</code>
+查看最新消息
+<code>LRANGE msg:a 0 4</code></p>
+<h1 id="微信抽奖小程序">微信抽奖小程序</h1>
+<ol>
+<li>加入抽奖集合
+<code>SADD key userid</code></li>
+<li>查看所有抽奖用户
+<code>SMEMBERS key</code></li>
+<li>抽取count名中奖者
+<code>SRANDMEMBER key count</code></li>
+<li>抽过奖的用户不允许重复抽奖
+<code>SPOP key count</code></li>
+</ol>
+<h1 id="点赞">点赞</h1>
+<ol>
+<li>点赞
+<code>SADD like:msgId userId</code></li>
+<li>取消点赞
+<code>SREM like:msgId userId</code></li>
+<li>检查用户是否点过赞
+<code>SISMEMBER like:msgId userId</code></li>
+<li>获取点赞用户列表
+<code>SMEMBERS like:msgId</code></li>
+<li>获取点赞用户数
+<code>SCARD like:msgId</code></li>
+</ol>
+
+        </div>
+
+        
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/post/zookeeper%E7%9A%84zap%E5%8D%8F%E8%AE%AE/">zookeeper的zap协议</a></li>
+        
+        <li><a href="/post/%E4%BA%8B%E5%8A%A1%E6%8B%86%E8%A7%A3/">事务拆解</a></li>
+        
+        <li><a href="/post/%E4%BF%A1%E6%81%AF%E6%B5%81%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/">信息流系统设计</a></li>
+        
+        <li><a href="/post/%E5%85%B3%E7%B3%BB%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/">关系系统设计</a></li>
+        
+        <li><a href="/post/%E5%8E%8B%E6%B5%8B%E5%B9%B3%E5%8F%B0%E8%AE%BE%E8%AE%A1/">压测平台设计</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='/tags/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1' target="_blank">系统设计</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    
+
+    
+    
+    
+    
+
+</div>
+
+                    <footer id="footer">
+    <br />
+</footer>
+
+
+    
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+<style type="text/css">
+div.highlight {
+    position: relative;
+    margin: 1em 0px;
+}
+
+.copy-code {
+    display: none;
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    color: rgba(255, 255, 255, 0.8);
+    background: rgba(78, 78, 78, 0.8);
+    border-radius: var(--radius);
+    padding: 0 5px;
+    font: inherit;
+    user-select: none;
+    cursor: pointer;
+    border: 0;
+    --radius: 8px;
+}
+
+div.highlight:hover .copy-code,pre:hover .copy-code {
+    display: block;
+}
+
+</style>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+
+
+
+
+
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='//www.google.com/search' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://bytewong123.github.io/">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title">Latest articles</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/benchmark/" title="benchmark" target="_blank">benchmark</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/b%E6%A0%91/" title="b树" target="_blank">b树</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0daemonset/" title="cka真题练习——daemonset" target="_blank">cka真题练习——daemonset</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0deploy/" title="cka真题练习——deploy" target="_blank">cka真题练习——deploy</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0etcd%E5%A4%87%E4%BB%BD%E8%BF%98%E5%8E%9F/" title="cka真题练习——etcd备份还原" target="_blank">cka真题练习——etcd备份还原</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0ingress/" title="cka真题练习——ingress" target="_blank">cka真题练习——ingress</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0networkpolicy/" title="cka真题练习——NetworkPolicy" target="_blank">cka真题练习——NetworkPolicy</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0node%E8%B0%83%E5%BA%A6/" title="cka真题练习——node调度" target="_blank">cka真题练习——node调度</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0pod/" title="cka真题练习——pod" target="_blank">cka真题练习——pod</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0pv/" title="cka真题练习——pv" target="_blank">cka真题练习——pv</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>Categories</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://bytewong123.github.io/categories/golang/">golang (12)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/k8s/">k8s (24)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/mysql/">mysql (10)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/redis/">redis (10)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/rust/">rust (1)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/sql/">sql (1)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统 (3)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E6%9E%81%E5%AE%A2%E6%97%B6%E9%97%B4/">极客时间 (5)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/">消息队列 (1)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B3%BB%E7%BB%9F/">深入理解计算机系统 (1)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E7%AE%97%E6%B3%95/">算法 (138)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/">系统设计 (19)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>Tags</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://bytewong123.github.io/tags/golang/">golang</a>
+    
+    <a href="https://bytewong123.github.io/tags/k8s/">k8s</a>
+    
+    <a href="https://bytewong123.github.io/tags/kafka/">kafka</a>
+    
+    <a href="https://bytewong123.github.io/tags/mysql/">mysql</a>
+    
+    <a href="https://bytewong123.github.io/tags/redis/">redis</a>
+    
+    <a href="https://bytewong123.github.io/tags/rust/">rust</a>
+    
+    <a href="https://bytewong123.github.io/tags/sql/">sql</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E6%9E%81%E5%AE%A2%E6%97%B6%E9%97%B4/">极客时间</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/">消息队列</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E7%AE%97%E6%B3%95/">算法</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/">系统设计</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/">读书笔记</a>
+    
+</div>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title">Links</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a target="_blank" href="http://yuedu.baidu.com/ebook/14a722970740be1e640e9a3e" title="Android Gradle权威指南">Android Gradle权威指南</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="http://mirrors.flysnow.org/" title="常用开发工具CDN镜像">常用开发工具CDN镜像</a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title">Meta</h3>
+        <ul class="widget-list">
+            <li><a href="https://bytewong123.github.io/index.xml">RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

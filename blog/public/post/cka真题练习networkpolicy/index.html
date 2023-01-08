@@ -1,0 +1,495 @@
+<!doctype html>
+<html lang="en">
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+
+    <title>cka真题练习——NetworkPolicy | sheeks</title>
+    <meta property="og:title" content="cka真题练习——NetworkPolicy - sheeks">
+    <meta property="og:type" content="article">
+        
+    <meta property="article:published_time" content='2023-01-08T18:06:57&#43;08:00'>
+        
+        
+    <meta property="article:modified_time" content='2023-01-08T18:06:57&#43;08:00'>
+        
+    <meta name="Keywords" content="golang,go语言,go语言笔记,sheeks,java,android,博客,项目管理,python,软件架构,公众号,小程序">
+    <meta name="description" content="cka真题练习——NetworkPolicy">
+        
+    <meta name="author" content="sheeks">
+    <meta property="og:url" content="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0networkpolicy/">
+    <link rel="shortcut icon" href='/favicon.ico'  type="image/x-icon">
+
+    <link rel="stylesheet" href='/css/normalize.css'>
+    <link rel="stylesheet" href='/css/style.css'>
+    <script type="text/javascript" src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    
+    
+    
+    
+    
+    
+</head>
+
+<body>
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://bytewong123.github.io/">
+                        sheeks
+                    </a>
+                
+                <p class="description">dev</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://bytewong123.github.io/">Home</a>
+                    
+                    <a  href="https://bytewong123.github.io/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    
+    <article class="post">
+        <header>
+            <h1 class="post-title">cka真题练习——NetworkPolicy</h1>
+        </header>
+        
+  <time datetime="2023-01-08T10:06:57Z" class="post-meta meta-date dt-published">
+    2023-01-08
+  </time>
+
+
+<div class="post-meta meta-category">
+  <span>&nbsp;|</span>
+  
+    <a href='/categories/k8s' target="_blank">k8s</a>
+  
+</div>
+
+
+        
+        
+        <div class="post-content">
+            <h1 id="cka真题练习networkpolicy">cka真题练习——NetworkPolicy</h1>
+<h2 id="在某个ns内部网络通信只允许访问pod的9200端口">在某个ns内部，网络通信只允许访问pod的9200端口</h2>
+<pre><code>Create a new NetworkPolicy named allow-port-from-namespace that allows Pods in the existing namespace my-app to connect to port 9200 of other pods in the same namespace
+</code></pre><h1 id="networkpolicy的配置解读">networkpolicy的配置解读</h1>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml"><span style="color:#f92672">apiVersion</span>: <span style="color:#ae81ff">networking.k8s.io/v1</span>
+<span style="color:#f92672">kind</span>: <span style="color:#ae81ff">NetworkPolicy</span>
+<span style="color:#f92672">metadata</span>:
+  <span style="color:#f92672">name</span>: <span style="color:#ae81ff">test-network-policy</span>
+  <span style="color:#f92672">namespace</span>: <span style="color:#ae81ff">default</span>
+<span style="color:#f92672">spec</span>:
+  <span style="color:#f92672">podSelector</span>:
+    <span style="color:#f92672">matchLabels</span>:
+      <span style="color:#f92672">role</span>: <span style="color:#ae81ff">db</span>
+  <span style="color:#f92672">policyTypes</span>:
+  - <span style="color:#ae81ff">Ingress</span>
+  - <span style="color:#ae81ff">Egress</span>
+  <span style="color:#f92672">ingress</span>:
+  - <span style="color:#f92672">from</span>:
+    - <span style="color:#f92672">ipBlock</span>:
+        <span style="color:#f92672">cidr</span>: <span style="color:#ae81ff">172.17.0.0</span><span style="color:#ae81ff">/16</span>
+        <span style="color:#f92672">except</span>:
+        - <span style="color:#ae81ff">172.17.1.0</span><span style="color:#ae81ff">/24</span>
+    - <span style="color:#f92672">namespaceSelector</span>:
+        <span style="color:#f92672">matchLabels</span>:
+          <span style="color:#f92672">project</span>: <span style="color:#ae81ff">myproject</span>
+    - <span style="color:#f92672">podSelector</span>:
+        <span style="color:#f92672">matchLabels</span>:
+          <span style="color:#f92672">role</span>: <span style="color:#ae81ff">frontend</span>
+    <span style="color:#f92672">ports</span>:
+    - <span style="color:#f92672">protocol</span>: <span style="color:#ae81ff">TCP</span>
+      <span style="color:#f92672">port</span>: <span style="color:#ae81ff">6379</span>
+  <span style="color:#f92672">egress</span>:
+  - <span style="color:#f92672">to</span>:
+    - <span style="color:#f92672">ipBlock</span>:
+        <span style="color:#f92672">cidr</span>: <span style="color:#ae81ff">10.0.0.0</span><span style="color:#ae81ff">/24</span>
+    <span style="color:#f92672">ports</span>:
+    - <span style="color:#f92672">protocol</span>: <span style="color:#ae81ff">TCP</span>
+      <span style="color:#f92672">port</span>: <span style="color:#ae81ff">5978</span>
+</code></pre></div><h2 id="specpodselector">spec.podSelector</h2>
+<p>这个配置指的是当前namespace所有需要被筛选的pod集合A；
+例如，当配置的policyTypes为ingress时，即筛选所有进入到pod集合A的流量；
+当配置的policyTypes为egress时，即筛选所有从pod集合A流出的流量
+podSelector可以使用label来筛选，填{}代表筛选当前namespace（由metadata.namespace决定）的所有集合</p>
+<h2 id="specpolicytypes">spec.policyTypes</h2>
+<p>这个配置即需要的策略，可以有Ingress、Egress。Ingress代表进入当前pod集合的流量，Egress代表离开当前pod集合的流量。pod集合由spec.podSelector决定。</p>
+<h2 id="specingressfrom">spec.ingress.from</h2>
+<p>有以下几种维度进行筛选</p>
+<h3 id="namespaceselector">namespaceSelector</h3>
+<p>只约束指定的namespace下的所有pod可以进入spec.podSelector的pod集合；</p>
+<h3 id="podselector">podSelector</h3>
+<p>只约束指定的pod可以进入spec.podSelector的pod集合；若只配podSelector，不配namespaceSelector，则代表只有当前namespace下选定的pod可以访问当前namespace的spec.podSelector的pod集合</p>
+<h3 id="namespaceselectorpodselector">namespaceSelector、podSelector</h3>
+<p>约束namespaceSelector筛选的namespace下的podSelector筛选的pod可以进入/离开spec.podSelector的pod集合</p>
+<h1 id="示例">示例</h1>
+<h2 id="只允许当前namespace的pod访问当前namespace的所有pod的80端口">只允许当前namespace的pod访问当前namespace的所有pod的80端口</h2>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml"><span style="color:#f92672">apiVersion</span>: <span style="color:#ae81ff">networking.k8s.io/v1</span>
+<span style="color:#f92672">kind</span>: <span style="color:#ae81ff">NetworkPolicy</span>
+<span style="color:#f92672">metadata</span>:
+  <span style="color:#f92672">name</span>: <span style="color:#ae81ff">test-network-policy</span>
+  <span style="color:#f92672">namespace</span>: <span style="color:#ae81ff">my-app</span>
+<span style="color:#f92672">spec</span>:
+  <span style="color:#f92672">podSelector</span>: {}
+  <span style="color:#f92672">policyTypes</span>:
+  - <span style="color:#ae81ff">Ingress</span>
+  <span style="color:#f92672">ingress</span>:
+  - <span style="color:#f92672">from</span>:
+    - <span style="color:#f92672">podSelector</span>: {}
+    <span style="color:#f92672">ports</span>:
+    - <span style="color:#f92672">protocol</span>: <span style="color:#ae81ff">TCP</span>
+      <span style="color:#f92672">port</span>: <span style="color:#ae81ff">80</span>
+</code></pre></div><ul>
+<li>spec.podSelector为{}，代表筛选的集合为my-app namespace下的所有pod</li>
+<li>ingress.from.podSelector为{}，代表哪些pod可以访问spec.podSelector筛选出来的pod，并且没配namespaceSelector，所以即当前namespace下所有的pod。</li>
+</ul>
+<h2 id="只允许指定namespace的pod访问当前namespace的所有pod的80端口">只允许指定namespace的pod访问当前namespace的所有pod的80端口</h2>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml"><span style="color:#f92672">apiVersion</span>: <span style="color:#ae81ff">networking.k8s.io/v1</span>
+<span style="color:#f92672">kind</span>: <span style="color:#ae81ff">NetworkPolicy</span>
+<span style="color:#f92672">metadata</span>:
+  <span style="color:#f92672">name</span>: <span style="color:#ae81ff">test-network-policy</span>
+  <span style="color:#f92672">namespace</span>: <span style="color:#ae81ff">my-app</span>
+<span style="color:#f92672">spec</span>:
+  <span style="color:#f92672">podSelector</span>: {}
+  <span style="color:#f92672">policyTypes</span>:
+  - <span style="color:#ae81ff">Ingress</span>
+  <span style="color:#f92672">ingress</span>:
+  - <span style="color:#f92672">from</span>:
+    - <span style="color:#f92672">namespaceSelector</span>:
+        <span style="color:#f92672">matchLabels</span>:
+          <span style="color:#f92672">kubernetes.io/metadata.name</span>: <span style="color:#ae81ff">default</span>
+    <span style="color:#f92672">ports</span>:
+    - <span style="color:#f92672">protocol</span>: <span style="color:#ae81ff">TCP</span>
+      <span style="color:#f92672">port</span>: <span style="color:#ae81ff">80</span>
+</code></pre></div><ul>
+<li>spec.podSelector为{}，代表筛选的集合为my-app namespace下的所有pod</li>
+<li>ingress.from.namespaceSelector筛选了default namespace，代表哪些pod可以访问spec.podSelector筛选出来的pod，并且没配podSelector，所以即namespaceSelector筛选出来的namespace下所有的pod。</li>
+<li>如何写namespaceSelector，可以通过以下命令查看namespace有哪些标签</li>
+</ul>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh"><span style="color:#f92672">[</span>wangzijie.byte k8s<span style="color:#f92672">]</span>$ kubectl get ns --show-labels
+NAME              STATUS   AGE   LABELS
+default           Active   56m   kubernetes.io/metadata.name<span style="color:#f92672">=</span>default
+kube-node-lease   Active   56m   kubernetes.io/metadata.name<span style="color:#f92672">=</span>kube-node-lease
+kube-public       Active   56m   kubernetes.io/metadata.name<span style="color:#f92672">=</span>kube-public
+kube-system       Active   56m   kubernetes.io/metadata.name<span style="color:#f92672">=</span>kube-system
+my-app            Active   51m   kubernetes.io/metadata.name<span style="color:#f92672">=</span>my-app
+</code></pre></div><p>根据以上结果写namespaceSelector即可</p>
+
+        </div>
+
+        
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0daemonset/">cka真题练习——daemonset</a></li>
+        
+        <li><a href="/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0deploy/">cka真题练习——deploy</a></li>
+        
+        <li><a href="/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0etcd%E5%A4%87%E4%BB%BD%E8%BF%98%E5%8E%9F/">cka真题练习——etcd备份还原</a></li>
+        
+        <li><a href="/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0ingress/">cka真题练习——ingress</a></li>
+        
+        <li><a href="/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0node%E8%B0%83%E5%BA%A6/">cka真题练习——node调度</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='/tags/k8s' target="_blank">k8s</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    
+
+    
+    
+    
+    
+
+</div>
+
+                    <footer id="footer">
+    <br />
+</footer>
+
+
+    
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+<style type="text/css">
+div.highlight {
+    position: relative;
+    margin: 1em 0px;
+}
+
+.copy-code {
+    display: none;
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    color: rgba(255, 255, 255, 0.8);
+    background: rgba(78, 78, 78, 0.8);
+    border-radius: var(--radius);
+    padding: 0 5px;
+    font: inherit;
+    user-select: none;
+    cursor: pointer;
+    border: 0;
+    --radius: 8px;
+}
+
+div.highlight:hover .copy-code,pre:hover .copy-code {
+    display: block;
+}
+
+</style>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+
+
+
+
+
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='//www.google.com/search' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://bytewong123.github.io/">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title">Latest articles</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/benchmark/" title="benchmark" target="_blank">benchmark</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/b%E6%A0%91/" title="b树" target="_blank">b树</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0daemonset/" title="cka真题练习——daemonset" target="_blank">cka真题练习——daemonset</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0deploy/" title="cka真题练习——deploy" target="_blank">cka真题练习——deploy</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0etcd%E5%A4%87%E4%BB%BD%E8%BF%98%E5%8E%9F/" title="cka真题练习——etcd备份还原" target="_blank">cka真题练习——etcd备份还原</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0ingress/" title="cka真题练习——ingress" target="_blank">cka真题练习——ingress</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0networkpolicy/" title="cka真题练习——NetworkPolicy" target="_blank">cka真题练习——NetworkPolicy</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0node%E8%B0%83%E5%BA%A6/" title="cka真题练习——node调度" target="_blank">cka真题练习——node调度</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0pod/" title="cka真题练习——pod" target="_blank">cka真题练习——pod</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0pv/" title="cka真题练习——pv" target="_blank">cka真题练习——pv</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>Categories</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://bytewong123.github.io/categories/golang/">golang (12)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/k8s/">k8s (24)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/mysql/">mysql (10)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/redis/">redis (10)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/rust/">rust (1)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/sql/">sql (1)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统 (3)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E6%9E%81%E5%AE%A2%E6%97%B6%E9%97%B4/">极客时间 (5)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/">消息队列 (1)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B3%BB%E7%BB%9F/">深入理解计算机系统 (1)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E7%AE%97%E6%B3%95/">算法 (138)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/">系统设计 (19)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>Tags</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://bytewong123.github.io/tags/golang/">golang</a>
+    
+    <a href="https://bytewong123.github.io/tags/k8s/">k8s</a>
+    
+    <a href="https://bytewong123.github.io/tags/kafka/">kafka</a>
+    
+    <a href="https://bytewong123.github.io/tags/mysql/">mysql</a>
+    
+    <a href="https://bytewong123.github.io/tags/redis/">redis</a>
+    
+    <a href="https://bytewong123.github.io/tags/rust/">rust</a>
+    
+    <a href="https://bytewong123.github.io/tags/sql/">sql</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E6%9E%81%E5%AE%A2%E6%97%B6%E9%97%B4/">极客时间</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/">消息队列</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E7%AE%97%E6%B3%95/">算法</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/">系统设计</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/">读书笔记</a>
+    
+</div>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title">Links</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a target="_blank" href="http://yuedu.baidu.com/ebook/14a722970740be1e640e9a3e" title="Android Gradle权威指南">Android Gradle权威指南</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="http://mirrors.flysnow.org/" title="常用开发工具CDN镜像">常用开发工具CDN镜像</a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title">Meta</h3>
+        <ul class="widget-list">
+            <li><a href="https://bytewong123.github.io/index.xml">RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

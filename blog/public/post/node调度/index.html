@@ -1,0 +1,525 @@
+<!doctype html>
+<html lang="en">
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+
+    <title>node调度 | sheeks</title>
+    <meta property="og:title" content="node调度 - sheeks">
+    <meta property="og:type" content="article">
+        
+    <meta property="article:published_time" content='2023-01-08T18:06:57&#43;08:00'>
+        
+        
+    <meta property="article:modified_time" content='2023-01-08T18:06:57&#43;08:00'>
+        
+    <meta name="Keywords" content="golang,go语言,go语言笔记,sheeks,java,android,博客,项目管理,python,软件架构,公众号,小程序">
+    <meta name="description" content="node调度">
+        
+    <meta name="author" content="sheeks">
+    <meta property="og:url" content="https://bytewong123.github.io/post/node%E8%B0%83%E5%BA%A6/">
+    <link rel="shortcut icon" href='/favicon.ico'  type="image/x-icon">
+
+    <link rel="stylesheet" href='/css/normalize.css'>
+    <link rel="stylesheet" href='/css/style.css'>
+    <script type="text/javascript" src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    
+    
+    
+    
+    
+    
+</head>
+
+<body>
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://bytewong123.github.io/">
+                        sheeks
+                    </a>
+                
+                <p class="description">dev</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://bytewong123.github.io/">Home</a>
+                    
+                    <a  href="https://bytewong123.github.io/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    
+    <article class="post">
+        <header>
+            <h1 class="post-title">node调度</h1>
+        </header>
+        
+  <time datetime="2023-01-08T10:06:57Z" class="post-meta meta-date dt-published">
+    2023-01-08
+  </time>
+
+
+<div class="post-meta meta-category">
+  <span>&nbsp;|</span>
+  
+    <a href='/categories/' target="_blank"></a>
+  
+</div>
+
+
+        
+        
+        <div class="post-content">
+            <h1 id="node调度">node调度</h1>
+<h2 id="将节点设置为不可用并重新调度所有运行在上面的pod">将节点设置为不可用并重新调度所有运行在上面的pod</h2>
+<pre><code>Set the node named ek8s-node-1 as unavailable and reschedule all the pods running on it
+</code></pre><h2 id="node节点禁止调度平滑维护方式--cordondraindelete"><strong>Node节点禁止调度（平滑维护）方式- cordon，drain，delete</strong></h2>
+<p>cordon、drain和delete三个命令都会使node停止被调度，后期创建的pod不会继续被调度到该节点上，但操作的暴力程度却不一样。
+但是若指定pod调度到该节点，仍然可以被调度到该节点上</p>
+<h2 id="1-cordon-停止调度不可调度临时从k8s集群隔离"><strong>1. cordon 停止调度</strong>（不可调度，临时从K8S集群隔离）</h2>
+<ul>
+<li>
+<p>影响最小，只会将node标识为SchedulingDisabled不可调度状态。</p>
+</li>
+<li>
+<p>之后K8S再创建的pod资源，不会被调度到该节点。</p>
+</li>
+<li>
+<p>旧有的pod不会受到影响，仍正常对外提供服务。</p>
+</li>
+<li>
+<p>禁止调度命令”kubectl cordon node_name”。</p>
+</li>
+<li>
+<p>恢复调度命令”kubectl uncordon node_name”。（恢复到K8S集群中，变回可调度状态）</p>
+</li>
+</ul>
+<h2 id="2-drain-驱逐节点先不可调度然后排干"><strong>2. drain 驱逐节点</strong>（先不可调度，然后排干）</h2>
+<ul>
+<li>
+<p>首先，驱逐Node上的pod资源到其他节点重新创建。</p>
+</li>
+<li>
+<p>接着，将节点调为SchedulingDisabled不可调度状态。</p>
+</li>
+<li>
+<p>禁止调度命令”kubectl drain node_name —force —ignore-daemonsets —delete-local-data”</p>
+</li>
+<li>
+<p>恢复调度命令”kubectl uncordon node_name”。（恢复到K8S集群中，变回可调度状态）</p>
+</li>
+<li>
+<p>drain方式是安全驱逐pod，会等到pod容器应用程序优雅停止后再删除该pod。</p>
+</li>
+<li>
+<p>drain驱逐流程：先在Node节点删除pod，然后再在其他Node节点创建该pod。所以为了确保drain驱逐pod过程中不中断服务（即做到”无感知”地平滑驱逐），必须保证要驱逐的pod副本数大于1，并且采用了”反亲和策略”将这些pod调度到不同的Node节点上了！也就是说，在”多个pod副本+反亲和策略”的场景下，drain驱逐过程对容器服务是没有影响的。</p>
+</li>
+</ul>
+<p>需要注意：</p>
+<ul>
+<li>
+<p>对节点执行维护操作之前（例如：内核升级，硬件维护等），您可以使用 kubectl drain 安全驱逐节点上面所有的 pod。</p>
+</li>
+<li>
+<p>drain安全驱逐方式将会允许 pod 里面的容器遵循指定的 PodDisruptionBudgets 执行优雅中止。也就是说，drain安全驱逐可以做到：优雅地终止pod里的容器进程。</p>
+</li>
+<li>
+<p>kubectl drain 返回成功表明所有的 pod （除了排除的那些）已经被安全驱逐（遵循期望优雅的中止期，并且没有违反任何应用程序级别的中断预算）。</p>
+</li>
+<li>
+<p>然后，通过对物理机断电或者在云平台上删除节点所在的虚拟机，都能安全的将节点移除。</p>
+</li>
+</ul>
+<p>一般线上K8S的PDB（PodDisruptionBudgets）配置的也是符合Pod驱逐的理想情况的，即maxUnavailable设置为0，maxSurge设置为1
+　
+默认情况下，kubectl drain 会忽略那些不能杀死的系统类型的 pod。drain命令中需要添加三个参数：—force、—ignore-daemonsets、—delete-local-data</p>
+<ul>
+<li>
+<p>—force 当一些pod不是经 ReplicationController, ReplicaSet, Job, DaemonSet 或者 StatefulSet 管理的时候就需要用&ndash;force来强制执行 (例如:kube-proxy)</p>
+</li>
+<li>
+<p>—ignore-daemonsets 无视DaemonSet管理下的Pod。即—ignore-daemonsets往往需要指定的,这是因为deamonset会忽略unschedulable标签(使用kubectl drain时会自动给节点打上不可调度标签),因此deamonset控制器控制的pod被删除后可能马上又在此节点上启动起来,这样就会成为死循环.因此这里忽略daemonset。</p>
+</li>
+<li>
+<p>—delete-local-data 如果有mount local volumn的pod，会强制杀掉该pod。</p>
+</li>
+</ul>
+<p>drain禁止调度的操作步骤：</p>
+<ol>
+<li>确定要排空的节点的名称</li>
+</ol>
+<pre><code>kubectl get nodes  
+</code></pre><ol start="2">
+<li>查看pod</li>
+</ol>
+<pre><code>kubectl get pod
+</code></pre><ol start="3">
+<li>命令node节点开始释放所有pod，并且不接收新的pod进程</li>
+</ol>
+<pre><code>kubectl drain [node-name] —force —ignore-daemonsets —delete-local-data 
+</code></pre><ol start="4">
+<li>此时可以对该node节点进行平滑维护，后续需要恢复到k8s集群中：</li>
+</ol>
+<pre><code>kubectl uncordon [node-name]
+</code></pre><h2 id="3-delete-删除节点"><strong>3. delete 删除节点</strong></h2>
+<ul>
+<li>首先，驱逐Node节点上的pod资源到其他节点重新创建。</li>
+<li>驱逐流程：先在Node节点删除pod，然后再在其他Node节点上创建这些pod。</li>
+<li>node节点删除，master失去对其控制，该节点从k8s集群摘除。</li>
+<li>delete是一种暴力删除node的方式。在驱逐pod时是强制干掉容器进程，做不到优雅终止Pod。相比较而言，显然drain更安全。</li>
+</ul>
+<p>恢复调度（即重新加入到K8S集群中）</p>
+<ul>
+<li>
+<p>delete删除后，后续如果需重新加入K8S集群。则需要重启node节点的kubelet服务，重启后，基于node的自注册功能，该节点才能重新加入到K8S集群，并且恢复使用（即恢复可调度的身份）。</p>
+</li>
+<li>
+<p>另外：如果kubelet服务重启后，node节点系统时间跟其他节点不一致，则导致该节点证书会失效！kubelet注册后，还需要手动approve签发TLS认证操作了。</p>
+</li>
+</ul>
+<h2 id="4-node节点平滑维护"><strong>4. Node节点平滑维护</strong></h2>
+<p><strong>通常情况下，如果要对K8S集群中的一台Node节点进行平滑维护，如升级或调整配置。正确的操作：</strong></p>
+<ul>
+<li>
+<p><strong>cordon临时从K8S集群隔离出来，标识为SchedulingDisabled不可调度状态。</strong></p>
+</li>
+<li>
+<p><strong>drain排干该节点上的pod资源到其他node节点上。</strong></p>
+</li>
+<li>
+<p><strong>对该节点展开平滑维护操作，如升级或调整配置。</strong></p>
+</li>
+<li>
+<p><strong>uncordon恢复，重新回到K8S集群，变回可调度状态。</strong></p>
+</li>
+</ul>
+<p>同时注意：为了确保drain驱逐pod的时候，容器应用服务不中断，必须满足：</p>
+<ul>
+<li>
+<p>要驱逐的pod副本数量必须大于1</p>
+</li>
+<li>
+<p>要配置”反亲和策略”，确保被驱逐的pod被调度到不同的Node节点上</p>
+</li>
+<li>
+<p>deployment采用滚动更新，设置maxUnavailable为0，maxSurge为1</p>
+</li>
+</ul>
+
+        </div>
+
+        
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/post/git-%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98/">git 常见问题</a></li>
+        
+        <li><a href="/post/goland/">goland</a></li>
+        
+        <li><a href="/post/golang-channel/">golang channel</a></li>
+        
+        <li><a href="/post/https/">https</a></li>
+        
+        <li><a href="/post/json/">json</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='/tags/' target="_blank"></a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    
+
+    
+    
+    
+    
+
+</div>
+
+                    <footer id="footer">
+    <br />
+</footer>
+
+
+    
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+<style type="text/css">
+div.highlight {
+    position: relative;
+    margin: 1em 0px;
+}
+
+.copy-code {
+    display: none;
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    color: rgba(255, 255, 255, 0.8);
+    background: rgba(78, 78, 78, 0.8);
+    border-radius: var(--radius);
+    padding: 0 5px;
+    font: inherit;
+    user-select: none;
+    cursor: pointer;
+    border: 0;
+    --radius: 8px;
+}
+
+div.highlight:hover .copy-code,pre:hover .copy-code {
+    display: block;
+}
+
+</style>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+
+
+
+
+
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='//www.google.com/search' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://bytewong123.github.io/">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title">Latest articles</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/benchmark/" title="benchmark" target="_blank">benchmark</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/b%E6%A0%91/" title="b树" target="_blank">b树</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0daemonset/" title="cka真题练习——daemonset" target="_blank">cka真题练习——daemonset</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0deploy/" title="cka真题练习——deploy" target="_blank">cka真题练习——deploy</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0etcd%E5%A4%87%E4%BB%BD%E8%BF%98%E5%8E%9F/" title="cka真题练习——etcd备份还原" target="_blank">cka真题练习——etcd备份还原</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0ingress/" title="cka真题练习——ingress" target="_blank">cka真题练习——ingress</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0networkpolicy/" title="cka真题练习——NetworkPolicy" target="_blank">cka真题练习——NetworkPolicy</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0node%E8%B0%83%E5%BA%A6/" title="cka真题练习——node调度" target="_blank">cka真题练习——node调度</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0pod/" title="cka真题练习——pod" target="_blank">cka真题练习——pod</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0pv/" title="cka真题练习——pv" target="_blank">cka真题练习——pv</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>Categories</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://bytewong123.github.io/categories/golang/">golang (12)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/k8s/">k8s (24)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/mysql/">mysql (10)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/redis/">redis (10)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/rust/">rust (1)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/sql/">sql (1)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统 (3)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E6%9E%81%E5%AE%A2%E6%97%B6%E9%97%B4/">极客时间 (5)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/">消息队列 (1)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B3%BB%E7%BB%9F/">深入理解计算机系统 (1)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E7%AE%97%E6%B3%95/">算法 (138)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/">系统设计 (19)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>Tags</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://bytewong123.github.io/tags/golang/">golang</a>
+    
+    <a href="https://bytewong123.github.io/tags/k8s/">k8s</a>
+    
+    <a href="https://bytewong123.github.io/tags/kafka/">kafka</a>
+    
+    <a href="https://bytewong123.github.io/tags/mysql/">mysql</a>
+    
+    <a href="https://bytewong123.github.io/tags/redis/">redis</a>
+    
+    <a href="https://bytewong123.github.io/tags/rust/">rust</a>
+    
+    <a href="https://bytewong123.github.io/tags/sql/">sql</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E6%9E%81%E5%AE%A2%E6%97%B6%E9%97%B4/">极客时间</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/">消息队列</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E7%AE%97%E6%B3%95/">算法</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/">系统设计</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/">读书笔记</a>
+    
+</div>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title">Links</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a target="_blank" href="http://yuedu.baidu.com/ebook/14a722970740be1e640e9a3e" title="Android Gradle权威指南">Android Gradle权威指南</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="http://mirrors.flysnow.org/" title="常用开发工具CDN镜像">常用开发工具CDN镜像</a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title">Meta</h3>
+        <ul class="widget-list">
+            <li><a href="https://bytewong123.github.io/index.xml">RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>golang on sheeks</title>
+    <link>https://bytewong123.github.io/categories/golang/</link>
+    <description>Recent content in golang on sheeks</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <lastBuildDate>Sun, 08 Jan 2023 18:06:57 +0800</lastBuildDate><atom:link href="https://bytewong123.github.io/categories/golang/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>benchmark</title>
+      <link>https://bytewong123.github.io/post/benchmark/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/benchmark/</guid>
+      <description>benchmark #技术/golang</description>
+    </item>
+    
+    <item>
+      <title>gc总结</title>
+      <link>https://bytewong123.github.io/post/gc%E6%80%BB%E7%BB%93/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/gc%E6%80%BB%E7%BB%93/</guid>
+      <description>gc总结 #技术/golang/gc</description>
+    </item>
+    
+    <item>
+      <title>go module版本选择</title>
+      <link>https://bytewong123.github.io/post/go-module%E7%89%88%E6%9C%AC%E9%80%89%E6%8B%A9/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/go-module%E7%89%88%E6%9C%AC%E9%80%89%E6%8B%A9/</guid>
+      <description>go module版本选择 #技术/golang/版本控制</description>
+    </item>
+    
+    <item>
+      <title>golang gc优化</title>
+      <link>https://bytewong123.github.io/post/golang-gc%E4%BC%98%E5%8C%96/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/golang-gc%E4%BC%98%E5%8C%96/</guid>
+      <description>golang gc优化 #技术/golang/gc</description>
+    </item>
+    
+    <item>
+      <title>golang内存管理</title>
+      <link>https://bytewong123.github.io/post/golang%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/golang%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/</guid>
+      <description>golang内存管理 #技术/golang</description>
+    </item>
+    
+    <item>
+      <title>gorm scanner value</title>
+      <link>https://bytewong123.github.io/post/gorm-scanner-value/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/gorm-scanner-value/</guid>
+      <description>gorm scanner value #技术/golang/代码风格</description>
+    </item>
+    
+    <item>
+      <title>interface</title>
+      <link>https://bytewong123.github.io/post/interface/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/interface/</guid>
+      <description>interface #技术/golang/interface golang/4、interface.</description>
+    </item>
+    
+    <item>
+      <title>netpoll</title>
+      <link>https://bytewong123.github.io/post/netpoll/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/netpoll/</guid>
+      <description>netpoll #技术/golang/netpoll</description>
+    </item>
+    
+    <item>
+      <title>sort</title>
+      <link>https://bytewong123.github.io/post/sort/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/sort/</guid>
+      <description>sort #go</description>
+    </item>
+    
+    <item>
+      <title>内存</title>
+      <link>https://bytewong123.github.io/post/%E5%86%85%E5%AD%98/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E5%86%85%E5%AD%98/</guid>
+      <description>内存 #技术/golang</description>
+    </item>
+    
+    <item>
+      <title>函数式编程</title>
+      <link>https://bytewong123.github.io/post/%E5%87%BD%E6%95%B0%E5%BC%8F%E7%BC%96%E7%A8%8B/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E5%87%BD%E6%95%B0%E5%BC%8F%E7%BC%96%E7%A8%8B/</guid>
+      <description>函数式编程 #技术/golang/代码风格</description>
+    </item>
+    
+    <item>
+      <title>闭包</title>
+      <link>https://bytewong123.github.io/post/%E9%97%AD%E5%8C%85/</link>
+      <pubDate>Sun, 08 Jan 2023 18:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E9%97%AD%E5%8C%85/</guid>
+      <description>闭包 #技术/golang</description>
+    </item>
+    
+  </channel>
+</rss>

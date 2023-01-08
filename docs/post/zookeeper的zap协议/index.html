@@ -1,0 +1,466 @@
+<!doctype html>
+<html lang="en">
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+
+    <title>zookeeper的zap协议 | sheeks</title>
+    <meta property="og:title" content="zookeeper的zap协议 - sheeks">
+    <meta property="og:type" content="article">
+        
+    <meta property="article:published_time" content='2023-01-08T18:06:57&#43;08:00'>
+        
+        
+    <meta property="article:modified_time" content='2023-01-08T18:06:57&#43;08:00'>
+        
+    <meta name="Keywords" content="golang,go语言,go语言笔记,sheeks,java,android,博客,项目管理,python,软件架构,公众号,小程序">
+    <meta name="description" content="zookeeper的zap协议">
+        
+    <meta name="author" content="sheeks">
+    <meta property="og:url" content="https://bytewong123.github.io/post/zookeeper%E7%9A%84zap%E5%8D%8F%E8%AE%AE/">
+    <link rel="shortcut icon" href='/favicon.ico'  type="image/x-icon">
+
+    <link rel="stylesheet" href='/css/normalize.css'>
+    <link rel="stylesheet" href='/css/style.css'>
+    <script type="text/javascript" src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    
+    
+    
+    
+    
+    
+</head>
+
+<body>
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://bytewong123.github.io/">
+                        sheeks
+                    </a>
+                
+                <p class="description">dev</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://bytewong123.github.io/">Home</a>
+                    
+                    <a  href="https://bytewong123.github.io/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    
+    <article class="post">
+        <header>
+            <h1 class="post-title">zookeeper的zap协议</h1>
+        </header>
+        
+  <time datetime="2023-01-08T10:06:57Z" class="post-meta meta-date dt-published">
+    2023-01-08
+  </time>
+
+
+<div class="post-meta meta-category">
+  <span>&nbsp;|</span>
+  
+    <a href='/categories/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1' target="_blank">系统设计</a>
+  
+</div>
+
+
+        
+        
+        <div class="post-content">
+            <h1 id="zookeeper的zap协议">zookeeper的zap协议</h1>
+<p>#技术/系统设计
+#技术/分布式理论</p>
+<p>CAP 原理认为，一个提供数据服务的分布式系统无法同时满足数据一致性（Consistency）、可用性（Availibility）、分区耐受性（Patition Tolerance）这三个条件</p>
+<ul>
+<li>其中，一致性的意思是，每次读取数据，要么读取到最近写入的数据，要么返回一个错误，而不是过期数据，这样就能保证数据一致。</li>
+<li>可用性的意思是，每次请求都应该得到一个响应，而不是返回一个错误或者失去响应，不过这个响应不需要保证数据是最近写入的。也就是说，系统需要一直都能正常使用，不会引起调用者的异常，但是并不保证响应的数据是最新的。</li>
+<li>分区耐受性的意思是，即使因为网络原因，部分服务器节点之间消息丢失或者延迟了，系统依然应该是可以操作的。</li>
+</ul>
+<p>当网络分区失效发生时，要么我们取消操作，保证数据一致性，但是系统却不可用；要么我们继续写入数据，但是数据的一致性就得不到保证。
+对于一个分布式系统而言，网络失效一定会发生，也就是说，分区耐受性是必须要保证的，那么可用性和一致性就只能二选一，这就是 CAP 原理。</p>
+<p>三种角色</p>
+<ul>
+<li><strong>Leader</strong> ：负责整个Zookeeper 集群工作机制中的核心，主要工作有一下两个：
+<ul>
+<li>事务请求的唯一调度和处理者，保证集群事务处理的顺序性</li>
+<li>集群内部各服务器的调度者</li>
+</ul>
+</li>
+<li><strong>Follower</strong> ：它是 Leader 的追随者，其主要工作有三个：
+<ul>
+<li>处理客户端的非实物请求，转发事务请求给 Leader 服务器</li>
+<li>参与事务请求 Proposal 的投票</li>
+<li>参与 Leader 选举投票</li>
+</ul>
+</li>
+<li><strong>Observer</strong> ：是 zookeeper 自 3.3.0 开始引入的一个角色，它不参与事务请求 Proposal 的投票，也不参与 Leader 选举投票，只提供非事务的服务（查询），通常在不影响集群事务处理能力的前提下提升集群的非事务处理能力。</li>
+</ul>
+<p>Zookeeper 是如何知道自己目前是什么角色的呢？
+在 ZAB 协议中定义：通过自身的状态来区分自己的角色的，在运行期间各个进程可能出现以下三种状态之一：</p>
+<ul>
+<li><strong>LOOKING</strong>：处在这个状态时，会进入 Leader 选举状态</li>
+<li><strong>FOLLOWER</strong>：Follower 服务器和 Leader 服务器保持同步时的状态</li>
+<li><strong>LEADING</strong>：Leader 服务器作为主进程领导者的状态
+在组成 ZAB 协议的所有进程启动的时候，初始化状态都是 LOOKING 状态，此时进程组中不存在 Leader，选举之后才有，在进行选举成功后，就进入消息广播模式，此时 Zookeeper 集群中的角色状态就不再是 LOOKING 状态。</li>
+</ul>
+<h2 id="zxid">ZXID</h2>
+<p>前文我们知道 zookeeper 消息有严格的因果关系，因此必须将每一个事务请求按照先后顺序来进行排序与处理。那 Zookeeper 是如何保持请求处理的顺序的呢？其中非常关键的点就是 ZXID。
+那 ZXID 究竟是怎么发挥作用的呢？
+Leader 服务器在接收到事务请求后，会为每个事务请求生成对应的 Proposal 来进行广播，并且在广播事务 Proposal 之前，Leader 服务器会首先为这个事务 Proposal 分配一个全局单调递增的唯一 ID ，我们称之为事务 ID（即 ZXID）。
+ZXID 的设计也很有特点，是一个全局有序的 64 位的数字，可以分为两个部分：</p>
+<ul>
+<li>高 32 位是： epoch（纪元），代表着周期，每当选举产生一个新的 Leader 服务器时就会取出其本地日志中最大事务的 ZXID ，解析出 epoch（纪元）值操作加 1作为新的 epoch ，并将低 32 位置零。</li>
+<li>低 32 位是： counter（计数器），它是一个简单的单调递增的计数器，针对客户端的每个事务请求都会进行加 1 操作；
+这里低 32 位 counter（计数器）单调递增还好理解，高 32 位 epoch（纪元）每次选举加 1 也许有些同学就有疑问了，为什么 epoch（纪元）每次选需要举加 1 ，它在整个 ZAB 协议中有什么作用？
+我们知道每当选举产生一个新的 Leader 服务器时生成一个新的 epoch（纪元）值，而在前文我们知道，服务运行过程中触发选举 Leader 的条件是：<strong>Leader 服务器的出现网络中断、奔溃退出、重启等异常情况，或者当集群中半数的服务器与该 Leader 服务器无法通信时</strong>。
+这说明整个 Zookeeper 集群此时处于一个异常的情况下，而在发生异常前，消息广播进行到哪一步骤我们根本不知道，集群中的其他 Follower 节点从这种崩溃恢复状态重新选举出 Leader 后，如果老 Leader 又恢复了连接进入集群。此时老 Leader 的 epoch 肯定会小于新 Leader 的 epoch，这时就将老 Leader 变成 Follower，对新的 Leader 进行数据同步。即便这时老 Leader 对其他的 Follower 节点发送了请求，Follower 节点也会比较 ZXID 的值，因为高 32 位加 1 了， Follower 的 epoch（纪元）大于老 Leader 的 epoch（纪元），所以 Follower 会忽略这个请求。</li>
+</ul>
+<h2 id="zab算法过程">ZAB算法过程</h2>
+<p><strong>Zab 协议的特性</strong>：
+1）Zab 协议需要确保那些<strong>已经在 Leader 服务器上提交（Commit）的事务最终被所有的服务器提交</strong>。
+2）Zab 协议需要确保<strong>丢弃那些只在 Leader 上被提出而没有被提交的事务</strong>。</p>
+<p>ZooKeeper 则是一个保证数据一致性的分布式系统，它主要通过一个 ZAB 算法（Zookeeper Atomic Broadcast， Zookeeper 原子广播）实现数据一致性，算法过程如下：</p>
+<ul>
+<li>ZooKeeper 集群由多台服务器组成，为了保证多台服务器上存储的数据是一致的，ZAB 需要在这些服务器中选举一个 Leader，所有的写请求都必须提交给 Leader。</li>
+<li>Leader 服务器会向其他服务器（Follower）发起 Propose，通知所有服务器：“我们要完成一个写操作请求，请大家检查自己的数据状态是否有问题。”</li>
+<li>如果所有 Follower 服务器都回复 Leader 服务器 ACK，即没有问题，那么 Leader 服务器会向所有 Follower 发送 Commit 命令，要求所有服务器完成写操作</li>
+<li>当有超过半数的服务器 ACK 响应后，Leader 就会广播一个 Commit 消息给所有的 Follower 服务器，同时自身也会完成事务提交</li>
+<li>Follower 接收到Commit后就完成对事务的提交操作</li>
+<li>实际应用中，客户端程序可以连接任意一个 Follower，进行数据读写操作。如果是写操作，那么这个请求会被 Follower 发送给 Leader，进行如上所述的处理；如果是读操作，因为所有服务器的数据都是一致的，那么这个 Follower 直接把自己本地的数据返回给客户端就可以了</li>
+</ul>
+<h2 id="最终一致性顺序一致性">最终一致性、顺序一致性</h2>
+<ul>
+<li>最终一致性
+zookeeper使用的ZAB协议进行主从数据同步，ZAB协议认为只要是过半数节点写入成为，数据就算写成功了，然后会告诉客户端A数据写入成功，如果这个时候客户端B恰好访问到还没同步最新数据的zookeeper节点，那么读到的数据就是不一致性的，因此zookeeper无法保证写数据的强一致性，只能保证最终一致性，而且可以保证同一客户端的顺序一致性</li>
+<li>顺序一致性
+ZXID的低32位是计数器，所以同一任期内，ZXID是连续的，每个结点又都保存着自身最新生效的ZXID，通过对比新提案的ZXID与自身最新ZXID是否相差“1”，来保证事务严格按照顺序生效的。如果当前新提案的ZXID前有未提交的ZXID，那么无法提交</li>
+</ul>
+<h2 id="选举">选举</h2>
+<p>当Leader出现崩溃退出或者机器重启，亦或是集群中不存在超过半数的服务器与Leader保存正常通信，Zab就会再一次进入崩溃恢复，发起新一轮Leader选举并实现数据同步。同步完成后又会进入消息广播模式，接收事务请求。</p>
+<p><strong>新选举出来的 Leader 不能包含未提交的 Proposal</strong> 。
+即新选举的 Leader 必须都是已经提交了 Proposal 的 Follower 服务器节点。
+<strong>新选举的 Leader 节点中含有最大的 zxid</strong> 。
+这样做的好处是可以避免 Leader 服务器检查 Proposal 的提交和丢弃工作。</p>
+<h2 id="保证消息有序">保证消息有序</h2>
+<p>在整个消息广播中，Leader会将每一个事务请求转换成对应的 proposal 来进行广播，并且在广播 事务Proposal 之前，Leader服务器会首先为这个事务Proposal分配一个全局单递增的唯一ID，称之为事务ID（即zxid），由于Zab协议需要保证每一个消息的严格的顺序关系，因此必须将每一个proposal按照其zxid的先后顺序进行排序和处理。</p>
+
+        </div>
+
+        
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/post/redis%E5%AE%9E%E7%8E%B0%E5%85%B3%E6%B3%A8%E6%A8%A1%E5%9E%8B/">redis实现关注模型</a></li>
+        
+        <li><a href="/post/%E4%BA%8B%E5%8A%A1%E6%8B%86%E8%A7%A3/">事务拆解</a></li>
+        
+        <li><a href="/post/%E4%BF%A1%E6%81%AF%E6%B5%81%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/">信息流系统设计</a></li>
+        
+        <li><a href="/post/%E5%85%B3%E7%B3%BB%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/">关系系统设计</a></li>
+        
+        <li><a href="/post/%E5%8E%8B%E6%B5%8B%E5%B9%B3%E5%8F%B0%E8%AE%BE%E8%AE%A1/">压测平台设计</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='/tags/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1' target="_blank">系统设计</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    
+
+    
+    
+    
+    
+
+</div>
+
+                    <footer id="footer">
+    <br />
+</footer>
+
+
+    
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+<style type="text/css">
+div.highlight {
+    position: relative;
+    margin: 1em 0px;
+}
+
+.copy-code {
+    display: none;
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    color: rgba(255, 255, 255, 0.8);
+    background: rgba(78, 78, 78, 0.8);
+    border-radius: var(--radius);
+    padding: 0 5px;
+    font: inherit;
+    user-select: none;
+    cursor: pointer;
+    border: 0;
+    --radius: 8px;
+}
+
+div.highlight:hover .copy-code,pre:hover .copy-code {
+    display: block;
+}
+
+</style>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+
+
+
+
+
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='//www.google.com/search' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://bytewong123.github.io/">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title">Latest articles</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/benchmark/" title="benchmark" target="_blank">benchmark</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/b%E6%A0%91/" title="b树" target="_blank">b树</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0daemonset/" title="cka真题练习——daemonset" target="_blank">cka真题练习——daemonset</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0deploy/" title="cka真题练习——deploy" target="_blank">cka真题练习——deploy</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0etcd%E5%A4%87%E4%BB%BD%E8%BF%98%E5%8E%9F/" title="cka真题练习——etcd备份还原" target="_blank">cka真题练习——etcd备份还原</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0ingress/" title="cka真题练习——ingress" target="_blank">cka真题练习——ingress</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0networkpolicy/" title="cka真题练习——NetworkPolicy" target="_blank">cka真题练习——NetworkPolicy</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0node%E8%B0%83%E5%BA%A6/" title="cka真题练习——node调度" target="_blank">cka真题练习——node调度</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0pod/" title="cka真题练习——pod" target="_blank">cka真题练习——pod</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0pv/" title="cka真题练习——pv" target="_blank">cka真题练习——pv</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>Categories</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://bytewong123.github.io/categories/golang/">golang (12)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/k8s/">k8s (24)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/mysql/">mysql (10)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/redis/">redis (10)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/rust/">rust (1)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/sql/">sql (1)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统 (3)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E6%9E%81%E5%AE%A2%E6%97%B6%E9%97%B4/">极客时间 (5)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/">消息队列 (1)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B3%BB%E7%BB%9F/">深入理解计算机系统 (1)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E7%AE%97%E6%B3%95/">算法 (138)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/">系统设计 (19)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>Tags</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://bytewong123.github.io/tags/golang/">golang</a>
+    
+    <a href="https://bytewong123.github.io/tags/k8s/">k8s</a>
+    
+    <a href="https://bytewong123.github.io/tags/kafka/">kafka</a>
+    
+    <a href="https://bytewong123.github.io/tags/mysql/">mysql</a>
+    
+    <a href="https://bytewong123.github.io/tags/redis/">redis</a>
+    
+    <a href="https://bytewong123.github.io/tags/rust/">rust</a>
+    
+    <a href="https://bytewong123.github.io/tags/sql/">sql</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E6%9E%81%E5%AE%A2%E6%97%B6%E9%97%B4/">极客时间</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/">消息队列</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E7%AE%97%E6%B3%95/">算法</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/">系统设计</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/">读书笔记</a>
+    
+</div>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title">Links</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a target="_blank" href="http://yuedu.baidu.com/ebook/14a722970740be1e640e9a3e" title="Android Gradle权威指南">Android Gradle权威指南</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="http://mirrors.flysnow.org/" title="常用开发工具CDN镜像">常用开发工具CDN镜像</a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title">Meta</h3>
+        <ul class="widget-list">
+            <li><a href="https://bytewong123.github.io/index.xml">RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

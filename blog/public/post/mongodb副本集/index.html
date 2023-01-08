@@ -1,0 +1,547 @@
+<!doctype html>
+<html lang="en">
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+
+    <title>mongodb副本集 | sheeks</title>
+    <meta property="og:title" content="mongodb副本集 - sheeks">
+    <meta property="og:type" content="article">
+        
+    <meta property="article:published_time" content='2023-01-08T18:06:57&#43;08:00'>
+        
+        
+    <meta property="article:modified_time" content='2023-01-08T18:06:57&#43;08:00'>
+        
+    <meta name="Keywords" content="golang,go语言,go语言笔记,sheeks,java,android,博客,项目管理,python,软件架构,公众号,小程序">
+    <meta name="description" content="mongodb副本集">
+        
+    <meta name="author" content="sheeks">
+    <meta property="og:url" content="https://bytewong123.github.io/post/mongodb%E5%89%AF%E6%9C%AC%E9%9B%86/">
+    <link rel="shortcut icon" href='/favicon.ico'  type="image/x-icon">
+
+    <link rel="stylesheet" href='/css/normalize.css'>
+    <link rel="stylesheet" href='/css/style.css'>
+    <script type="text/javascript" src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    
+    
+    
+    
+    
+    
+</head>
+
+<body>
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://bytewong123.github.io/">
+                        sheeks
+                    </a>
+                
+                <p class="description">dev</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://bytewong123.github.io/">Home</a>
+                    
+                    <a  href="https://bytewong123.github.io/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    
+    <article class="post">
+        <header>
+            <h1 class="post-title">mongodb副本集</h1>
+        </header>
+        
+  <time datetime="2023-01-08T10:06:57Z" class="post-meta meta-date dt-published">
+    2023-01-08
+  </time>
+
+
+<div class="post-meta meta-category">
+  <span>&nbsp;|</span>
+  
+    <a href='/categories/' target="_blank"></a>
+  
+</div>
+
+
+        
+        
+        <div class="post-content">
+            <h1 id="mongodb副本集">mongodb副本集</h1>
+<p>#mongodb</p>
+<p>使用复制可以将数据副本保存到多台服务器上，即使一台或多台服务器出错，也可以保证应用程序正常运行和数据安全。
+在mongodb中，创建一个副本集之后就可以使用复制功能了。副本集是一组服务器，其中有一个主服务器，用于处理客户端请求；还有多个备份服务器，用于保存主服务器的数据副本。如果主服务器崩溃了，备份服务器会自动将其中一个成员升级为新的主服务器。</p>
+<p>客户端不能在备份节点执行写操作
+默认情况下，客户端不能从备份节点读取数据。在备份节点上显式地执行setSlaveOK之后，客户端就可以从备份节点读取数据了。</p>
+<p>副本集中很重要的一个概念是<strong>大多数</strong>：选择主节点时需要由大多数决定，主节点只有在得到大多数支持时才能继续作为主节点。写操作被复制到大多数成员时这个写操作就是安全的。这里的<strong>大多数</strong>被定义为<strong>副本集中一半以上的成员</strong>。</p>
+<p>假设一个包含5个成员的副本集，其中3个成员不可用，仍然有2个可以正常工作，剩余的2个成员已经无法达到副本集<strong>大多数</strong>的要求（大多是为3个），所以它们无法选举主节点。如果这2个成员中有一个是主节点，当它注意到它无法得到<strong>大多数</strong>成员支持时，就会从主节点上退位。几秒钟之后，这个副本集中会包含2个备份节点和3个不可达节点。</p>
+<h2 id="选举机制">选举机制</h2>
+<p>当一个备份节点无法与主节点连通时，它就会联系其他的副本集成员将自己选举为主节点。其他成员会做几项理性检查：</p>
+<ul>
+<li>其他成员自身是否能和主节点连通</li>
+<li>希望被选举为主节点的备份节点数据是否最新</li>
+<li>有没有其他更高优先级的成员被选举为主节点
+如果要求被选举为主节点的成员能够得到副本集中<strong>大多数</strong>成员的投票，它就会成为主节点。如果大多数成员中只有一个否决了本次选举，选举就会被取消。如果成员发现任何原因，表明当前希望成为主节点的成员不应该成为主节点，那么它就会否决此次的选举。</li>
+</ul>
+<blockquote>
+<p>一张否决票相当于10000张赞成票，即值为-10000</p>
+</blockquote>
+<p>复制操作是严格按时间排序的，所以候选人的最后一条操作要比它能连通的其他所有成员更晚（或者与其他成员相等）。</p>
+<h2 id="成员配置选项">成员配置选项</h2>
+<h3 id="仲裁者">仲裁者</h3>
+<p>很多人的应用程序使用量比较小，并不想保存三份数据副本。两份副本已经足够了，保存三份副本的话纯粹是浪费人力，物力，财力。对于这种部署，mongodb支持一种特殊类型的成员，成为仲裁者。仲裁者的唯一作用就是参与选举。仲裁者并不保存数据，也不会为客户端提供服务，它只是为了帮助具有两个成员的副本集能够满足<strong>大多数</strong>这个条件。</p>
+<p>由于仲裁者并不需要履行传统mongod服务器的责任，所以可以将仲裁者作为轻量级进程，运行在配置比较差的服务器上。如果可以，可以将仲裁者放在单独的故障域中，与其他成员分开。这样他就可以以外部视角来看待副本集中的成员了。</p>
+<p>可以使用<code>rs.addArb(&quot;$ip:$port&quot;)</code>或在成员配置中指定arbiterOnlt选项<code>rs.add({&quot;_id&quot;:$id, &quot;host&quot;:&quot;$ip:$port&quot;, &quot;arbiterOnly&quot;:true})</code>。</p>
+<p>成员一旦以仲裁者的身份添加到副本集中，它就永远只能是仲裁者，无法将仲裁者重新配置为非仲裁者，反之亦然。</p>
+<p>使用仲裁者的另一个好处是，如果节点拥有的节点数是偶数，仲裁者可以投出决定胜负的关键一票。</p>
+<h3 id="优先级">优先级</h3>
+<p>优先级用于表示一个成员渴望成为主节点的程度，取值范围是1-100，默认是1。将优先级设为0有特殊含义：优先级为0的成员永远不能够成为主节点，这样的成员被称为被动成员。拥有最高优先级的成员会优先选举为主节点（只要它能够得到集合中大多数成员的赞成票，并且数据是最新的）</p>
+<h3 id="隐藏成员">隐藏成员</h3>
+<p>客户端不会向隐藏成员发送请求，隐藏成员也不会作为复制源。因此，很多人会将不够强大的服务器或备份服务器隐藏起来。<strong>只有优先级为0的成员才能被隐藏</strong>。即设置<code>priority=0</code>和<code>hidden=true</code></p>
+<h3 id="延迟备份节点">延迟备份节点</h3>
+<p>数据可能会因为人为错误而遭受毁灭性的破坏，为了防止这类问题，可以使用slaveDelay设置一个延迟的备份节点。
+延迟备份节点会比主节点延迟指定的时间（秒），这是有意为之的。这样，如果有人不小心摧毁了你的主集合，还可以将数据从先前的备份中恢复过来。<strong>slaveDelay要求成员的优先级是0</strong>，如果应用会将读请求路由到备份节点，应该将延迟备份节点隐藏掉，以免读请求被路由到延迟备份节点。</p>
+<h3 id="不创建索引的成员">不创建索引的成员</h3>
+<p>有时备份节点并不需要与主节点拥有相同的索引，甚至可以没有索引。如果某个备份节点的用途仅仅是处理数据备份或者离线的批量任务，那么你可能希望在它的成员配置中指定<code>&quot;buildIndexes&quot;:false</code>。这个选项可以阻止备份节点创建索引。这是一个永久选项，这个成员将永远无法恢复为可以创建索引的成员。<strong>要求成员的优先级为0</strong>。</p>
+<h2 id="同步的过程">同步的过程</h2>
+<p>mongodb的复制功能是使用操作日志oplog实现的，操作日志包含了主节点的每一次写操作。oplog是主节点的local数据库中的一个固定集合。备份节点通过查询这个集合就可以知道需要进行复制的操作。</p>
+<p>每个备份节点都维护着自己的oplog，记录着每一次从主节点复制数据的操作。这样，每个成员都可以作为同步源提供给其他成员使用。</p>
+<p>备份节点从当前使用的同步源中获取需要执行的操作，然后在自己的数据集上执行这些操作，最后再将这些操作写入自己的oplog。如果某个备份节点挂掉了，当它重新启动后，就会自动从oplog中最后一个操作开始进行同步。由于复制操作的过程是先复制数据再写入oplog，所以备份节点可能会在已经同步过的数据上再次执行复制操作。mongodb在设计之初就考虑到了这种情况：将oplog的同一个操作执行多次与只执行一次的效果是一样的。</p>
+<p>由于oplog的大小是固定的，它只能保存特定数量的操作日志。如果单个操作会影响多个文档，例如<code>db.coll.remove()</code>，删除了10000个文档，那么oplog中就会有10000条操作日志，每条日志对应一个被删除的文档。如果执行大量的批量操作，oplog很快就会被填满。</p>
+<h3 id="选择同步源">选择同步源</h3>
+<p>MongoDB 默认是采取级联复制的架构，就是默认不一定选择主库作为自己的同步源，如果不想让其进行级联复制，可以通过 chainingAllowed 参数来进行控制。在级联复制的情况下，你也可以通过 replSetSyncFrom 命令来指定你想复制的同步源。所以这里说的同步源其实相对于从库来说就是它的主库。那么同步源的选取流程是怎样的呢？
+MongoDB 从库会在副本集其他节点通过以下条件筛选符合自己的同步源。</p>
+<ul>
+<li>如果设置了 chainingAllowed 为 false，那么只能选取主库为同步源</li>
+<li>找到与自己 ping 时间最小的并且数据比自己新的节点（在副本集初始化的时候，或者新节点加入副本集的时候，新节点对副本集的其他节点至少 ping 两次）</li>
+<li>该同步源与主库最新 optime 做对比，如果延迟主库超过 30s，则不选择该同步源。</li>
+</ul>
+<p>在第一次的过滤中，首先会淘汰比自己数据还旧的节点。如果第一次没有，那么第二次需要算上这些节点，防止最后没有节点可以做为同步源了。最后确认该节点是否被禁止参与选举，如果是则跳过该节点。通过上述筛选最后过滤出来的节点作为新的同步源。</p>
+<p>其实 MongoDB 同步源在除了在 Initial Sync 和增量复制 的时候选定之后呢，并不是一直是稳定的，它可能在以下情况下进行变更同步源：</p>
+<ul>
+<li>ping 不通自己的同步源</li>
+<li>自己的同步源角色发生变化</li>
+<li>自己的同步源与副本集任意一个节点延迟超过 30s</li>
+</ul>
+<h3 id="删除除local以外的所有数据库">删除除local以外的所有数据库</h3>
+<h3 id="全量同步">全量同步</h3>
+<ol>
+<li>在创建的集合的时候同时创建了索引（与主库一样），在 MongoDB 3.4 版本之前只创建 _id 索引，其他索引等待数据 copy 完成之后进行创建。</li>
+<li>在创建集合和拷贝数据的同时，也将 oplog 拷贝到本地 local 数据库中，等到数据拷贝完成之后，开始应用本地 oplog 数据。</li>
+</ol>
+<p>克隆数据是耗时操作，如果克隆完成后，新成员数据同步速度赶不上同步源的变化速度，同步源可能会将新成员需要复制的某些数据oplog覆盖掉。</p>
+<p>备份节点远远落后于同步源当前的操作，那么这个备份节点就是陈旧的。
+当一个备份节点陈旧之后，它会查看副本集中的其他成员，如果某个成员的oplog足够详尽，可以用于处理那些落下的操作，就从这个成员处进行同步。如果任何一个成员的oplog都没有参考价值，那么这个成员上的复制操作就会中止，这个成员需要重新进行全量同步。</p>
+<h3 id="增量同步">增量同步</h3>
+<ol>
+<li>Sencondary 初始化同步完成之后，开始增量复制，通过 produce 线程在 Primary oplog.rs 集合上建立 cursor，并且实时请求获取数据。</li>
+<li>Primary 返回 oplog 数据给 Secondary。</li>
+<li>Sencondary 读取到 Primary 发送过来的 oplog，将其写入到队列中。</li>
+<li>Sencondary 的同步线程会通过 tryPopAndWaitForMore 方法一直消费队列，当每次达到一定的条件之后，条件如下：
+<ul>
+<li>总数据大于 100MB</li>
+<li>已经取到部分数据但没到 100MB，但是目前队列没数据了，这个时候会阻塞等待一秒，如果还没有数据则本次取数据完成。
+上述两个条件满足一个之后，就会将数据给 prefetchOps 方法处理，prefetchOps 方法主要将数据以 database 级别切分，便于后面多线程写入到数据库中。如果采用的 WiredTiger 引擎，那这里是以 Docment ID 进行切分。</li>
+</ul>
+</li>
+<li>最终将划分好的数据以多线程的方式批量写入到数据库中（在从库批量写入数据的时候 MongoDB 会阻塞所有的读）。</li>
+<li>然后再将 Queue 中的 Oplog 数据写入到 Sencondary 中的 oplog.rs 集合中。</li>
+</ol>
+<h3 id="心跳">心跳</h3>
+<p>每个成员需要知道其他成员的状态：哪个是主节点？哪个可以作为同步源？哪个挂掉了？为了维护集合的最新视图，每个成员每隔2秒就会向其他成员发送一个心跳请求。心跳请求的信息量很小，用于检查每个成员的状态。
+心跳最重要的功能之一就是让主节点知道自己是否满足集合大多数的条件。如果主节点不再得到大多数服务器的支持，它就会退位，变成备份节点。</p>
+<h4 id="成员状态">成员状态</h4>
+<p>各个成员会通过心跳将自己当前的状态告诉其他成员。</p>
+<ul>
+<li>
+<p>STARTUP
+成员刚启动时处于这个状态，在这个状态下，mongodb会尝试加载成员的副本集配置。配置加载成功后，就进入STARTUP2状态。</p>
+</li>
+<li>
+<p>STARTUP2
+整个初始化同步过程都处于这个状态。当初始化同步完成后，进入RECOVERING状态。</p>
+</li>
+<li>
+<p>RECOVERING
+这个状态表明成员运转正常，但是暂时还不能处理读取请求。在处理非常耗时的操作时，成员也可能进入RECOVERING状态，比如压缩或<code>replSetMaintenance</code>命令。当一个成员和其他成员脱节时，也会进入这个状态，通常来说，这时这个成员处于无效状态，需要重新同步。但是，成员这时并没有进入错误状态，因为它期望一个拥有足够详尽oplog的成员，然后继续同步oplog，然后回到正常状态。</p>
+</li>
+<li>
+<p>ARBITER
+仲裁者状态。</p>
+</li>
+<li>
+<p>DOWN
+不可达的成员会被报告为DOWN状态。它有可能仍然是运行状态，只是网络不可达。</p>
+</li>
+<li>
+<p>UNKNOWN
+别的成员暂时不知道该成员的状态，会被报告为该状态</p>
+</li>
+<li>
+<p>REMOVED
+成员被移除副本集时的状态</p>
+</li>
+<li>
+<p>ROLLBACK
+正在进行数据回滚的状态，回滚完成后会转换为RECOVERING状态</p>
+</li>
+<li>
+<p>FATAL
+一个成员发生了不可挽回的错误，也不再尝试恢复正常。应该查看详细日志查明为何该成员处于FATAL状态。通常应该重启服务器，进行重新同步或者从备份中恢复</p>
+</li>
+<li>
+<p>PRIMARY
+主节点状态</p>
+</li>
+<li>
+<p>SECONDARY
+备份节点状态</p>
+</li>
+</ul>
+<h3 id="选举">选举</h3>
+<p>当一个节点无法到达主节点时，它就会申请被选举为主节点。希望被选举为主节点的成员会向它能到达的所有成员发通知。如果这个成员不符合候选人的要求：</p>
+<ol>
+<li>这个成员的数据落后于副本集</li>
+<li>有一个运行中的主节点（那个力求被选举为主节点的成员无法到达这个主节点）
+在这些情况下，其他成员不会允许进行选举。</li>
+</ol>
+<p>加入没有反对的理由，其他成员就会对这个成员进行选举投票。如果这个成员得到副本集中大多数成员的赞成票，它就会选举成功，会转换到主节点状态。如果达不到大多数成员的要求，就会选举失败，仍然处于备份节点的状态。之后还可以再次申请被选举为主节点。主节点若不再满足大多数节点的要求，会退位。</p>
+<p>心跳超时时间为20秒，若选举达成平局，每个成员需要等待30秒才能开始下一次选举。</p>
+<h3 id="回滚">回滚</h3>
+<p>我们知道在发生切换的时候是有可能造成数据丢失的，主要是因为主库宕机，但是新写入的数据还没有来得及同步到从库中，这个时候就会发生数据丢失的情况。
+那针对这种情况，MongoDB 增加了回滚的机制。在主库恢复后重新加入到复制集中，这个时候老主库会与同步源对比 oplog 信息，这时候分为以下两种情况：</p>
+<ol>
+<li>在同步源中没有找到比老主库新的 oplog 信息。</li>
+<li>同步源最新一条 oplog 信息跟老主库的 optime 和 oplog 的 hash 内容不同。</li>
+</ol>
+<p>针对上述两种情况 MongoDB 会进行回滚，回滚的过程就是逆向对比 oplog 的信息，直到在老主库和同步源中找到对应的 oplog，然后将这期间老主库的 oplog 全部记录到 rollback 目录里的文件中，并将这期间的oplog撤销。</p>
+<p>之后可以将这些被回滚的操作应用到当前的主节点。</p>
+<p>以下情况会终止回滚：</p>
+<ol>
+<li>对比老主库的 optime 和同步源的 optime，如果超过了 30 分钟，那么放弃回滚。</li>
+<li>在回滚的过程中，如果发现单条 oplog 超过 512M，则放弃回滚。</li>
+<li>如果有 dropDatabase 操作，则放弃回滚。</li>
+<li>最终生成的回滚记录超过 300M，也会放弃回滚。</li>
+</ol>
+<p>这种情况最常见的原因是备份节点远远落后于主节点，而这时主节点挂了。如果其中一个备份节点成为主节点，这个主节点与旧的主节点相比，缺少很多操作。为了保证成员不会在备份中失败，最好的方式是保持备份节点的数据尽可能的最新。</p>
+
+        </div>
+
+        
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/post/git-%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98/">git 常见问题</a></li>
+        
+        <li><a href="/post/goland/">goland</a></li>
+        
+        <li><a href="/post/golang-channel/">golang channel</a></li>
+        
+        <li><a href="/post/https/">https</a></li>
+        
+        <li><a href="/post/json/">json</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='/tags/' target="_blank"></a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    
+
+    
+    
+    
+    
+
+</div>
+
+                    <footer id="footer">
+    <br />
+</footer>
+
+
+    
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+<style type="text/css">
+div.highlight {
+    position: relative;
+    margin: 1em 0px;
+}
+
+.copy-code {
+    display: none;
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    color: rgba(255, 255, 255, 0.8);
+    background: rgba(78, 78, 78, 0.8);
+    border-radius: var(--radius);
+    padding: 0 5px;
+    font: inherit;
+    user-select: none;
+    cursor: pointer;
+    border: 0;
+    --radius: 8px;
+}
+
+div.highlight:hover .copy-code,pre:hover .copy-code {
+    display: block;
+}
+
+</style>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+
+
+
+
+
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='//www.google.com/search' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://bytewong123.github.io/">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title">Latest articles</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/benchmark/" title="benchmark" target="_blank">benchmark</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/b%E6%A0%91/" title="b树" target="_blank">b树</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0daemonset/" title="cka真题练习——daemonset" target="_blank">cka真题练习——daemonset</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0deploy/" title="cka真题练习——deploy" target="_blank">cka真题练习——deploy</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0etcd%E5%A4%87%E4%BB%BD%E8%BF%98%E5%8E%9F/" title="cka真题练习——etcd备份还原" target="_blank">cka真题练习——etcd备份还原</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0ingress/" title="cka真题练习——ingress" target="_blank">cka真题练习——ingress</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0networkpolicy/" title="cka真题练习——NetworkPolicy" target="_blank">cka真题练习——NetworkPolicy</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0node%E8%B0%83%E5%BA%A6/" title="cka真题练习——node调度" target="_blank">cka真题练习——node调度</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0pod/" title="cka真题练习——pod" target="_blank">cka真题练习——pod</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0pv/" title="cka真题练习——pv" target="_blank">cka真题练习——pv</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>Categories</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://bytewong123.github.io/categories/golang/">golang (12)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/k8s/">k8s (24)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/mysql/">mysql (10)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/redis/">redis (10)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/rust/">rust (1)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/sql/">sql (1)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统 (3)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E6%9E%81%E5%AE%A2%E6%97%B6%E9%97%B4/">极客时间 (5)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/">消息队列 (1)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B3%BB%E7%BB%9F/">深入理解计算机系统 (1)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E7%AE%97%E6%B3%95/">算法 (138)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/">系统设计 (19)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>Tags</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://bytewong123.github.io/tags/golang/">golang</a>
+    
+    <a href="https://bytewong123.github.io/tags/k8s/">k8s</a>
+    
+    <a href="https://bytewong123.github.io/tags/kafka/">kafka</a>
+    
+    <a href="https://bytewong123.github.io/tags/mysql/">mysql</a>
+    
+    <a href="https://bytewong123.github.io/tags/redis/">redis</a>
+    
+    <a href="https://bytewong123.github.io/tags/rust/">rust</a>
+    
+    <a href="https://bytewong123.github.io/tags/sql/">sql</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E6%9E%81%E5%AE%A2%E6%97%B6%E9%97%B4/">极客时间</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/">消息队列</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E7%AE%97%E6%B3%95/">算法</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/">系统设计</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/">读书笔记</a>
+    
+</div>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title">Links</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a target="_blank" href="http://yuedu.baidu.com/ebook/14a722970740be1e640e9a3e" title="Android Gradle权威指南">Android Gradle权威指南</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="http://mirrors.flysnow.org/" title="常用开发工具CDN镜像">常用开发工具CDN镜像</a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title">Meta</h3>
+        <ul class="widget-list">
+            <li><a href="https://bytewong123.github.io/index.xml">RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
