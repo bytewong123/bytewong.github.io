@@ -2,12 +2,14 @@
 title: mpg
 date: 2023-01-08T18:06:57+08:00
 draft: false
-categories: [""]
-tags: [""]
+categories: ["golang"]
+tags: ["golang"]
 ---
 
 # mpg
 #iv/golang
+
+![](/images/batman.jpeg)
 
 - P的数量由用户设置的GOMAXPROCS决定，但是不论GOMAXPROCS设置为多大，P的数量最大为256，p的本地队列大小限制为256
 - M的数量是不定的，由Go Runtime调整，为了防止创建过多OS线程导致系统调度不过来，目前默认最大限制为10000个
