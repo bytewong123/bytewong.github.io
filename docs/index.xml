@@ -6,7 +6,16 @@
     <description>Recent content on sheeks</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Sun, 08 Jan 2023 18:06:57 +0800</lastBuildDate><atom:link href="https://bytewong123.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sun, 15 Jan 2023 17:06:57 +0800</lastBuildDate><atom:link href="https://bytewong123.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>DDIA读书笔记</title>
+      <link>https://bytewong123.github.io/post/%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/</link>
+      <pubDate>Sun, 15 Jan 2023 17:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/</guid>
+      <description>数据存储 #技术/读书笔记/数据密集型应用系统设计</description>
+    </item>
+    
     <item>
       <title>benchmark</title>
       <link>https://bytewong123.github.io/post/benchmark/</link>
@@ -2147,6 +2156,15 @@
       
       <guid>https://bytewong123.github.io/post/%E9%AB%98%E6%80%A7%E8%83%BD%E4%B8%89%E6%9D%BF%E6%96%A7/</guid>
       <description>高性能三板斧 #技术/系统设计</description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>https://bytewong123.github.io/about/</link>
+      <pubDate>Sat, 15 Oct 2022 21:26:45 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/about/</guid>
+      <description>image: aaa bbb</description>
     </item>
     
   </channel>

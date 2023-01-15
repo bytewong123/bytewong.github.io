@@ -1,0 +1,479 @@
+<!doctype html>
+<html lang="en">
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+
+    <title>DDIA读书笔记 | sheeks</title>
+    <meta property="og:title" content="DDIA读书笔记 - sheeks">
+    <meta property="og:type" content="article">
+        
+    <meta property="article:published_time" content='2023-01-15T17:06:57&#43;08:00'>
+        
+        
+    <meta property="article:modified_time" content='2023-01-15T17:06:57&#43;08:00'>
+        
+    <meta name="Keywords" content="golang,go语言,go语言笔记,sheeks,java,android,博客,项目管理,python,软件架构,公众号,小程序">
+    <meta name="description" content="DDIA读书笔记">
+        
+    <meta name="author" content="sheeks">
+    <meta property="og:url" content="https://bytewong123.github.io/post/%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/">
+    <link rel="shortcut icon" href='/favicon.ico'  type="image/x-icon">
+
+    <link rel="stylesheet" href='/css/normalize.css'>
+    <link rel="stylesheet" href='/css/style.css'>
+    <script type="text/javascript" src="//cdn.bootcdn.net/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    
+    
+    
+    
+    
+    
+</head>
+
+<body>
+    <header id="header" class="clearfix">
+    <div class="container">
+        <div class="col-group">
+            <div class="site-name ">
+                
+                    <a id="logo" href="https://bytewong123.github.io/">
+                        sheeks
+                    </a>
+                
+                <p class="description">dev</p>
+            </div>
+            <div>
+                <nav id="nav-menu" class="clearfix">
+                    <a class="current" href="https://bytewong123.github.io/">Home</a>
+                    
+                    <a  href="https://bytewong123.github.io/about/" title="关于">关于</a>
+                    
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <div id="body">
+        <div class="container">
+            <div class="col-group">
+
+                <div class="col-8" id="main">
+                    
+<div class="res-cons">
+    
+    <article class="post">
+        <header>
+            <h1 class="post-title">DDIA读书笔记</h1>
+        </header>
+        
+  <time datetime="2023-01-15T09:06:57Z" class="post-meta meta-date dt-published">
+    2023-01-15
+  </time>
+
+
+<div class="post-meta meta-category">
+  <span>&nbsp;|</span>
+  
+    <a href='/categories/ddia' target="_blank">DDIA</a>
+  
+</div>
+
+
+        
+        
+        <div class="post-content">
+            <h1 id="数据存储">数据存储</h1>
+<p>#技术/读书笔记/数据密集型应用系统设计</p>
+<p>设计一个数据库，最简单的方式就是一个文件，进行追加写的操作，每一行包含一个k-v对，用逗号分隔；每次set即追加一行，写到文件末尾，如果多次更新某个键，旧版本的值不会被覆盖，而是需要查看文件中最后一次出现的键来找到最新的值。
+这种方式的问题在于：如果日志文件保存了大量的记录，get操作的性能会非常差，每次想查找一个键，必须从头到尾扫描整个数据库文件来查找其位置，开销为O(n)。
+为了高效地查找数据库中特定键的值，需要新的数据结构：索引。其背后的基本想法是保留一些额外的元数据，这些元数据作为路标，帮助定位想要的数据。</p>
+<h2 id="hash索引">hash索引</h2>
+<p>最简单的索引策略：保存内存中的hash map，把每个键一一映射到数据文件中特定的字节偏移量，这样就可以找到每个值的位置。</p>
+<blockquote>
+<p>数据的写入，仍然使用追加写的方式，如果一直都只追加到一个文件，需要考虑如何避免用尽磁盘空间，一个解决方式是将日志分解成一定大小的段，当文件达到一定大小时就关闭它，并将后续写入到最新的段文件中。然后可以在这些段上执行压缩。压缩意味着在日志中丢弃重复的键，并且只保留每个键最近的更新。
+每个段都有自己的内存hash表，将键映射到文件的偏移量。为了找到键的值，首先检查最新的段hash表，如果键不存在则检查第二新的段，以此类推。由于合并过程可以维持较少的段数量，因此不需要检查很多hash表。
+tips：
+数据删除：
+如果要删除键和它关联的值，则必须在数据文件中追加一个特殊的删除记录（有时候称为墓碑）。当合并日志段时，一旦发现墓碑标记，则会丢弃这个已删除键的所有值。
+崩溃恢复：
+如果数据库重新启动，内存中的hash map会丢失。可以通过读取整个段文件，记录每个键的最新值偏移量进行恢复，但是可能存在恢复缓慢的问题。可以将每个段的hash map快照存储在磁盘上，加速恢复。</p>
+</blockquote>
+<p>追加日志很浪费空间，为何不原地更新文件：</p>
+<ul>
+<li>追加和分段主要是顺序写，比随机写快得多。</li>
+<li>段文件是追加或不可变的，并发和崩溃恢复更简单。</li>
+<li>合并旧段可以避免随着时间推移数据文件出现碎片化的问题。</li>
+</ul>
+<p>问题：</p>
+<ul>
+<li>hash表必须全部放入内存，如果键过多会有问题。虽然可以在磁盘上维护hash表，但是需要大量的随机i/o，当hash表变满时继续增长代价昂贵，并且需要处理hash冲突的逻辑</li>
+<li>区间查询效率不高，只能逐个查找</li>
+</ul>
+<h2 id="sstable和lsm-tree">SSTable和LSM-Tree</h2>
+<p>日志结构的存储段都是一组k-v对的序列。这些k-v对按照它们的写入顺序排列，并且出现在日志中的同一个键，后出现的值优于先出现的值。除此之外，文件中k-v对的顺序并不重要。
+改变段文件的格式，要求k-v对的顺序按键排序。这种格式称为排序字符串表，或简称SSTable。它要求每个键在每个合并的段文件中只能出现一次（压缩过程已经确保了），SSTable相比哈希索引的日志段，具有以下优点：</p>
+<ol>
+<li>合并段更简单高效：并发读取多个段文件，比较每个文件的第一个键，把最小的拷贝到输出文件，并重复这个过程，这会产生一个新的按键排序的合并段文件。</li>
+<li>在文件中查找特定的键时，不需要在内存中保存所有键的索引，只需稀疏存储部分键的索引即可，需要定位的键一定在存储的索引的某一范围内</li>
+</ol>
+<p>如何维护SSTable：
+内存排序可以使用红黑树或AVL树，使用这些数据结构可以按任意顺序插入键并以排序后的顺序读取它们。
+写入流程：</p>
+<ol>
+<li>当写入时，将其添加到内存中的平衡树数据结构中，称其为内存表</li>
+<li>当内存表大于某个阈值，将其作为SSTable文件写入到磁盘</li>
+<li>处理读请求，首先尝试在内存表查找，然后是最新的磁盘段文件，接下来是次新的内存表文件，以此类推，知道查找到目标（如果miss，开销是比较大的，可以考虑使用布隆过滤器确定键不存在）</li>
+<li>后台进程周期性地执行段合并与压缩过程，以合并多个段文件，并丢弃那些已被覆盖或删除的值</li>
+</ol>
+<p>[image:9152FC8F-32FC-44EF-9580-57C0DD76B497-28420-00001A0FDB9DA35A/ueqj0v1mqu.jpeg]</p>
+<blockquote>
+<p>总结下在在LSM-Tree里面如何写数据的？</p>
+<ol>
+<li>当收到一个写请求时，会先把该条数据记录在WAL Log里面，用作故障恢复</li>
+<li>当写完WAL Log后，会把该条数据写入内存的SSTable里面（删除是墓碑标记，更新是新记录一条的数据），也称Memtable。注意为了维持有序性在内存里面可以采用红黑树或者跳跃表相关的数据结构</li>
+<li>当Memtable超过一定的大小后，会在内存里面冻结，变成不可变的Memtable，同时为了不阻塞写操作需要新生成一个Memtable继续提供服务</li>
+<li>把内存里面不可变的Memtable给dump到到硬盘上的SSTable层中，此步骤也称为Minor Compaction，这里需要注意在L0层的SSTable是没有进行合并的，所以这里的key range在多个SSTable中可能会出现重叠，在层数大于0层之后的SSTable，不存在重叠key</li>
+<li>当每层的磁盘上的SSTable的体积超过一定的大小或者个数，也会周期的进行合并。此步骤也称为Major Compaction，这个阶段会真正 的清除掉被标记删除掉的数据以及多版本数据的合并，避免浪费空间，注意由于SSTable都是有序的，我们可以直接采用merge sort进行高效合并</li>
+</ol>
+</blockquote>
+<p>总结下在LSM-Tree里面如何读数据的？</p>
+<blockquote>
+<ol>
+<li>当收到一个读请求的时候，会直接先在内存里面查询，如果查询到就返回</li>
+<li>如果没有查询到就会依次下沉，知道把所有的Level层查询一遍得到最终结果。</li>
+</ol>
+</blockquote>
+<p>如果写入内存表但是未写入磁盘，数据将会丢失，可以在磁盘上单独保留日志，每个写入都会立即追加到该日志。这个日志不需要排序，只是用于恢复，当内存表写入了SSTable，相应日志可以被丢弃。</p>
+<p>基于合并和压缩排序文件原理的存储引擎通常都被称为LSM存储引擎。
+LSM的优点：</p>
+<ol>
+<li>数据按排序存储，有效支持区间查询</li>
+<li>磁盘是顺序写入的，支持非常高的写入吞吐量</li>
+</ol>
+<h2 id="b-tree">B-Tree</h2>
+<p>将数据库分解成固定大小的块或页，传统上大小为4KB，页是内部读写的最小单元。每个页面都可以使用地址或位置进行标识，可以让一个页面引用另一个页面，类似指针，不过是指向磁盘地址。如果要添加新键，则需要找到包含新键范围的页，并将其添加到该页。如果页中没有足够的可用空间来容纳新键，则将其分裂为两个半满的页，并且父页也需要更新以包含分裂之后的新的键范围。该算法确保树保持平衡。具有n个键的B-Tree总是具有O(logn)的深度。大多数数据库可以适合3-4层的B树，因此不需要遍历非常深的页面层次即可找到所需的页（分支因子为500的4KB页的四级树可以存储高达256TB）。</p>
+<p>B树与LSM的区别：
+LSM仅追加更新，不会修改文件；B树则是使用新数据覆盖磁盘上的旧页。
+覆盖写比较复杂：</p>
+<ol>
+<li>在磁性硬盘驱动器上，需要将刺头移动到正确的位置，然后旋转页面，最后用新的数据覆盖相应扇区；SSD则必须一次擦除并重写非常大的存储芯片块。</li>
+<li>如果插入导致页溢出，需要分裂页，并且覆盖父页对两个子页的引用，可能存在中间步骤完成后崩溃等问题。
+为了解决崩溃恢复，常见的B树实现需要支持磁盘上的额外数据结构：预写日志（WAL）。这是一个仅支持追加修改的文件，在修改B树前先更新WAL。</li>
+</ol>
+<p>LSM-Tree的优点是支持高吞吐的写（可认为是O（1）），这个特点在分布式系统上更为看重，当然针对读取普通的LSM-Tree结构，读取是O（N）的复杂度，在使用索引或者缓存优化后的也可以达到O（logN）的复杂度。
+而B+tree的优点是支持高效的读（稳定的OlogN），但是在大规模的写请求下（复杂度O(LogN)），效率会变得比较低，因为随着insert的操作，为了维护B+树结构，节点会不断的分裂和合并。操作磁盘的随机读写概率会变大，故导致性能降低。
+基于LSM-Tree分层存储能够做到写的高吞吐，带来的副作用是整个系统必须频繁的进行compaction，写入量越大，Compaction的过程越频繁。而compaction是一个compare &amp; merge的过程，非常消耗CPU和存储IO，在高吞吐的写入情形下，大量的compaction操作占用大量系统资源，必然带来整个系统性能断崖式下跌，对应用系统产生巨大影响，当然我们可以禁用自动Major Compaction，在每天系统低峰期定期触发合并，来避免这个问题。</p>
+
+        </div>
+
+        
+
+
+        
+
+<div class="post-archive">
+    <h2>See Also</h2>
+    <ul class="listing">
+        
+        <li><a href="/post/z%E5%AD%97%E5%9E%8B%E5%8F%98%E6%8D%A2/">Z字型变换</a></li>
+        
+        <li><a href="/post/benchmark/">benchmark</a></li>
+        
+        <li><a href="/post/b%E6%A0%91/">b树</a></li>
+        
+        <li><a href="/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0networkpolicy/">cka真题练习——NetworkPolicy</a></li>
+        
+        <li><a href="/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0daemonset/">cka真题练习——daemonset</a></li>
+        
+    </ul>
+</div>
+
+
+        <div class="post-meta meta-tags">
+            
+            <ul class="clearfix">
+                
+                <li><a href='/tags/ddia' target="_blank">DDIA</a></li>
+                
+            </ul>
+            
+        </div>
+    </article>
+    
+    
+
+    
+    
+    
+    
+
+</div>
+
+                    <footer id="footer">
+    <br />
+</footer>
+
+
+    
+    
+    <script type="text/javascript">
+        window.MathJax = {
+            tex2jax: {
+                inlineMath: [['$', '$']],
+                processEscapes: true
+                }
+            };
+    </script>
+    <script src='//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
+
+<a id="rocket" href="#top"></a>
+<script type="text/javascript" src='/js/totop.js?v=0.0.0' async=""></script>
+<style type="text/css">
+div.highlight {
+    position: relative;
+    margin: 1em 0px;
+}
+
+.copy-code {
+    display: none;
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    color: rgba(255, 255, 255, 0.8);
+    background: rgba(78, 78, 78, 0.8);
+    border-radius: var(--radius);
+    padding: 0 5px;
+    font: inherit;
+    user-select: none;
+    cursor: pointer;
+    border: 0;
+    --radius: 8px;
+}
+
+div.highlight:hover .copy-code,pre:hover .copy-code {
+    display: block;
+}
+
+</style>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+
+
+
+
+
+
+                </div>
+
+                <div id="secondary">
+    <section class="widget">
+        <form id="search" action='//www.google.com/search' method="get" accept-charset="utf-8" target="_blank" _lpchecked="1">
+      
+      <input type="text" name="q" maxlength="20" placeholder="Search">
+      <input type="hidden" name="sitesearch" value="https://bytewong123.github.io/">
+      <button type="submit" class="submit icon-search"></button>
+</form>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title">Latest articles</h3>
+<ul class="widget-list">
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/" title="DDIA读书笔记" target="_blank">DDIA读书笔记</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/benchmark/" title="benchmark" target="_blank">benchmark</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/b%E6%A0%91/" title="b树" target="_blank">b树</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0daemonset/" title="cka真题练习——daemonset" target="_blank">cka真题练习——daemonset</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0deploy/" title="cka真题练习——deploy" target="_blank">cka真题练习——deploy</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0etcd%E5%A4%87%E4%BB%BD%E8%BF%98%E5%8E%9F/" title="cka真题练习——etcd备份还原" target="_blank">cka真题练习——etcd备份还原</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0ingress/" title="cka真题练习——ingress" target="_blank">cka真题练习——ingress</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0networkpolicy/" title="cka真题练习——NetworkPolicy" target="_blank">cka真题练习——NetworkPolicy</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0node%E8%B0%83%E5%BA%A6/" title="cka真题练习——node调度" target="_blank">cka真题练习——node调度</a>
+    </li>
+    
+    <li>
+        <a href="https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0pod/" title="cka真题练习——pod" target="_blank">cka真题练习——pod</a>
+    </li>
+    
+</ul>
+    </section>
+
+    
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/categories/'>Categories</a></h3>
+<ul class="widget-list">
+    
+    <li><a href="https://bytewong123.github.io/categories/blog/">blog (1)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/ddia/">DDIA (1)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/golang/">golang (13)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/k8s/">k8s (24)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/mysql/">mysql (10)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/redis/">redis (10)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/rust/">rust (1)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/sql/">sql (1)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统 (3)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E6%9E%81%E5%AE%A2%E6%97%B6%E9%97%B4/">极客时间 (5)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/">消息队列 (1)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B3%BB%E7%BB%9F/">深入理解计算机系统 (1)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E7%AE%97%E6%B3%95/">算法 (138)</a></li>
+    
+    <li><a href="https://bytewong123.github.io/categories/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/">系统设计 (19)</a></li>
+    
+</ul>
+    </section>
+
+    <section class="widget">
+        <h3 class="widget-title"><a href='/tags/'>Tags</a></h3>
+<div class="tagcloud">
+    
+    <a href="https://bytewong123.github.io/tags/ddia/">DDIA</a>
+    
+    <a href="https://bytewong123.github.io/tags/golang/">golang</a>
+    
+    <a href="https://bytewong123.github.io/tags/k8s/">k8s</a>
+    
+    <a href="https://bytewong123.github.io/tags/kafka/">kafka</a>
+    
+    <a href="https://bytewong123.github.io/tags/mysql/">mysql</a>
+    
+    <a href="https://bytewong123.github.io/tags/redis/">redis</a>
+    
+    <a href="https://bytewong123.github.io/tags/rust/">rust</a>
+    
+    <a href="https://bytewong123.github.io/tags/sql/">sql</a>
+    
+    <a href="https://bytewong123.github.io/tags/web/">web</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E6%9E%81%E5%AE%A2%E6%97%B6%E9%97%B4/">极客时间</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/">消息队列</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E7%AE%97%E6%B3%95/">算法</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/">系统设计</a>
+    
+    <a href="https://bytewong123.github.io/tags/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/">读书笔记</a>
+    
+</div>
+    </section>
+
+    
+<section class="widget">
+    <h3 class="widget-title">Links</h3>
+    <ul class="widget-list">
+        
+        <li>
+            <a target="_blank" href="http://yuedu.baidu.com/ebook/14a722970740be1e640e9a3e" title="Android Gradle权威指南">Android Gradle权威指南</a>
+        </li>
+        
+        <li>
+            <a target="_blank" href="http://mirrors.flysnow.org/" title="常用开发工具CDN镜像">常用开发工具CDN镜像</a>
+        </li>
+        
+    </ul>
+</section>
+
+
+    <section class="widget">
+        <h3 class="widget-title">Meta</h3>
+        <ul class="widget-list">
+            <li><a href="https://bytewong123.github.io/index.xml">RSS</a></li>
+        </ul>
+    </section>
+</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

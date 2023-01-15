@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>DDIA on sheeks</title>
+    <link>https://bytewong123.github.io/tags/ddia/</link>
+    <description>Recent content in DDIA on sheeks</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <lastBuildDate>Sun, 15 Jan 2023 17:06:57 +0800</lastBuildDate><atom:link href="https://bytewong123.github.io/tags/ddia/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>DDIA读书笔记</title>
+      <link>https://bytewong123.github.io/post/%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/</link>
+      <pubDate>Sun, 15 Jan 2023 17:06:57 +0800</pubDate>
+      
+      <guid>https://bytewong123.github.io/post/%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/</guid>
+      <description>数据存储 #技术/读书笔记/数据密集型应用系统设计</description>
+    </item>
+    
+  </channel>
+</rss>

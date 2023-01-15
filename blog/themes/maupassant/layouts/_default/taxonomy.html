@@ -2,9 +2,6 @@
 <div class="res-cons">
     {{ if eq .Data.Singular "category" }}
     <h3 class="archive-title">
-        {{ range .Site.Taxonomies.categories.ByCount }}
-            <span>{{ .Count }}</span>
-        {{ end }}
         <span class="keyword">{{ .Data.Term }}</span>
         {{ i18n "Articles" }}
     </h3>

@@ -2,13 +2,31 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
+    <loc>https://bytewong123.github.io/categories/</loc>
+    <lastmod>2023-01-15T17:06:57+08:00</lastmod>
+  </url><url>
+    <loc>https://bytewong123.github.io/tags/ddia/</loc>
+    <lastmod>2023-01-15T17:06:57+08:00</lastmod>
+  </url><url>
+    <loc>https://bytewong123.github.io/categories/ddia/</loc>
+    <lastmod>2023-01-15T17:06:57+08:00</lastmod>
+  </url><url>
+    <loc>https://bytewong123.github.io/post/%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/</loc>
+    <lastmod>2023-01-15T17:06:57+08:00</lastmod>
+  </url><url>
+    <loc>https://bytewong123.github.io/post/</loc>
+    <lastmod>2023-01-15T17:06:57+08:00</lastmod>
+  </url><url>
+    <loc>https://bytewong123.github.io/</loc>
+    <lastmod>2023-01-15T17:06:57+08:00</lastmod>
+  </url><url>
+    <loc>https://bytewong123.github.io/tags/</loc>
+    <lastmod>2023-01-15T17:06:57+08:00</lastmod>
+  </url><url>
     <loc>https://bytewong123.github.io/post/benchmark/</loc>
     <lastmod>2023-01-08T18:06:57+08:00</lastmod>
   </url><url>
     <loc>https://bytewong123.github.io/post/b%E6%A0%91/</loc>
-    <lastmod>2023-01-08T18:06:57+08:00</lastmod>
-  </url><url>
-    <loc>https://bytewong123.github.io/categories/</loc>
     <lastmod>2023-01-08T18:06:57+08:00</lastmod>
   </url><url>
     <loc>https://bytewong123.github.io/post/cka%E7%9C%9F%E9%A2%98%E7%BB%83%E4%B9%A0daemonset/</loc>
@@ -188,9 +206,6 @@
     <loc>https://bytewong123.github.io/post/pod%E5%8E%9F%E7%90%86/</loc>
     <lastmod>2023-01-08T18:06:57+08:00</lastmod>
   </url><url>
-    <loc>https://bytewong123.github.io/post/</loc>
-    <lastmod>2023-01-08T18:06:57+08:00</lastmod>
-  </url><url>
     <loc>https://bytewong123.github.io/post/pvpvc%E5%8E%9F%E7%90%86/</loc>
     <lastmod>2023-01-08T18:06:57+08:00</lastmod>
   </url><url>
@@ -242,9 +257,6 @@
     <loc>https://bytewong123.github.io/post/rust%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</loc>
     <lastmod>2023-01-08T18:06:57+08:00</lastmod>
   </url><url>
-    <loc>https://bytewong123.github.io/</loc>
-    <lastmod>2023-01-08T18:06:57+08:00</lastmod>
-  </url><url>
     <loc>https://bytewong123.github.io/post/sort/</loc>
     <lastmod>2023-01-08T18:06:57+08:00</lastmod>
   </url><url>
@@ -255,9 +267,6 @@
     <lastmod>2023-01-08T18:06:57+08:00</lastmod>
   </url><url>
     <loc>https://bytewong123.github.io/post/statefulset%E5%8E%9F%E7%90%86/</loc>
-    <lastmod>2023-01-08T18:06:57+08:00</lastmod>
-  </url><url>
-    <loc>https://bytewong123.github.io/tags/</loc>
     <lastmod>2023-01-08T18:06:57+08:00</lastmod>
   </url><url>
     <loc>https://bytewong123.github.io/post/zookeeper%E7%9A%84zap%E5%8D%8F%E8%AE%AE/</loc>
@@ -802,5 +811,14 @@
   </url><url>
     <loc>https://bytewong123.github.io/post/%E9%AB%98%E6%80%A7%E8%83%BD%E4%B8%89%E6%9D%BF%E6%96%A7/</loc>
     <lastmod>2023-01-08T18:06:57+08:00</lastmod>
+  </url><url>
+    <loc>https://bytewong123.github.io/about/</loc>
+    <lastmod>2022-10-15T21:26:45+08:00</lastmod>
+  </url><url>
+    <loc>https://bytewong123.github.io/categories/blog/</loc>
+    <lastmod>2022-10-15T21:26:45+08:00</lastmod>
+  </url><url>
+    <loc>https://bytewong123.github.io/tags/web/</loc>
+    <lastmod>2022-10-15T21:26:45+08:00</lastmod>
   </url>
 </urlset>
